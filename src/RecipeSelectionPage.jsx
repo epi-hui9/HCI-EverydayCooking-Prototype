@@ -10,10 +10,11 @@ import {
   Flex,
   Spacer,
   Badge,
-  Spinner,
   useDisclosure,
+  IconButton,
+  Tooltip,
 } from "@chakra-ui/react";
-import { ChevronLeftIcon, UpDownIcon } from "@chakra-ui/icons";
+import { ChevronLeftIcon, UpDownIcon, ChatIcon } from "@chakra-ui/icons";
 
 const initialIngredients = [
   { id: 1, name: "Spinach", emoji: "🥬", daysLeft: 2 },
@@ -28,10 +29,9 @@ const initialIngredients = [
   { id: 12, name: "Cheese", emoji: "🧀", daysLeft: 20 },
 ];
 
-const RecipeSelectionPage = () => {
+const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
   const [ingredients, setIngredients] = useState(initialIngredients);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [isSorted, setIsSorted] = useState(false);
 
   // Toggle selection
@@ -50,19 +50,6 @@ const RecipeSelectionPage = () => {
       return newSortedState ? a.daysLeft - b.daysLeft : a.id - b.id;
     });
     setIngredients(sortedList);
-  };
-
-  // Simulated Loading Function
-  const handleFindRecipe = () => {
-    setIsSearching(true);
-    // Simulate 1.5 seconds of searching
-    setTimeout(() => {
-      setIsSearching(false);
-      const selectedNames = ingredients
-        .filter((item) => selectedIds.includes(item.id))
-        .map((item) => item.name);
-      alert(`Found 3 recipes for: ${selectedNames.join(", ")}`);
-    }, 1500);
   };
 
   return (
@@ -88,6 +75,7 @@ const RecipeSelectionPage = () => {
         pt={6}
         pb={5}
         px={5}
+        position="relative"
       >
         {/* Header Section */}
         <Box pb={4}>
@@ -98,6 +86,7 @@ const RecipeSelectionPage = () => {
               color="gray.500"
               size="xs"
               _hover={{ bg: "rgba(0,0,0,0.04)" }}
+              onClick={onBack}
             >
               Back
             </Button>
@@ -204,16 +193,34 @@ const RecipeSelectionPage = () => {
             bg="#5a7a6a"
             color="white"
             boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
-            onClick={handleFindRecipe}
+            onClick={onNext}
             isDisabled={selectedIds.length === 0}
-            isLoading={isSearching}
-            loadingText="Searching..."
             _hover={{ bg: "#4d6b5d" }}
             _active={{ bg: "#445d50" }}
           >
-            Find Recipe
+            Next
           </Button>
         </Box>
+
+        {onOpenChat && (
+          <Tooltip label="Chat" placement="left">
+            <IconButton
+              aria-label="Open Chat"
+              icon={<ChatIcon />}
+              size="sm"
+              borderRadius="full"
+              bg="#5a7a6a"
+              color="white"
+              position="absolute"
+              bottom="16px"
+              right="16px"
+              boxShadow="0 2px 8px rgba(90, 122, 106, 0.35)"
+              _hover={{ bg: "#4d6b5d" }}
+              _active={{ bg: "#445d50" }}
+              onClick={onOpenChat}
+            />
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );

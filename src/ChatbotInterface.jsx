@@ -22,7 +22,7 @@ const SUGGESTED_QUESTIONS = [
   'What recipes use ingredients from my pantry?',
 ]
 
-function ChatbotInterface() {
+function ChatbotInterface({ onBack }) {
   const [messages, setMessages] = useState([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -132,6 +132,7 @@ function ChatbotInterface() {
               color="gray.500"
               size="xs"
               _hover={{ bg: 'rgba(0,0,0,0.04)' }}
+              onClick={onBack}
             >
               Back
             </Button>

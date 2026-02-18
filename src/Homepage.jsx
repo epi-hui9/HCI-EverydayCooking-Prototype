@@ -3,17 +3,23 @@ import {
   Box,
   Heading,
   Button,
-  VStack,
   Text,
-  Flex,
-  Spacer,
   SimpleGrid,
+  VStack,
+  IconButton,
+  Tooltip,
 } from "@chakra-ui/react";
-import { ChevronLeftIcon } from "@chakra-ui/icons";
+import { ChatIcon } from "@chakra-ui/icons";
 
-const PRIMARY_GREEN = "#5a7a6a";
+/* Katie 原版配色与样式保留 */
+const BUTTON_COLORS = {
+  yourFood: "#547757",
+  recipes: "#86A76A",
+  history: "#BAD07B",
+  weeklyPlan: "#BD645E",
+};
 
-export default function Homepage({ onNavigate }) {
+export default function Homepage({ onNavigate, onOpenChat }) {
   return (
     <Box
       minH="100vh"
@@ -37,102 +43,89 @@ export default function Homepage({ onNavigate }) {
         pt={6}
         pb={5}
         px={5}
+        position="relative"
       >
-        {/* Header: same as Energy/Chat */}
-        <Box pb={4}>
-          <Flex align="center" mb={4}>
-            <Button
-              leftIcon={<ChevronLeftIcon />}
-              variant="ghost"
-              color="gray.500"
-              size="xs"
-              _hover={{ bg: "rgba(0,0,0,0.04)" }}
-            >
-              Back
-            </Button>
-            <Spacer />
-            <Heading
-              fontSize="11px"
-              fontWeight="500"
-              letterSpacing="0.06em"
-              textTransform="uppercase"
-              color="gray.500"
-            >
-              Home
-            </Heading>
-            <Spacer />
-            <Box w="52px" />
-          </Flex>
-
+        <VStack spacing={8} align="stretch" flex="1" pt={8}>
           <Box textAlign="center">
-            <Heading as="h1" size="md" fontWeight="600" color="gray.800">
-              Name of website
+            <Heading as="h1" size="lg">
+              Earthplate
             </Heading>
-            <Text mt={1} fontSize="sm" color="gray.600">
+            <Text mt={2} color="gray.600">
               Your Food Manager
             </Text>
           </Box>
-        </Box>
 
-        {/* 4 entry buttons – unified primary #5a7a6a */}
-        <SimpleGrid columns={2} spacing={3} flex="1" alignContent="start" py={4}>
-          <Button
-            height="100px"
-            fontSize="md"
-            fontWeight="500"
-            borderRadius="xl"
-            boxShadow="0 8px 24px rgba(90, 122, 106, 0.18)"
-            bg={PRIMARY_GREEN}
-            color="white"
-            _hover={{ bg: "#4d6b5d" }}
-            _active={{ bg: "#445d50" }}
-            onClick={() => onNavigate?.("Fridge")}
-          >
-            Your Food
-          </Button>
-          <Button
-            height="100px"
-            fontSize="md"
-            fontWeight="500"
-            borderRadius="xl"
-            boxShadow="0 8px 24px rgba(90, 122, 106, 0.18)"
-            bg={PRIMARY_GREEN}
-            color="white"
-            _hover={{ bg: "#4d6b5d" }}
-            _active={{ bg: "#445d50" }}
-            onClick={() => onNavigate?.("Recipe")}
-          >
-            Recipes
-          </Button>
-          <Button
-            height="100px"
-            fontSize="md"
-            fontWeight="500"
-            borderRadius="xl"
-            borderWidth="1px"
-            borderColor="#e8e2d9"
-            bg="#fdfbf8"
-            color="gray.700"
-            _hover={{ bg: "rgba(200, 220, 210, 0.3)", borderColor: "rgba(90, 122, 106, 0.4)" }}
-            onClick={() => onNavigate?.("History")}
-          >
-            History
-          </Button>
-          <Button
-            height="100px"
-            fontSize="md"
-            fontWeight="500"
-            borderRadius="xl"
-            borderWidth="1px"
-            borderColor="#e8e2d9"
-            bg="#fdfbf8"
-            color="gray.700"
-            _hover={{ bg: "rgba(200, 220, 210, 0.3)", borderColor: "rgba(90, 122, 106, 0.4)" }}
-            onClick={() => onNavigate?.("WeeklyPlan")}
-          >
-            Weekly Plan
-          </Button>
-        </SimpleGrid>
+          <SimpleGrid columns={2} spacing={4} flex="1" alignContent="start">
+            <Button
+              height="100px"
+              fontSize="xl"
+              borderRadius="md"
+              boxShadow="sm"
+              bg={BUTTON_COLORS.yourFood}
+              color="white"
+              _hover={{ opacity: 0.9 }}
+              onClick={() => onNavigate?.("Fridge")}
+            >
+              Your Food
+            </Button>
+            <Button
+              height="100px"
+              fontSize="xl"
+              borderRadius="md"
+              boxShadow="sm"
+              bg={BUTTON_COLORS.recipes}
+              color="white"
+              _hover={{ opacity: 0.9 }}
+              onClick={() => onNavigate?.("Recipe")}
+            >
+              Recipes
+            </Button>
+            <Button
+              height="100px"
+              fontSize="xl"
+              borderRadius="md"
+              boxShadow="sm"
+              bg={BUTTON_COLORS.history}
+              color="white"
+              _hover={{ opacity: 0.9 }}
+              onClick={() => onNavigate?.("History")}
+            >
+              History
+            </Button>
+            <Button
+              height="100px"
+              fontSize="xl"
+              borderRadius="md"
+              boxShadow="sm"
+              bg={BUTTON_COLORS.weeklyPlan}
+              color="white"
+              _hover={{ opacity: 0.9 }}
+              onClick={() => onNavigate?.("WeeklyPlan")}
+            >
+              Weekly Plan
+            </Button>
+          </SimpleGrid>
+        </VStack>
+
+        {onOpenChat && (
+          <Tooltip label="Chat" placement="left">
+            <IconButton
+              aria-label="Open Chat"
+              icon={<ChatIcon />}
+              size="sm"
+              borderRadius="full"
+              bg="#5a7a6a"
+              color="white"
+              position="absolute"
+              bottom="16px"
+              right="16px"
+              boxShadow="0 2px 8px rgba(90, 122, 106, 0.35)"
+              _hover={{ bg: "#4d6b5d" }}
+              _active={{ bg: "#445d50" }}
+              onClick={onOpenChat}
+            />
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );

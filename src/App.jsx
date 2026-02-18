@@ -9,15 +9,21 @@ import PlaceholderPage from "./PlaceholderPage";
 
 function App() {
   const [page, setPage] = useState("Home");
+  const [returnToOnChatBack, setReturnToOnChatBack] = useState("Home");
+
+  const goToChat = () => {
+    setReturnToOnChatBack(page);
+    setPage("Chat");
+  };
 
   const pages = {
-    Home: <Homepage onNavigate={setPage} />,
-    Fridge: <FridgeContent />,
-    Recipe: <RecipeSelectionPage />,
-    Energy: <EnergyLevelPage />,
-    Chat: <ChatbotInterface />,
-    History: <PlaceholderPage title="History" />,
-    WeeklyPlan: <PlaceholderPage title="Weekly Plan" />,
+    Home: <Homepage onNavigate={setPage} onOpenChat={goToChat} />,
+    Fridge: <FridgeContent onOpenChat={goToChat} onBack={() => setPage("Home")} />,
+    Recipe: <RecipeSelectionPage onOpenChat={goToChat} onNext={() => setPage("Energy")} onBack={() => setPage("Home")} />,
+    Energy: <EnergyLevelPage onOpenChat={goToChat} onBack={() => setPage("Recipe")} />,
+    Chat: <ChatbotInterface onBack={() => setPage(returnToOnChatBack)} />,
+    History: <PlaceholderPage title="History" onOpenChat={goToChat} />,
+    WeeklyPlan: <PlaceholderPage title="Weekly Plan" onOpenChat={goToChat} />,
   };
 
   return (

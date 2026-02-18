@@ -1,8 +1,17 @@
 import React from "react";
-import { Box, Heading, Text, Flex, Button, Spacer } from "@chakra-ui/react";
-import { ChevronLeftIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  Heading,
+  Text,
+  Flex,
+  Button,
+  Spacer,
+  IconButton,
+  Tooltip,
+} from "@chakra-ui/react";
+import { ChevronLeftIcon, ChatIcon } from "@chakra-ui/icons";
 
-export default function PlaceholderPage({ title }) {
+export default function PlaceholderPage({ title, onOpenChat }) {
   return (
     <Box
       minH="100vh"
@@ -26,6 +35,7 @@ export default function PlaceholderPage({ title }) {
         pt={6}
         pb={5}
         px={5}
+        position="relative"
       >
         <Box pb={4}>
           <Flex align="center" mb={4}>
@@ -57,6 +67,26 @@ export default function PlaceholderPage({ title }) {
             Coming soon
           </Text>
         </Flex>
+
+        {onOpenChat && (
+          <Tooltip label="Chat" placement="left">
+            <IconButton
+              aria-label="Open Chat"
+              icon={<ChatIcon />}
+              size="sm"
+              borderRadius="full"
+              bg="#5a7a6a"
+              color="white"
+              position="absolute"
+              bottom="16px"
+              right="16px"
+              boxShadow="0 2px 8px rgba(90, 122, 106, 0.35)"
+              _hover={{ bg: "#4d6b5d" }}
+              _active={{ bg: "#445d50" }}
+              onClick={onOpenChat}
+            />
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );

@@ -17,8 +17,9 @@ import {
   Flex,
   Spacer,
   extendTheme,
+  Tooltip,
 } from '@chakra-ui/react';
-import { AddIcon, DeleteIcon, ChevronLeftIcon, CloseIcon } from '@chakra-ui/icons';
+import { AddIcon, DeleteIcon, ChevronLeftIcon, CloseIcon, ChatIcon } from '@chakra-ui/icons';
 
 // Same fonts as app theme so Fridge matches Recipe/Energy; only override body bg
 const fridgeTheme = extendTheme({
@@ -36,7 +37,7 @@ const fridgeTheme = extendTheme({
   },
 });
 
-const FoodExpirationTracker = () => {
+const FoodExpirationTracker = ({ onOpenChat, onBack }) => {
   const [foods, setFoods] = useState([
     { id: 1, name: 'Tomatoes', expiryDate: '2026-02-17', category: 'Produce' },
     { id: 2, name: 'Eggplant', expiryDate: '2026-02-20', category: 'Produce' },
@@ -246,6 +247,7 @@ const FoodExpirationTracker = () => {
               color="gray.500"
               size="xs"
               _hover={{ bg: "rgba(0,0,0,0.04)" }}
+              onClick={onBack}
             >
               Back
             </Button>
@@ -396,6 +398,27 @@ const FoodExpirationTracker = () => {
           </VStack>
 
           </Container>
+
+          {onOpenChat && (
+            <Tooltip label="Chat" placement="left">
+              <IconButton
+                aria-label="Open Chat"
+                icon={<ChatIcon />}
+                size="sm"
+                borderRadius="full"
+                bg="#5a7a6a"
+                color="white"
+                position="absolute"
+                bottom="16px"
+                right="16px"
+                zIndex={5}
+                boxShadow="0 2px 8px rgba(90, 122, 106, 0.35)"
+                _hover={{ bg: "#4d6b5d" }}
+                _active={{ bg: "#445d50" }}
+                onClick={onOpenChat}
+              />
+            </Tooltip>
+          )}
         </Box>
 
         <style>{`
