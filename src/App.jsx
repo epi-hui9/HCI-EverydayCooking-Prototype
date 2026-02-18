@@ -4,14 +4,20 @@ import RecipeSelectionPage from "./RecipeSelectionPage";
 import EnergyLevelPage from "./EnergyLevelPage";
 import FridgeContent from "./FridgeContent";
 import ChatbotInterface from "./ChatbotInterface";
+import Homepage from "./Homepage";
+import PlaceholderPage from "./PlaceholderPage";
+
 function App() {
-  const [page, setPage] = useState("Fridge");
+  const [page, setPage] = useState("Home");
 
   const pages = {
+    Home: <Homepage onNavigate={setPage} />,
     Fridge: <FridgeContent />,
     Recipe: <RecipeSelectionPage />,
     Energy: <EnergyLevelPage />,
     Chat: <ChatbotInterface />,
+    History: <PlaceholderPage title="History" />,
+    WeeklyPlan: <PlaceholderPage title="Weekly Plan" />,
   };
 
   return (
@@ -27,7 +33,7 @@ function App() {
           boxShadow="0 10px 30px rgba(0,0,0,0.08)"
           backdropFilter="blur(10px)"
         >
-          {Object.keys(pages).map((key) => (
+          {["Home", "Fridge", "Recipe", "Energy", "Chat"].map((key) => (
             <Button
               key={key}
               size="sm"
