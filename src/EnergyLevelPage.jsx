@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Box,
-  Container,
   VStack,
   HStack,
   Text,
@@ -18,19 +17,19 @@ const energyOptions = [
     id: "low",
     label: "Low",
     description: "Reheat or assemble.",
-    size: "64px",
+    size: "50px",
   },
   {
     id: "medium",
     label: "Medium",
     description: "Simple, one-pan.",
-    size: "88px",
+    size: "68px",
   },
   {
     id: "high",
     label: "High",
     description: "Up for cooking.",
-    size: "112px",
+    size: "84px",
   },
 ];
 
@@ -44,74 +43,77 @@ const EnergyLevelPage = () => {
   };
 
   return (
-    <Container
-      maxW="full"
-      p={0}
+    <Box
       minH="100vh"
-      bg="#f8f5f0"
-      centerContent
-      py={10}
+      bg="#f5f2ed"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      py={6}
     >
       <Box
-        w="100%"
-        maxW="430px"
-        minH="720px"
-        bg="#fdfaf6"
+        w="min(88vw, 330px)"
+        sx={{ aspectRatio: "393 / 852" }}
+        bg="#fdfbf8"
         display="flex"
         flexDirection="column"
         overflow="hidden"
-        borderRadius="2xl"
+        borderRadius="24px"
         border="1px solid"
-        borderColor="#efe3d4"
-        boxShadow="0 24px 60px rgba(70, 50, 30, 0.12)"
+        borderColor="#e8e2d9"
+        boxShadow="0 20px 50px rgba(55, 45, 35, 0.08)"
+        pt={6}
+        pb={5}
+        px={5}
       >
         {/* Header */}
-        <Box pt={8} pb={2} px={6}>
-          <Flex align="center" mb={2}>
+        <Box pb={4}>
+          <Flex align="center" mb={4}>
             <Button
               leftIcon={<ChevronLeftIcon />}
               variant="ghost"
               color="gray.500"
-              size="sm"
+              size="xs"
+              _hover={{ bg: "rgba(0,0,0,0.04)" }}
             >
               Back
             </Button>
             <Spacer />
             <Heading
-              size="sm"
+              fontSize="11px"
               fontWeight="500"
-              letterSpacing="0.08em"
+              letterSpacing="0.06em"
               textTransform="uppercase"
               color="gray.500"
             >
               Energy check-in
             </Heading>
             <Spacer />
-            <Box w="60px" />
+            <Box w="52px" />
           </Flex>
 
-          <VStack align="center" spacing={2} mt={6}>
+          <VStack align="center" spacing={2} mt={2}>
             <Box
-              w="46px"
-              h="46px"
+              w="40px"
+              h="40px"
               borderRadius="full"
-              bg="#f3e3cc"
+              bg="rgba(230, 218, 200, 0.6)"
               display="flex"
               alignItems="center"
               justifyContent="center"
-              mb={1}
             >
-              <Text fontSize="lg">🥘</Text>
+              <Text fontSize="md">🥘</Text>
             </Box>
             <Text
-              fontSize="lg"
+              fontSize="sm"
               fontWeight="500"
-              color="gray.700"
+              color="gray.600"
               textAlign="center"
+              lineHeight="1.4"
             >
               How much energy do you have right now?
             </Text>
-            <Text fontSize="sm" color="gray.500" textAlign="center">
+            <Text fontSize="xs" color="gray.400" textAlign="center">
               Your kitchen will follow your pace.
             </Text>
           </VStack>
@@ -119,10 +121,9 @@ const EnergyLevelPage = () => {
 
         {/* Content: Bubbles */}
         <VStack
-          spacing={4}
+          spacing={3}
           flex="1"
-          px={6}
-          pb={6}
+          pb={4}
           pt={2}
           align="stretch"
           justify="center"
@@ -138,32 +139,32 @@ const EnergyLevelPage = () => {
                 cursor="pointer"
                 borderRadius="2xl"
                 borderWidth={isActive ? 1 : 0}
-                borderColor={isActive ? "green.400" : "transparent"}
-                bg={isActive ? "green.50" : "transparent"}
-                px={4}
-                py={3}
+                borderColor={isActive ? "rgba(90, 122, 106, 0.4)" : "transparent"}
+                bg={isActive ? "rgba(200, 220, 210, 0.4)" : "transparent"}
+                px={3}
+                py={2}
                 transition="background-color 0.26s cubic-bezier(0.19, 1, 0.22, 1), border-color 0.26s cubic-bezier(0.19, 1, 0.22, 1), transform 0.26s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.26s cubic-bezier(0.19, 1, 0.22, 1)"
                 _hover={{
-                  bg: isActive ? "green.50" : "gray.50",
+                  bg: isActive ? "rgba(200, 220, 210, 0.4)" : "rgba(0,0,0,0.03)",
                   transform: "translateY(-2px)",
                 }}
               >
-                <HStack spacing={4}>
+                <HStack spacing={3}>
                   <Circle
                     size={option.size}
                     bg="white"
                     borderWidth={2}
                     borderColor={
                       isHigh
-                        ? "green.500"
+                        ? "rgba(90, 122, 106, 0.7)"
                         : isLow
-                          ? "green.200"
-                          : "green.400"
+                          ? "rgba(90, 122, 106, 0.35)"
+                          : "rgba(90, 122, 106, 0.5)"
                     }
                     boxShadow={
                       isActive
-                        ? "0 14px 32px rgba(72, 187, 120, 0.26)"
-                        : "0 6px 18px rgba(15, 30, 20, 0.06)"
+                        ? "0 12px 28px rgba(70, 100, 85, 0.18)"
+                        : "0 4px 14px rgba(40, 55, 45, 0.06)"
                     }
                     transform={
                       isActive ? "translateY(-2px) scale(1.03)" : "scale(1)"
@@ -172,14 +173,14 @@ const EnergyLevelPage = () => {
                   />
                   <VStack align="start" spacing={0}>
                     <Text
-                      fontSize="sm"
+                      fontSize="xs"
                       fontWeight={isActive ? "semibold" : "medium"}
-                      color={isActive ? "green.700" : "gray.800"}
+                      color={isActive ? "gray.700" : "gray.600"}
                     >
                       {option.label}
                     </Text>
                     <Text
-                      fontSize="xs"
+                      fontSize="11px"
                       color={isActive ? "gray.600" : "gray.500"}
                     >
                       {option.description}
@@ -190,51 +191,44 @@ const EnergyLevelPage = () => {
             );
           })}
 
-          <Box pt={1}>
-            <Text fontSize="xs" textAlign="center" color="gray.400">
+          <Box pt={0}>
+            <Text fontSize="11px" textAlign="center" color="gray.400">
               No right answer — this is just for right now.
             </Text>
           </Box>
         </VStack>
 
         {/* Footer */}
-        <Box
-          p={8}
-          pt={6}
-          pb={12}
-          bg="white"
-          borderTop="1px solid"
-          borderColor="gray.50"
-        >
-          <VStack spacing={3}>
+        <Box pt={4} pb={2}>
+          <VStack spacing={2} align="stretch">
             <Button
               w="full"
-              size="lg"
-              h="56px"
-              borderRadius="2xl"
-              fontSize="md"
-              fontWeight="semibold"
-              bg="#4f7b63"
+              size="md"
+              h="46px"
+              borderRadius="xl"
+              fontSize="sm"
+              fontWeight="500"
+              bg="#5a7a6a"
               color="white"
-              boxShadow="0 10px 26px rgba(29, 54, 40, 0.30)"
-              _hover={{ bg: "#446755" }}
-              _active={{ bg: "#3a5747" }}
+              boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
+              _hover={{ bg: "#4d6b5d" }}
+              _active={{ bg: "#445d50" }}
               onClick={handleContinue}
             >
               Continue
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              color="gray.500"
-              _hover={{ color: "gray.700", bg: "gray.50" }}
+              size="xs"
+              color="gray.400"
+              _hover={{ color: "gray.600", bg: "rgba(0,0,0,0.03)" }}
             >
               Skip for now
             </Button>
           </VStack>
         </Box>
       </Box>
-    </Container>
+    </Box>
   );
 };
 
