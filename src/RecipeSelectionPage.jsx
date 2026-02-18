@@ -7,7 +7,6 @@ import {
   Button,
   Checkbox,
   Heading,
-  Container,
   Flex,
   Spacer,
   Badge,
@@ -67,58 +66,79 @@ const RecipeSelectionPage = () => {
   };
 
   return (
-    <Container maxW="md" p={0} h="100vh" centerContent>
+    <Box
+      minH="100vh"
+      bg="#f5f2ed"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      py={6}
+    >
       <Box
-        w="full"
-        h="full"
-        bg="white"
+        w="min(88vw, 330px)"
+        sx={{ aspectRatio: "393 / 852" }}
+        bg="#fdfbf8"
         display="flex"
         flexDirection="column"
         overflow="hidden"
+        borderRadius="24px"
+        border="1px solid"
+        borderColor="#e8e2d9"
+        boxShadow="0 20px 50px rgba(55, 45, 35, 0.08)"
+        pt={6}
+        pb={5}
+        px={5}
       >
         {/* Header Section */}
-        <Box pt={12} pb={4} px={6}>
+        <Box pb={4}>
           <Flex align="center" mb={4}>
             <Button
               leftIcon={<ChevronLeftIcon />}
               variant="ghost"
-              color="green.600"
-              size="sm"
+              color="gray.500"
+              size="xs"
+              _hover={{ bg: "rgba(0,0,0,0.04)" }}
             >
               Back
             </Button>
             <Spacer />
-            <Heading size="md" fontWeight="bold">
-              Storage
+            <Heading
+              fontSize="11px"
+              fontWeight="500"
+              letterSpacing="0.06em"
+              textTransform="uppercase"
+              color="gray.500"
+            >
+              Ingredients
             </Heading>
             <Spacer />
-            <Box w="60px" />
+            <Box w="52px" />
           </Flex>
 
           <Flex justify="space-between" align="center">
-            {/* Sort Button in Top Left */}
             <Button
               leftIcon={<UpDownIcon />}
               size="xs"
               variant="outline"
-              colorScheme={isSorted ? "green" : "gray"}
+              borderColor={isSorted ? "rgba(90, 122, 106, 0.5)" : "gray.200"}
+              color={isSorted ? "gray.600" : "gray.500"}
               onClick={handleSort}
+              _hover={{ bg: "rgba(0,0,0,0.03)" }}
             >
               {isSorted ? "Original Order" : "Sort by Expire"}
             </Button>
-            <Text fontSize="xs" color="gray.500" fontWeight="bold">
+            <Text fontSize="xs" color="gray.400" fontWeight="500">
               {selectedIds.length} items selected
             </Text>
           </Flex>
         </Box>
 
-        {/* Scrollable List with Active State Feedback */}
+        {/* Scrollable List */}
         <VStack
           spacing={3}
           align="stretch"
           flex="1"
           overflowY="auto"
-          px={8}
           pb={4}
           css={{
             "&::-webkit-scrollbar": { display: "none" },
@@ -132,30 +152,30 @@ const RecipeSelectionPage = () => {
                 key={item.id}
                 py={3}
                 px={4}
-                bg={isSelected ? "green.50" : "white"}
+                bg={isSelected ? "rgba(200, 220, 210, 0.4)" : "rgba(255,255,255,0.6)"}
                 borderRadius="xl"
                 border="1px solid"
-                borderColor={isSelected ? "green.300" : "gray.100"}
+                borderColor={isSelected ? "rgba(90, 122, 106, 0.3)" : "rgba(0,0,0,0.06)"}
                 justify="space-between"
                 onClick={() => toggleIngredient(item.id)}
                 cursor="pointer"
-                /* Active State Feedback */
-                transition="all 0.1s cubic-bezier(0.4, 0, 0.2, 1)"
-                _active={{ transform: "scale(0.96)", bg: "gray.50" }}
-                boxShadow={isSelected ? "sm" : "none"}
+                transition="all 0.2s ease"
+                _active={{ transform: "scale(0.98)" }}
+                _hover={{ bg: isSelected ? "rgba(200, 220, 210, 0.5)" : "rgba(0,0,0,0.02)" }}
               >
                 <HStack spacing={4}>
                   <Text fontSize="xl">{item.emoji}</Text>
                   <VStack align="start" spacing={0}>
-                    <Text fontWeight="bold" fontSize="sm" color="gray.700">
+                    <Text fontWeight="600" fontSize="sm" color="gray.600">
                       {item.name}
                     </Text>
                     <Badge
-                      colorScheme={item.daysLeft <= 3 ? "red" : "green"}
                       variant="subtle"
                       borderRadius="full"
                       px={2}
                       fontSize="10px"
+                      bg={item.daysLeft <= 3 ? "rgba(180, 100, 90, 0.2)" : "rgba(90, 122, 106, 0.15)"}
+                      color={item.daysLeft <= 3 ? "gray.600" : "gray.600"}
                     >
                       {item.daysLeft} days left
                     </Badge>
@@ -165,42 +185,37 @@ const RecipeSelectionPage = () => {
                   colorScheme="green"
                   isChecked={isSelected}
                   pointerEvents="none"
+                  sx={{ "& .chakra-checkbox__control": { borderColor: "rgba(90, 122, 106, 0.5)" } }}
                 />
               </HStack>
             );
           })}
         </VStack>
 
-        {/* Footer with Loading Animation */}
-        <Box
-          p={8}
-          pt={6}
-          pb={12}
-          bg="white"
-          borderTop="1px solid"
-          borderColor="gray.50"
-        >
+        {/* Footer */}
+        <Box pt={4} pb={2}>
           <Button
             w="full"
-            colorScheme="green"
-            size="lg"
-            h="60px"
-            borderRadius="2xl"
-            fontSize="lg"
-            fontWeight="bold"
-            boxShadow="0 4px 12px rgba(72, 187, 120, 0.2)"
+            size="md"
+            h="46px"
+            borderRadius="xl"
+            fontSize="sm"
+            fontWeight="500"
+            bg="#5a7a6a"
+            color="white"
+            boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
             onClick={handleFindRecipe}
             isDisabled={selectedIds.length === 0}
-            /* Loading State Implementation */
             isLoading={isSearching}
             loadingText="Searching..."
-            _hover={{ bg: "green.500" }}
+            _hover={{ bg: "#4d6b5d" }}
+            _active={{ bg: "#445d50" }}
           >
             Find Recipe
           </Button>
         </Box>
       </Box>
-    </Container>
+    </Box>
   );
 };
 

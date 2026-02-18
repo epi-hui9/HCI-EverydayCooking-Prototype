@@ -4,12 +4,12 @@ import RecipeSelectionPage from "./RecipeSelectionPage";
 import EnergyLevelPage from "./EnergyLevelPage";
 import FridgeContent from "./FridgeContent";
 function App() {
-  const [page, setPage] = useState("Energy");
+  const [page, setPage] = useState("Fridge");
 
   const pages = {
-    Energy: <EnergyLevelPage />,
     Fridge: <FridgeContent />,
     Recipe: <RecipeSelectionPage />,
+    Energy: <EnergyLevelPage />,
   };
 
   return (

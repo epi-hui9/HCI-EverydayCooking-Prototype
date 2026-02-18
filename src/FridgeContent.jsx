@@ -12,30 +12,25 @@ import {
   FormControl,
   FormLabel,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
   IconButton,
   Badge,
   Flex,
+  Spacer,
   extendTheme,
 } from '@chakra-ui/react';
-import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
+import { AddIcon, DeleteIcon, ChevronLeftIcon, CloseIcon } from '@chakra-ui/icons';
 
-// Custom theme with organic, fresh aesthetic
-const theme = extendTheme({
+// Same fonts as app theme so Fridge matches Recipe/Energy; only override body bg
+const fridgeTheme = extendTheme({
   fonts: {
-    heading: '"Fraunces", serif',
-    body: '"DM Sans", sans-serif',
+    heading: '"Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    body: '"Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   },
   styles: {
     global: {
       body: {
-        bg: '#FEFAF5',
-        color: '#2D3319',
+        bg: "#f5f2ed",
+        color: "#2D3319",
       },
     },
   },
@@ -99,39 +94,204 @@ const FoodExpirationTracker = () => {
   });
 
   return (
-    <ChakraProvider theme={theme}>
-      <Box minH="100vh" bg="#FEFAF5">
-        <Container maxW="container.md" py={8}>
+    <ChakraProvider theme={fridgeTheme}>
+      <Box
+        minH="100vh"
+        bg="#f5f2ed"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        py={6}
+      >
+        <Box
+          w="min(88vw, 330px)"
+          sx={{ aspectRatio: "393 / 852" }}
+          bg="#fdfbf8"
+          borderRadius="24px"
+          border="1px solid"
+          borderColor="#e8e2d9"
+          boxShadow="0 20px 50px rgba(55, 45, 35, 0.08)"
+          overflow="hidden"
+          pt={6}
+          pb={5}
+          px={5}
+          position="relative"
+        >
+          {/* In-card overlay: Add New Food (stays inside phone frame) */}
+          {isOpen && (
+            <Box
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              bg="#fdfbf8"
+              zIndex={10}
+              overflowY="auto"
+              px={5}
+              pt={6}
+              pb={6}
+            >
+              <Flex align="center" mb={4}>
+                <Button
+                  leftIcon={<ChevronLeftIcon />}
+                  variant="ghost"
+                  color="gray.500"
+                  size="xs"
+                  _hover={{ bg: "rgba(0,0,0,0.04)" }}
+                  onClick={onClose}
+                >
+                  Back
+                </Button>
+                <Spacer />
+                <Heading
+                  fontSize="11px"
+                  fontWeight="500"
+                  letterSpacing="0.06em"
+                  textTransform="uppercase"
+                  color="gray.500"
+                >
+                  Add food
+                </Heading>
+                <Spacer />
+                <Box w="52px" display="flex" justifyContent="flex-end">
+                  <IconButton
+                    aria-label="Close"
+                    icon={<CloseIcon />}
+                    variant="ghost"
+                    size="xs"
+                    color="gray.500"
+                    _hover={{ bg: "rgba(0,0,0,0.04)" }}
+                    onClick={onClose}
+                  />
+                </Box>
+              </Flex>
+              <VStack spacing={4} align="stretch" mt={2}>
+                <FormControl isRequired>
+                  <FormLabel fontWeight="600" color="gray.700" fontSize="sm">
+                    Food Name
+                  </FormLabel>
+                  <Input
+                    placeholder="e.g., Strawberries"
+                    value={newFood.name}
+                    onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
+                    bg="white"
+                    borderColor="rgba(0,0,0,0.1)"
+                    borderWidth="1px"
+                    _focus={{ borderColor: "rgba(90, 122, 106, 0.6)", boxShadow: "0 0 0 1px rgba(90, 122, 106, 0.3)" }}
+                    size="md"
+                    borderRadius="xl"
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel fontWeight="600" color="gray.700" fontSize="sm">
+                    Expiry Date
+                  </FormLabel>
+                  <Input
+                    type="date"
+                    value={newFood.expiryDate}
+                    onChange={(e) =>
+                      setNewFood({ ...newFood, expiryDate: e.target.value })
+                    }
+                    bg="white"
+                    borderColor="rgba(0,0,0,0.1)"
+                    borderWidth="1px"
+                    _focus={{ borderColor: "rgba(90, 122, 106, 0.6)", boxShadow: "0 0 0 1px rgba(90, 122, 106, 0.3)" }}
+                    size="md"
+                    borderRadius="xl"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontWeight="600" color="gray.700" fontSize="sm">
+                    Category
+                  </FormLabel>
+                  <Input
+                    placeholder="e.g., Produce, Dairy, Snacks"
+                    value={newFood.category}
+                    onChange={(e) =>
+                      setNewFood({ ...newFood, category: e.target.value })
+                    }
+                    bg="white"
+                    borderColor="rgba(0,0,0,0.1)"
+                    borderWidth="1px"
+                    _focus={{ borderColor: "rgba(90, 122, 106, 0.6)", boxShadow: "0 0 0 1px rgba(90, 122, 106, 0.3)" }}
+                    size="md"
+                    borderRadius="xl"
+                  />
+                </FormControl>
+                <Button
+                  onClick={handleAddFood}
+                  bg="#5a7a6a"
+                  color="white"
+                  size="md"
+                  width="full"
+                  mt={2}
+                  h="46px"
+                  borderRadius="xl"
+                  fontWeight="500"
+                  _hover={{ bg: "#4d6b5d" }}
+                  _active={{ bg: "#445d50" }}
+                >
+                  Add to Fridge
+                </Button>
+              </VStack>
+            </Box>
+          )}
+
+          <Container maxW="full" h="100%" py={0} px={0} overflowY="auto">
+          <Flex align="center" mb={4}>
+            <Button
+              leftIcon={<ChevronLeftIcon />}
+              variant="ghost"
+              color="gray.500"
+              size="xs"
+              _hover={{ bg: "rgba(0,0,0,0.04)" }}
+            >
+              Back
+            </Button>
+            <Spacer />
+            <Heading
+              fontSize="11px"
+              fontWeight="500"
+              letterSpacing="0.06em"
+              textTransform="uppercase"
+              color="gray.500"
+            >
+              Fridge
+            </Heading>
+            <Spacer />
+            <Box w="52px" />
+          </Flex>
+
           {/* Header */}
-          <VStack spacing={2} align="stretch" mb={8}>
+          <VStack spacing={2} align="stretch" mb={5}>
             <HStack justify="space-between" align="flex-start">
               <Box>
                 <Heading
-                  fontSize={{ base: '3xl', md: '5xl' }}
-                  fontWeight="900"
-                  color="#2D3319"
-                  letterSpacing="-0.02em"
+                  fontSize="lg"
+                  fontWeight="700"
+                  color="gray.700"
+                  letterSpacing="-0.01em"
                   mb={1}
                 >
-                  Expiring Soon!
+                  Expiring Soon
                 </Heading>
-                <Text fontSize="md" color="#6B7354" fontWeight="500">
+                <Text fontSize="sm" color="gray.500" fontWeight="500">
                   Keep track of your food freshness
                 </Text>
               </Box>
               <IconButton
                 icon={<AddIcon />}
                 onClick={onOpen}
-                size="lg"
-                colorScheme="green"
-                bg="#5C7C3C"
+                size="md"
+                bg="#5a7a6a"
                 color="white"
-                _hover={{ bg: '#4A6530', transform: 'scale(1.05)' }}
-                _active={{ transform: 'scale(0.95)' }}
+                _hover={{ bg: "#4d6b5d", transform: "scale(1.04)" }}
+                _active={{ transform: "scale(0.98)" }}
                 transition="all 0.2s"
                 aria-label="Add food"
                 borderRadius="full"
-                boxShadow="0 4px 12px rgba(92, 124, 60, 0.3)"
+                boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
               />
             </HStack>
           </VStack>
@@ -146,15 +306,15 @@ const FoodExpirationTracker = () => {
                 <Box
                   key={food.id}
                   bg={colorScheme.bg}
-                  borderRadius="16px"
-                  p={5}
-                  border="3px solid"
-                  borderColor="rgba(45, 51, 25, 0.15)"
-                  boxShadow="0 2px 8px rgba(0, 0, 0, 0.08)"
-                  transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                  borderRadius="xl"
+                  p={4}
+                  border="1px solid"
+                  borderColor="rgba(0,0,0,0.06)"
+                  boxShadow="0 2px 10px rgba(50, 45, 35, 0.06)"
+                  transition="all 0.2s ease"
                   _hover={{
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)',
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 4px 14px rgba(50, 45, 35, 0.08)",
                   }}
                   style={{
                     animationDelay: `${index * 0.05}s`,
@@ -166,10 +326,9 @@ const FoodExpirationTracker = () => {
                     <Box flex="1">
                       <HStack spacing={3} mb={2}>
                         <Text
-                          fontSize="2xl"
-                          fontWeight="800"
+                          fontSize="xl"
+                          fontWeight="700"
                           color={colorScheme.text}
-                          fontFamily="heading"
                         >
                           {food.name}
                         </Text>
@@ -236,114 +395,10 @@ const FoodExpirationTracker = () => {
             })}
           </VStack>
 
-          {/* Add Food Modal */}
-          <Modal isOpen={isOpen} onClose={onClose} size="md">
-            <ModalOverlay bg="rgba(45, 51, 25, 0.4)" backdropFilter="blur(4px)" />
-            <ModalContent
-              bg="#FEFAF5"
-              borderRadius="24px"
-              border="3px solid"
-              borderColor="rgba(92, 124, 60, 0.2)"
-              boxShadow="0 12px 40px rgba(0, 0, 0, 0.15)"
-            >
-              <ModalHeader
-                fontFamily="heading"
-                fontSize="2xl"
-                fontWeight="900"
-                color="#2D3319"
-                pt={6}
-              >
-                Add New Food
-              </ModalHeader>
-              <ModalCloseButton mt={2} />
-              <ModalBody pb={6}>
-                <VStack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel fontWeight="600" color="#2D3319">
-                      Food Name
-                    </FormLabel>
-                    <Input
-                      placeholder="e.g., Strawberries"
-                      value={newFood.name}
-                      onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
-                      bg="white"
-                      borderColor="#C8E6C9"
-                      borderWidth="2px"
-                      _hover={{ borderColor: '#5C7C3C' }}
-                      _focus={{ borderColor: '#5C7C3C', boxShadow: '0 0 0 1px #5C7C3C' }}
-                      size="lg"
-                      borderRadius="12px"
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel fontWeight="600" color="#2D3319">
-                      Expiry Date
-                    </FormLabel>
-                    <Input
-                      type="date"
-                      value={newFood.expiryDate}
-                      onChange={(e) =>
-                        setNewFood({ ...newFood, expiryDate: e.target.value })
-                      }
-                      bg="white"
-                      borderColor="#C8E6C9"
-                      borderWidth="2px"
-                      _hover={{ borderColor: '#5C7C3C' }}
-                      _focus={{ borderColor: '#5C7C3C', boxShadow: '0 0 0 1px #5C7C3C' }}
-                      size="lg"
-                      borderRadius="12px"
-                    />
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel fontWeight="600" color="#2D3319">
-                      Category
-                    </FormLabel>
-                    <Input
-                      placeholder="e.g., Produce, Dairy, Snacks"
-                      value={newFood.category}
-                      onChange={(e) =>
-                        setNewFood({ ...newFood, category: e.target.value })
-                      }
-                      bg="white"
-                      borderColor="#C8E6C9"
-                      borderWidth="2px"
-                      _hover={{ borderColor: '#5C7C3C' }}
-                      _focus={{ borderColor: '#5C7C3C', boxShadow: '0 0 0 1px #5C7C3C' }}
-                      size="lg"
-                      borderRadius="12px"
-                    />
-                  </FormControl>
-
-                  <Button
-                    onClick={handleAddFood}
-                    bg="#5C7C3C"
-                    color="white"
-                    size="lg"
-                    width="full"
-                    mt={4}
-                    borderRadius="12px"
-                    fontWeight="700"
-                    _hover={{
-                      bg: '#4A6530',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 16px rgba(92, 124, 60, 0.4)',
-                    }}
-                    _active={{ transform: 'translateY(0)' }}
-                    transition="all 0.2s"
-                  >
-                    Add to Fridge
-                  </Button>
-                </VStack>
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-        </Container>
+          </Container>
+        </Box>
 
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
-
           @keyframes slideIn {
             from {
               opacity: 0;
