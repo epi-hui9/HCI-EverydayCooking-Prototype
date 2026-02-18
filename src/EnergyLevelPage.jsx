@@ -38,7 +38,7 @@ const EnergyLevelPage = () => {
   const [selectedEnergy, setSelectedEnergy] = useState("medium");
 
   const handleContinue = () => {
-    // 课堂原型阶段：先用 alert 占位，后续可接到下一个页面
+    // Prototype phase: placeholder behavior before wiring the next page
     const current = energyOptions.find((e) => e.id === selectedEnergy);
     alert(`Energy level set to: ${current?.label ?? "Unknown"}`);
   };
