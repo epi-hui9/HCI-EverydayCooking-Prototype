@@ -1,10 +1,9 @@
-import { useState } from "react";
-import RecipeSelectionPage from "./RecipeSelectionPage";
+import EnergyLevelPage from "./EnergyLevelPage";
 function App() {
   return (
     <>
-      {/* 2. 直接在這裡「呼叫」你的頁面 */}
-      <RecipeSelectionPage />
+      {/* 這裡暫時渲染 Zeli 的 Energy Level 頁面 */}
+      <EnergyLevelPage />
     </>
   );
 }
