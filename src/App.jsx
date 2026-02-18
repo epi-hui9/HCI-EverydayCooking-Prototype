@@ -1,11 +1,7 @@
-import EnergyLevelPage from "./EnergyLevelPage";
+import Homepage from "./Homepage";
+
 function App() {
-  return (
-    <>
-      {/* 這裡暫時渲染 Zeli 的 Energy Level 頁面 */}
-      <EnergyLevelPage />
-    </>
-  );
+  return <Homepage />;
 }
 
 export default App;
