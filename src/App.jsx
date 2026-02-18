@@ -3,6 +3,7 @@ import { Box, Button, HStack } from "@chakra-ui/react";
 import RecipeSelectionPage from "./RecipeSelectionPage";
 import EnergyLevelPage from "./EnergyLevelPage";
 import FridgeContent from "./FridgeContent";
+import ChatbotInterface from "./ChatbotInterface";
 function App() {
   const [page, setPage] = useState("Fridge");
 
@@ -10,6 +11,7 @@ function App() {
     Fridge: <FridgeContent />,
     Recipe: <RecipeSelectionPage />,
     Energy: <EnergyLevelPage />,
+    Chat: <ChatbotInterface />,
   };
 
   return (

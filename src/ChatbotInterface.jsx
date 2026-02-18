@@ -4,15 +4,16 @@ import {
   Flex,
   Input,
   IconButton,
-  Avatar,
   Text,
   VStack,
   HStack,
-  useBreakpointValue,
   Spinner,
+  Button,
+  Heading,
+  Spacer,
 } from '@chakra-ui/react'
-import { ArrowForwardIcon, ChatIcon } from '@chakra-ui/icons'
-import { getAnswer } from '../utils/chatbotAnswers'
+import { ArrowForwardIcon, ChatIcon, ChevronLeftIcon } from '@chakra-ui/icons'
+import { getAnswer } from './utils/chatbotAnswers'
 
 const SUGGESTED_QUESTIONS = [
   'What can I cook with chicken and carrots?',
@@ -26,8 +27,6 @@ function ChatbotInterface() {
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const chatEndRef = useRef(null)
-  const avatarSize = useBreakpointValue({ base: 'md', md: 'sm' })
-  const inputPadding = useBreakpointValue({ base: 4, md: 3 })
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -98,69 +97,69 @@ function ChatbotInterface() {
     })
   }
 
+  const primaryGreen = '#5a7a6a'
+
   return (
     <Box
       minH="100vh"
-      bg="linear-gradient(135deg, #f0fdfa 0%, #f8fafc 50%, #f1f5f9 100%)"
+      bg="#f5f2ed"
       display="flex"
-      flexDirection="column"
-      alignItems="stretch"
-      justifyContent="stretch"
-      p={{ base: 3, md: 6 }}
+      alignItems="center"
+      justifyContent="center"
+      py={6}
     >
       <Box
-        w="full"
-        maxW="4xl"
-        flex="1"
-        minH={{ base: '90vh', md: '85vh' }}
-        alignSelf="center"
-        bg="white"
-        borderRadius={{ base: 'xl', md: '2xl' }}
-        boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)"
-        overflow="hidden"
-        borderWidth="1px"
-        borderColor="blackAlpha.100"
+        w="min(88vw, 330px)"
+        sx={{ aspectRatio: '393 / 852' }}
+        bg="#fdfbf8"
         display="flex"
         flexDirection="column"
+        overflow="hidden"
+        borderRadius="24px"
+        border="1px solid"
+        borderColor="#e8e2d9"
+        boxShadow="0 20px 50px rgba(55, 45, 35, 0.08)"
+        pt={6}
+        pb={5}
+        px={5}
       >
-        {/* Header */}
-        <Flex
-          px={{ base: 4, md: 6 }}
-          py={4}
-          align="center"
-          gap={3}
-          bg="white"
-          borderBottomWidth="1px"
-          borderColor="blackAlpha.100"
-        >
-          <Flex
-            w={10}
-            h={10}
-            borderRadius="xl"
-            bg="brand.500"
-            align="center"
-            justify="center"
-            flexShrink={0}
-          >
-            <ChatIcon color="white" boxSize={5} />
+        {/* Header: Back + centered title (same as Energy) */}
+        <Box pb={4}>
+          <Flex align="center" mb={2}>
+            <Button
+              leftIcon={<ChevronLeftIcon />}
+              variant="ghost"
+              color="gray.500"
+              size="xs"
+              _hover={{ bg: 'rgba(0,0,0,0.04)' }}
+            >
+              Back
+            </Button>
+            <Spacer />
+            <Heading
+              fontSize="11px"
+              fontWeight="500"
+              letterSpacing="0.06em"
+              textTransform="uppercase"
+              color="gray.500"
+            >
+              Chat
+            </Heading>
+            <Spacer />
+            <Box w="52px" />
           </Flex>
-          <Box>
-            <Text fontWeight="600" fontSize="lg" color="gray.800">
-              Kitchen Assistant
-            </Text>
-            <Text fontSize="sm" color="gray.500">
-              Ideas for what you have on hand
-            </Text>
-          </Box>
-        </Flex>
+        </Box>
 
         {/* Chat area */}
         <Box
           flex="1"
-          minH="300px"
+          minH="200px"
           overflowY="auto"
-          p={{ base: 4, md: 6 }}
-          bg="gray.50"
+          p={3}
+          bg="rgba(248, 246, 242, 0.6)"
+          borderRadius="xl"
+          borderWidth="1px"
+          borderColor="rgba(232, 226, 217, 0.8)"
           css={{
             '&::-webkit-scrollbar': { width: '6px' },
             '&::-webkit-scrollbar-track': { bg: 'transparent' },
@@ -187,17 +186,17 @@ function ChatbotInterface() {
                     as="button"
                     onClick={() => handleSuggestionClick(question)}
                     textAlign="left"
-                    px={5}
-                    py={4}
+                    px={4}
+                    py={3}
                     borderRadius="xl"
-                    bg="white"
+                    bg="#fdfbf8"
                     borderWidth="1px"
-                    borderColor="gray.200"
+                    borderColor="#e8e2d9"
                     boxShadow="sm"
                     transition="all 0.2s"
                     _hover={{
-                      borderColor: 'brand.300',
-                      bg: 'brand.50',
+                      borderColor: 'rgba(90, 122, 106, 0.4)',
+                      bg: 'rgba(200, 220, 210, 0.3)',
                       transform: 'translateY(-1px)',
                       boxShadow: 'md',
                     }}
@@ -207,7 +206,7 @@ function ChatbotInterface() {
                       <Text fontSize="sm" color="gray.700" fontWeight="500">
                         {question}
                       </Text>
-                      <Text color="brand.500" fontSize="lg" fontWeight="600">
+                      <Text color={primaryGreen} fontSize="lg" fontWeight="600">
                         ›
                       </Text>
                     </HStack>
@@ -226,7 +225,7 @@ function ChatbotInterface() {
                       py={3}
                       borderRadius="xl"
                       borderTopRightRadius="md"
-                      bg="brand.500"
+                      bg={primaryGreen}
                       color="white"
                       boxShadow="sm"
                     >
@@ -241,7 +240,7 @@ function ChatbotInterface() {
                       w={8}
                       h={8}
                       borderRadius="lg"
-                      bg="brand.500"
+                      bg={primaryGreen}
                       align="center"
                       justify="center"
                       flexShrink={0}
@@ -255,9 +254,9 @@ function ChatbotInterface() {
                       py={3}
                       borderRadius="xl"
                       borderTopLeftRadius="md"
-                      bg="white"
+                      bg="#fdfbf8"
                       borderWidth="1px"
-                      borderColor="gray.200"
+                      borderColor="#e8e2d9"
                       boxShadow="sm"
                     >
                       <Box fontSize="sm" color="gray.700">
@@ -273,7 +272,7 @@ function ChatbotInterface() {
                     w={8}
                     h={8}
                     borderRadius="lg"
-                    bg="brand.500"
+                    bg={primaryGreen}
                     align="center"
                     justify="center"
                     flexShrink={0}
@@ -285,11 +284,11 @@ function ChatbotInterface() {
                     py={3}
                     borderRadius="xl"
                     borderTopLeftRadius="md"
-                    bg="white"
+                    bg="#fdfbf8"
                     borderWidth="1px"
-                    borderColor="gray.200"
+                    borderColor="#e8e2d9"
                   >
-                    <Spinner size="sm" color="brand.500" />
+                    <Spinner size="sm" color={primaryGreen} />
                   </Box>
                 </Flex>
               )}
@@ -300,20 +299,11 @@ function ChatbotInterface() {
 
         {/* Input bar */}
         <Flex
-          p={inputPadding}
-          gap={3}
+          pt={3}
+          gap={2}
           align="center"
-          borderTopWidth="1px"
-          borderColor="blackAlpha.100"
-          bg="white"
+          flexShrink={0}
         >
-          <Avatar
-            size={avatarSize}
-            name="User"
-            bg="brand.400"
-            color="white"
-            flexShrink={0}
-          />
           <Input
             placeholder="What ingredients do you have? Ask me anything..."
             value={inputValue}
@@ -321,25 +311,28 @@ function ChatbotInterface() {
             onKeyPress={handleKeyPress}
             variant="outline"
             borderRadius="full"
-            borderColor="gray.200"
-            bg="gray.50"
+            borderColor="#e8e2d9"
+            bg="#fdfbf8"
             _hover={{ borderColor: 'gray.300' }}
             _focus={{
-              borderColor: 'brand.400',
-              boxShadow: '0 0 0 1px var(--chakra-colors-brand-400)',
-              bg: 'white',
+              borderColor: primaryGreen,
+              boxShadow: `0 0 0 1px ${primaryGreen}`,
+              bg: '#fdfbf8',
             }}
             _placeholder={{ color: 'gray.500' }}
-            size="md"
+            size="sm"
           />
           <IconButton
             aria-label="Send message"
             icon={<ArrowForwardIcon />}
-            colorScheme="brand"
+            bg={primaryGreen}
+            color="white"
             borderRadius="full"
-            size="md"
-            minW={10}
-            minH={10}
+            size="sm"
+            minW={9}
+            minH={9}
+            _hover={{ bg: '#4d6b5d' }}
+            _active={{ bg: '#445d50' }}
             onClick={handleSend}
           />
         </Flex>
