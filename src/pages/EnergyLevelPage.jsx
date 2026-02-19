@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   VStack,
@@ -13,71 +13,40 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChatIcon } from "@chakra-ui/icons";
+import { ENERGY_OPTIONS } from "../constants/energy";
 
-const energyOptions = [
-  {
-    id: "low",
-    label: "Low",
-    description: "Reheat or assemble.",
-    size: "50px",
-  },
-  {
-    id: "medium",
-    label: "Medium",
-    description: "Simple, one-pan.",
-    size: "68px",
-  },
-  {
-    id: "high",
-    label: "High",
-    description: "Up for cooking.",
-    size: "84px",
-  },
-];
-
-const EnergyLevelPage = ({ onOpenChat, onBack }) => {
-  const [selectedEnergy, setSelectedEnergy] = useState("medium");
-
+const EnergyLevelPage = ({ onOpenChat, onBack, onContinue, selectedEnergy = "medium", onEnergyChange }) => {
   const handleContinue = () => {
-    // Prototype phase: placeholder behavior before wiring the next page
-    const current = energyOptions.find((e) => e.id === selectedEnergy);
-    alert(`Energy level set to: ${current?.label ?? "Unknown"}`);
+    onContinue?.(selectedEnergy);
   };
 
   return (
-    <Box
-      minH="100vh"
-      bg="#f5f2ed"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      py={6}
-    >
+    <Box minH="100vh" w="100%" display="flex" flexDirection="column" alignItems="stretch">
       <Box
-        w="min(88vw, 330px)"
-        sx={{ aspectRatio: "393 / 852" }}
-        bg="#fdfbf8"
-        display="flex"
-        flexDirection="column"
-        overflow="hidden"
-        borderRadius="24px"
-        border="1px solid"
-        borderColor="#e8e2d9"
-        boxShadow="0 20px 50px rgba(55, 45, 35, 0.08)"
+        flex="1"
+        w="100%"
+        maxW="420px"
+        mx="auto"
         pt={6}
-        pb={5}
+        pb={8}
         px={5}
+        bg="#fdfbf8"
+        borderRadius="2xl"
+        boxShadow="0 4px 24px rgba(55, 45, 35, 0.06)"
         position="relative"
+        minH="100vh"
       >
-        {/* Header */}
-        <Box pb={4}>
+        <Box pb={4} style={{ animation: "slideIn 0.4s ease-out forwards" }}>
           <Flex align="center" mb={4}>
             <Button
               leftIcon={<ChevronLeftIcon />}
               variant="ghost"
               color="gray.500"
-              size="xs"
+              size="sm"
+              minH="44px"
+              px={3}
               _hover={{ bg: "rgba(0,0,0,0.04)" }}
+              _active={{ bg: "rgba(0,0,0,0.06)" }}
               onClick={onBack}
             >
               Back
@@ -108,13 +77,7 @@ const EnergyLevelPage = ({ onOpenChat, onBack }) => {
             >
               <Text fontSize="md">🥘</Text>
             </Box>
-            <Text
-              fontSize="sm"
-              fontWeight="500"
-              color="gray.600"
-              textAlign="center"
-              lineHeight="1.4"
-            >
+            <Text fontSize="sm" fontWeight="500" color="gray.600" textAlign="center" lineHeight="1.4">
               How much energy do you have right now?
             </Text>
             <Text fontSize="xs" color="gray.400" textAlign="center">
@@ -123,24 +86,20 @@ const EnergyLevelPage = ({ onOpenChat, onBack }) => {
           </VStack>
         </Box>
 
-        {/* Content: Bubbles */}
-        <VStack
-          spacing={3}
-          flex="1"
-          pb={4}
-          pt={2}
-          align="stretch"
-          justify="center"
-        >
-          {energyOptions.map((option) => {
+        <VStack spacing={3} flex="1" pb={4} pt={2} align="stretch" justify="center">
+          {ENERGY_OPTIONS.map((option, index) => {
             const isActive = option.id === selectedEnergy;
             const isLow = option.id === "low";
             const isHigh = option.id === "high";
             return (
               <Box
                 key={option.id}
-                onClick={() => setSelectedEnergy(option.id)}
+                onClick={() => onEnergyChange?.(option.id)}
                 cursor="pointer"
+                minH="52px"
+                style={{ animation: `slideIn 0.4s ease-out ${0.06 + index * 0.05}s both` }}
+                display="flex"
+                alignItems="center"
                 borderRadius="2xl"
                 borderWidth={isActive ? 1 : 0}
                 borderColor={isActive ? "rgba(90, 122, 106, 0.4)" : "transparent"}
@@ -152,6 +111,7 @@ const EnergyLevelPage = ({ onOpenChat, onBack }) => {
                   bg: isActive ? "rgba(200, 220, 210, 0.4)" : "rgba(0,0,0,0.03)",
                   transform: "translateY(-2px)",
                 }}
+                _active={{ transform: "scale(0.98)" }}
               >
                 <HStack spacing={3}>
                   <Circle
@@ -159,34 +119,19 @@ const EnergyLevelPage = ({ onOpenChat, onBack }) => {
                     bg="white"
                     borderWidth={2}
                     borderColor={
-                      isHigh
-                        ? "rgba(90, 122, 106, 0.7)"
-                        : isLow
-                          ? "rgba(90, 122, 106, 0.35)"
-                          : "rgba(90, 122, 106, 0.5)"
+                      isHigh ? "rgba(90, 122, 106, 0.7)" : isLow ? "rgba(90, 122, 106, 0.35)" : "rgba(90, 122, 106, 0.5)"
                     }
                     boxShadow={
-                      isActive
-                        ? "0 12px 28px rgba(70, 100, 85, 0.18)"
-                        : "0 4px 14px rgba(40, 55, 45, 0.06)"
+                      isActive ? "0 12px 28px rgba(70, 100, 85, 0.18)" : "0 4px 14px rgba(40, 55, 45, 0.06)"
                     }
-                    transform={
-                      isActive ? "translateY(-2px) scale(1.03)" : "scale(1)"
-                    }
+                    transform={isActive ? "translateY(-2px) scale(1.03)" : "scale(1)"}
                     transition="transform 0.26s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.26s cubic-bezier(0.19, 1, 0.22, 1)"
                   />
                   <VStack align="start" spacing={0}>
-                    <Text
-                      fontSize="xs"
-                      fontWeight={isActive ? "semibold" : "medium"}
-                      color={isActive ? "gray.700" : "gray.600"}
-                    >
+                    <Text fontSize="xs" fontWeight={isActive ? "semibold" : "medium"} color={isActive ? "gray.700" : "gray.600"}>
                       {option.label}
                     </Text>
-                    <Text
-                      fontSize="11px"
-                      color={isActive ? "gray.600" : "gray.500"}
-                    >
+                    <Text fontSize="11px" color={isActive ? "gray.600" : "gray.500"}>
                       {option.description}
                     </Text>
                   </VStack>
@@ -202,31 +147,26 @@ const EnergyLevelPage = ({ onOpenChat, onBack }) => {
           </Box>
         </VStack>
 
-        {/* Footer */}
         <Box pt={4} pb={2}>
           <VStack spacing={2} align="stretch">
             <Button
               w="full"
               size="md"
-              h="46px"
+              minH="48px"
+              h="48px"
               borderRadius="xl"
               fontSize="sm"
-              fontWeight="500"
-              bg="#5a7a6a"
+              fontWeight="600"
+              bg="var(--primary)"
               color="white"
               boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
-              _hover={{ bg: "#4d6b5d" }}
-              _active={{ bg: "#445d50" }}
+              _hover={{ bg: "var(--primary-hover)" }}
+              _active={{ bg: "var(--primary-active)", transform: "scale(0.98)" }}
               onClick={handleContinue}
             >
               Continue
             </Button>
-            <Button
-              variant="ghost"
-              size="xs"
-              color="gray.400"
-              _hover={{ color: "gray.600", bg: "rgba(0,0,0,0.03)" }}
-            >
+            <Button variant="ghost" size="xs" color="gray.400" _hover={{ color: "gray.600", bg: "rgba(0,0,0,0.03)" }}>
               Skip for now
             </Button>
           </VStack>
@@ -236,17 +176,19 @@ const EnergyLevelPage = ({ onOpenChat, onBack }) => {
           <Tooltip label="Chat" placement="left">
             <IconButton
               aria-label="Open Chat"
-              icon={<ChatIcon />}
-              size="sm"
+              icon={<ChatIcon color="white" boxSize={6} />}
+              size="md"
+              minW="44px"
+              minH="44px"
               borderRadius="full"
               bg="#5a7a6a"
               color="white"
               position="absolute"
-              bottom="16px"
+              bottom="calc(16px + var(--safe-bottom))"
               right="16px"
-              boxShadow="0 2px 8px rgba(90, 122, 106, 0.35)"
-              _hover={{ bg: "#4d6b5d" }}
-              _active={{ bg: "#445d50" }}
+              boxShadow="0 4px 16px rgba(90, 122, 106, 0.4)"
+              _hover={{ bg: "#4d6b5d", transform: "scale(1.05)" }}
+              _active={{ bg: "#445d50", transform: "scale(0.95)" }}
               onClick={onOpenChat}
             />
           </Tooltip>
@@ -257,4 +199,3 @@ const EnergyLevelPage = ({ onOpenChat, onBack }) => {
 };
 
 export default EnergyLevelPage;
-

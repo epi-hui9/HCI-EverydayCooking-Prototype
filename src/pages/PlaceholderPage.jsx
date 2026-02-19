@@ -13,38 +13,35 @@ import { ChevronLeftIcon, ChatIcon } from "@chakra-ui/icons";
 
 export default function PlaceholderPage({ title, onOpenChat }) {
   return (
-    <Box
-      minH="100vh"
-      bg="#f5f2ed"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      py={6}
-    >
+    <Box minH="100vh" bg="#f5f2ed" display="flex" flexDirection="column" alignItems="stretch">
       <Box
-        w="min(88vw, 330px)"
-        sx={{ aspectRatio: "393 / 852" }}
+        flex="1"
+        w="100%"
+        maxW="420px"
+        mx="auto"
+        pt={6}
+        pb={8}
+        px={5}
         bg="#fdfbf8"
+        borderRadius="2xl"
+        boxShadow="0 4px 24px rgba(55, 45, 35, 0.06)"
+        minH="100vh"
         display="flex"
         flexDirection="column"
         overflow="hidden"
-        borderRadius="24px"
-        border="1px solid"
-        borderColor="#e8e2d9"
-        boxShadow="0 20px 50px rgba(55, 45, 35, 0.08)"
-        pt={6}
-        pb={5}
-        px={5}
         position="relative"
       >
-        <Box pb={4}>
+        <Box pb={4} style={{ animation: "slideIn 0.4s ease-out forwards" }}>
           <Flex align="center" mb={4}>
             <Button
               leftIcon={<ChevronLeftIcon />}
               variant="ghost"
               color="gray.500"
-              size="xs"
+              size="sm"
+              minH="44px"
+              px={3}
               _hover={{ bg: "rgba(0,0,0,0.04)" }}
+              _active={{ bg: "rgba(0,0,0,0.06)" }}
             >
               Back
             </Button>
@@ -62,7 +59,7 @@ export default function PlaceholderPage({ title, onOpenChat }) {
             <Box w="52px" />
           </Flex>
         </Box>
-        <Flex flex="1" align="center" justify="center">
+        <Flex flex="1" align="center" justify="center" style={{ animation: "slideIn 0.4s ease-out 0.08s both" }}>
           <Text fontSize="sm" color="gray.500">
             Coming soon
           </Text>
@@ -72,17 +69,19 @@ export default function PlaceholderPage({ title, onOpenChat }) {
           <Tooltip label="Chat" placement="left">
             <IconButton
               aria-label="Open Chat"
-              icon={<ChatIcon />}
-              size="sm"
+              icon={<ChatIcon color="white" boxSize={6} />}
+              size="md"
+              minW="44px"
+              minH="44px"
               borderRadius="full"
               bg="#5a7a6a"
               color="white"
               position="absolute"
-              bottom="16px"
+              bottom="calc(16px + var(--safe-bottom))"
               right="16px"
-              boxShadow="0 2px 8px rgba(90, 122, 106, 0.35)"
-              _hover={{ bg: "#4d6b5d" }}
-              _active={{ bg: "#445d50" }}
+              boxShadow="0 4px 16px rgba(90, 122, 106, 0.4)"
+              _hover={{ bg: "#4d6b5d", transform: "scale(1.05)" }}
+              _active={{ bg: "#445d50", transform: "scale(0.95)" }}
               onClick={onOpenChat}
             />
           </Tooltip>

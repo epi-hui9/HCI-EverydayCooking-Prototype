@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   VStack,
@@ -10,94 +10,68 @@ import {
   Flex,
   Spacer,
   Badge,
-  useDisclosure,
   IconButton,
   Tooltip,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, UpDownIcon, ChatIcon } from "@chakra-ui/icons";
-
-const initialIngredients = [
-  { id: 1, name: "Spinach", emoji: "🥬", daysLeft: 2 },
-  { id: 2, name: "Garlic", emoji: "🧄", daysLeft: 14 },
-  { id: 3, name: "Ground Beef", emoji: "🐂", daysLeft: 1 },
-  { id: 4, name: "Onions", emoji: "🧅", daysLeft: 7 },
-  { id: 5, name: "Eggs", emoji: "🥚", daysLeft: 10 },
-  { id: 6, name: "Milk", emoji: "🥛", daysLeft: 3 },
-  { id: 7, name: "Chicken Breast", emoji: "🍗", daysLeft: 2 },
-  { id: 8, name: "Tomato", emoji: "🍅", daysLeft: 5 },
-  { id: 10, name: "Broccoli", emoji: "🥦", daysLeft: 4 },
-  { id: 12, name: "Cheese", emoji: "🧀", daysLeft: 20 },
-];
+import { INITIAL_INGREDIENTS } from "../data/ingredients";
 
 const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
-  const [ingredients, setIngredients] = useState(initialIngredients);
+  const [ingredients, setIngredients] = useState(INITIAL_INGREDIENTS);
   const [selectedIds, setSelectedIds] = useState([]);
   const [isSorted, setIsSorted] = useState(false);
 
-  // Toggle selection
   const toggleIngredient = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
-  // Sorting Logic
   const handleSort = () => {
     const newSortedState = !isSorted;
     setIsSorted(newSortedState);
-
-    const sortedList = [...ingredients].sort((a, b) => {
-      return newSortedState ? a.daysLeft - b.daysLeft : a.id - b.id;
-    });
+    const sortedList = [...ingredients].sort((a, b) =>
+      newSortedState ? a.daysLeft - b.daysLeft : a.id - b.id,
+    );
     setIngredients(sortedList);
   };
 
   return (
-    <Box
-      minH="100vh"
-      bg="#f5f2ed"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      py={6}
-    >
+    <Box minH="100vh" bg="#f5f2ed" display="flex" flexDirection="column" alignItems="stretch">
       <Box
-        w="min(88vw, 330px)"
-        sx={{ aspectRatio: "393 / 852" }}
+        flex="1"
+        w="100%"
+        maxW="420px"
+        mx="auto"
+        pt={6}
+        pb={8}
+        px={5}
         bg="#fdfbf8"
+        borderRadius="2xl"
+        boxShadow="0 4px 24px rgba(55, 45, 35, 0.06)"
+        position="relative"
+        minH="100vh"
         display="flex"
         flexDirection="column"
         overflow="hidden"
-        borderRadius="24px"
-        border="1px solid"
-        borderColor="#e8e2d9"
-        boxShadow="0 20px 50px rgba(55, 45, 35, 0.08)"
-        pt={6}
-        pb={5}
-        px={5}
-        position="relative"
       >
-        {/* Header Section */}
-        <Box pb={4}>
+        <Box pb={4} style={{ animation: "slideIn 0.4s ease-out forwards" }}>
           <Flex align="center" mb={4}>
             <Button
               leftIcon={<ChevronLeftIcon />}
               variant="ghost"
               color="gray.500"
-              size="xs"
+              size="sm"
+              minH="44px"
+              px={3}
               _hover={{ bg: "rgba(0,0,0,0.04)" }}
+              _active={{ bg: "rgba(0,0,0,0.06)" }}
               onClick={onBack}
             >
               Back
             </Button>
             <Spacer />
-            <Heading
-              fontSize="11px"
-              fontWeight="500"
-              letterSpacing="0.06em"
-              textTransform="uppercase"
-              color="gray.500"
-            >
+            <Heading fontSize="11px" fontWeight="500" letterSpacing="0.06em" textTransform="uppercase" color="gray.500">
               Ingredients
             </Heading>
             <Spacer />
@@ -107,12 +81,14 @@ const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
           <Flex justify="space-between" align="center">
             <Button
               leftIcon={<UpDownIcon />}
-              size="xs"
+              size="sm"
+              minH="40px"
               variant="outline"
               borderColor={isSorted ? "rgba(90, 122, 106, 0.5)" : "gray.200"}
               color={isSorted ? "gray.600" : "gray.500"}
               onClick={handleSort}
               _hover={{ bg: "rgba(0,0,0,0.03)" }}
+              _active={{ bg: "rgba(0,0,0,0.05)" }}
             >
               {isSorted ? "Original Order" : "Sort by Expire"}
             </Button>
@@ -122,7 +98,6 @@ const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
           </Flex>
         </Box>
 
-        {/* Scrollable List */}
         <VStack
           spacing={3}
           align="stretch"
@@ -134,11 +109,13 @@ const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          {ingredients.map((item) => {
+          {ingredients.map((item, index) => {
             const isSelected = selectedIds.includes(item.id);
             return (
               <HStack
                 key={item.id}
+                minH="52px"
+                style={{ animation: `slideIn 0.4s ease-out ${index * 0.04}s both` }}
                 py={3}
                 px={4}
                 bg={isSelected ? "rgba(200, 220, 210, 0.4)" : "rgba(255,255,255,0.6)"}
@@ -164,7 +141,7 @@ const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
                       px={2}
                       fontSize="10px"
                       bg={item.daysLeft <= 3 ? "rgba(180, 100, 90, 0.2)" : "rgba(90, 122, 106, 0.15)"}
-                      color={item.daysLeft <= 3 ? "gray.600" : "gray.600"}
+                      color="gray.600"
                     >
                       {item.daysLeft} days left
                     </Badge>
@@ -181,22 +158,28 @@ const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
           })}
         </VStack>
 
-        {/* Footer */}
         <Box pt={4} pb={2}>
           <Button
             w="full"
             size="md"
-            h="46px"
+            minH="48px"
+            h="48px"
             borderRadius="xl"
             fontSize="sm"
-            fontWeight="500"
-            bg="#5a7a6a"
+            fontWeight="600"
+            bg="var(--primary)"
             color="white"
             boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
-            onClick={onNext}
+            onClick={() => {
+              const selectedNames = ingredients
+                .filter((i) => selectedIds.includes(i.id))
+                .map((i) => i.name);
+              onNext?.(selectedNames);
+            }}
             isDisabled={selectedIds.length === 0}
-            _hover={{ bg: "#4d6b5d" }}
-            _active={{ bg: "#445d50" }}
+            _hover={{ bg: "var(--primary-hover)" }}
+            _active={{ bg: "var(--primary-active)", transform: "scale(0.98)" }}
+            transition="transform 0.2s ease"
           >
             Next
           </Button>
@@ -206,17 +189,19 @@ const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
           <Tooltip label="Chat" placement="left">
             <IconButton
               aria-label="Open Chat"
-              icon={<ChatIcon />}
-              size="sm"
+              icon={<ChatIcon color="white" boxSize={6} />}
+              size="md"
+              minW="44px"
+              minH="44px"
               borderRadius="full"
               bg="#5a7a6a"
               color="white"
               position="absolute"
-              bottom="16px"
+              bottom="calc(16px + var(--safe-bottom))"
               right="16px"
-              boxShadow="0 2px 8px rgba(90, 122, 106, 0.35)"
-              _hover={{ bg: "#4d6b5d" }}
-              _active={{ bg: "#445d50" }}
+              boxShadow="0 4px 16px rgba(90, 122, 106, 0.4)"
+              _hover={{ bg: "#4d6b5d", transform: "scale(1.05)" }}
+              _active={{ bg: "#445d50", transform: "scale(0.95)" }}
               onClick={onOpenChat}
             />
           </Tooltip>
