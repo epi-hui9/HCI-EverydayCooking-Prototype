@@ -149,13 +149,14 @@ const RecipeDetailsPage = ({ onOpenChat, onBack, selectedIngredientNames = [], s
               borderRadius="xl"
               fontSize="sm"
               fontWeight="600"
-              bg="var(--primary)"
+              bg="#5a7a6a"
               color="white"
               boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
               onClick={handleNext}
               isDisabled={!selectedRecipe}
-              _hover={{ bg: "var(--primary-hover)" }}
-              _active={{ bg: "var(--primary-active)", transform: "scale(0.98)" }}
+              _hover={{ bg: "#4d6b5d" }}
+              _active={{ bg: "#445d50", transform: "scale(0.98)" }}
+              _disabled={{ bg: "gray.300", color: "gray.700", opacity: 1 }}
             >
               Next
             </Button>
