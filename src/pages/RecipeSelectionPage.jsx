@@ -1,22 +1,23 @@
+/**
+ * Recipe flow step 1: select ingredients (from fridge). Content fits inside app frame.
+ */
 import React, { useState } from "react";
 import {
   Box,
-  VStack,
-  HStack,
-  Text,
   Button,
+  Stack,
+  Typography,
   Checkbox,
-  Heading,
-  Flex,
-  Spacer,
-  Badge,
+  Chip,
   IconButton,
-  Tooltip,
-} from "@chakra-ui/react";
-import { ChevronLeftIcon, UpDownIcon, ChatIcon } from "@chakra-ui/icons";
+} from "@mui/material";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import SwapVert from "@mui/icons-material/SwapVert";
+import ChatIcon from "@mui/icons-material/Chat";
 import { INITIAL_INGREDIENTS } from "../data/ingredients";
+import { PALETTE } from "../theme";
 
-const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
+export default function RecipeSelectionPage({ onOpenChat, onNext, onBack }) {
   const [ingredients, setIngredients] = useState(INITIAL_INGREDIENTS);
   const [selectedIds, setSelectedIds] = useState([]);
   const [isSorted, setIsSorted] = useState(false);
@@ -37,179 +38,128 @@ const RecipeSelectionPage = ({ onOpenChat, onNext, onBack }) => {
   };
 
   return (
-    <Box minH="100vh" bg="#f5f2ed" display="flex" flexDirection="column" alignItems="stretch">
-      <Box
-        flex="1"
-        w="100%"
-        maxW="420px"
-        mx="auto"
-        pt={6}
-        pb={8}
-        px={5}
-        bg="#fdfbf8"
-        borderRadius="2xl"
-        boxShadow="0 4px 24px rgba(55, 45, 35, 0.06)"
-        position="relative"
-        minH="100vh"
-        display="flex"
-        flexDirection="column"
-        overflow="hidden"
-      >
-        <Box pb={4} style={{ animation: "slideIn 0.4s ease-out forwards" }}>
-          <Flex align="center" mb={4}>
-            <Button
-              leftIcon={<ChevronLeftIcon />}
-              variant="ghost"
-              color="gray.500"
-              size="sm"
-              minH="44px"
-              px={3}
-              _hover={{ bg: "rgba(0,0,0,0.04)" }}
-              _active={{ bg: "rgba(0,0,0,0.06)" }}
-              onClick={onBack}
-            >
-              Back
-            </Button>
-            <Spacer />
-            <Heading fontSize="11px" fontWeight="500" letterSpacing="0.06em" textTransform="uppercase" color="gray.500">
-              Ingredients
-            </Heading>
-            <Spacer />
-            <Box w="52px" />
-          </Flex>
+    <Box sx={{ minHeight: "100%", display: "flex", flexDirection: "column", px: 2.5, pt: 3, pb: 2 }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Button
+          startIcon={<ChevronLeft />}
+          onClick={onBack}
+          sx={{ color: "text.secondary", minHeight: 44, "&:hover": { bgcolor: "rgba(0,0,0,0.04)" } }}
+        >
+          Back
+        </Button>
+        <Typography variant="overline" sx={{ letterSpacing: 0.6, color: "text.secondary" }}>
+          Ingredients
+        </Typography>
+        <Box sx={{ width: 52 }} />
+      </Stack>
 
-          <Flex justify="space-between" align="center">
-            <Button
-              leftIcon={<UpDownIcon />}
-              size="sm"
-              minH="40px"
-              variant="outline"
-              borderColor={isSorted ? "rgba(90, 122, 106, 0.5)" : "gray.200"}
-              color={isSorted ? "gray.600" : "gray.500"}
-              onClick={handleSort}
-              _hover={{ bg: "rgba(0,0,0,0.03)" }}
-              _active={{ bg: "rgba(0,0,0,0.05)" }}
-            >
-              {isSorted ? "Original Order" : "Sort by Expire"}
-            </Button>
-            <Text fontSize="xs" color="gray.400" fontWeight="500">
-              {selectedIds.length} items selected
-            </Text>
-          </Flex>
-        </Box>
-
-        <VStack
-          spacing={3}
-          align="stretch"
-          flex="1"
-          overflowY="auto"
-          pb={4}
-          css={{
-            "&::-webkit-scrollbar": { display: "none" },
-            WebkitOverflowScrolling: "touch",
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+        <Button
+          startIcon={<SwapVert />}
+          size="small"
+          variant="outlined"
+          onClick={handleSort}
+          sx={{
+            minHeight: 40,
+            borderColor: isSorted ? PALETTE.sage : "divider",
+            color: isSorted ? "text.primary" : "text.secondary",
+            "&:hover": { bgcolor: "rgba(0,0,0,0.03)" },
           }}
         >
-          {ingredients.map((item, index) => {
-            const isSelected = selectedIds.includes(item.id);
-            return (
-              <HStack
-                key={item.id}
-                minH="52px"
-                style={{ animation: `slideIn 0.4s ease-out ${index * 0.04}s both` }}
-                py={3}
-                px={4}
-                bg={isSelected ? "rgba(200, 220, 210, 0.4)" : "rgba(255,255,255,0.6)"}
-                borderRadius="xl"
-                border="1px solid"
-                borderColor={isSelected ? "rgba(90, 122, 106, 0.3)" : "rgba(0,0,0,0.06)"}
-                justify="space-between"
-                onClick={() => toggleIngredient(item.id)}
-                cursor="pointer"
-                transition="all 0.2s ease"
-                _active={{ transform: "scale(0.98)" }}
-                _hover={{ bg: isSelected ? "rgba(200, 220, 210, 0.5)" : "rgba(0,0,0,0.02)" }}
-              >
-                <HStack spacing={4}>
-                  <Text fontSize="xl">{item.emoji}</Text>
-                  <VStack align="start" spacing={0}>
-                    <Text fontWeight="600" fontSize="sm" color="gray.600">
-                      {item.name}
-                    </Text>
-                    <Badge
-                      variant="subtle"
-                      borderRadius="full"
-                      px={2}
-                      fontSize="10px"
-                      bg={item.daysLeft <= 3 ? "rgba(180, 100, 90, 0.2)" : "rgba(90, 122, 106, 0.15)"}
-                      color="gray.600"
-                    >
-                      {item.daysLeft} days left
-                    </Badge>
-                  </VStack>
-                </HStack>
-                <Checkbox
-                  colorScheme="green"
-                  isChecked={isSelected}
-                  pointerEvents="none"
-                  sx={{ "& .chakra-checkbox__control": { borderColor: "rgba(90, 122, 106, 0.5)" } }}
-                />
-              </HStack>
-            );
-          })}
-        </VStack>
+          {isSorted ? "Original Order" : "Sort by Expire"}
+        </Button>
+        <Typography variant="caption" color="text.secondary" fontWeight={500}>
+          {selectedIds.length} items selected
+        </Typography>
+      </Stack>
 
-        <Box pt={4} pb={2}>
-          <Button
-            w="full"
-            size="md"
-            minH="48px"
-            h="48px"
-            borderRadius="xl"
-            fontSize="sm"
-            fontWeight="600"
-            bg="#5a7a6a"
-            color="white"
-            boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
-            onClick={() => {
-              const selectedNames = ingredients
-                .filter((i) => selectedIds.includes(i.id))
-                .map((i) => i.name);
-              onNext?.(selectedNames);
-            }}
-            isDisabled={selectedIds.length === 0}
-            _hover={{ bg: "#4d6b5d" }}
-            _active={{ bg: "#445d50", transform: "scale(0.98)" }}
-            _disabled={{ bg: "gray.300", color: "gray.700", opacity: 1 }}
-            transition="transform 0.2s ease"
-          >
-            Next
-          </Button>
-        </Box>
+      <Stack spacing={1.5} sx={{ flex: 1, pb: 2 }}>
+        {ingredients.map((item) => {
+          const isSelected = selectedIds.includes(item.id);
+          return (
+            <Box
+              key={item.id}
+              onClick={() => toggleIngredient(item.id)}
+              sx={{
+                minHeight: 52,
+                py: 1.5,
+                px: 2,
+                bgcolor: isSelected ? PALETTE.sageLight : "rgba(255,255,255,0.6)",
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: isSelected ? PALETTE.sage : "rgba(0,0,0,0.06)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                "&:hover": { bgcolor: isSelected ? PALETTE.sageLight : "rgba(0,0,0,0.02)" },
+              }}
+            >
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography sx={{ fontSize: "1.25rem" }}>{item.emoji}</Typography>
+                <Stack spacing={0}>
+                  <Typography fontWeight={600} variant="body2" color="text.secondary">
+                    {item.name}
+                  </Typography>
+                  <Chip
+                    label={`${item.daysLeft} days left`}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: "0.7rem",
+                      bgcolor: item.daysLeft <= 3 ? "rgba(180,100,90,0.2)" : "rgba(0,0,0,0.06)",
+                    }}
+                  />
+                </Stack>
+              </Stack>
+              <Checkbox checked={isSelected} sx={{ pointerEvents: "none", color: PALETTE.sage }} />
+            </Box>
+          );
+        })}
+      </Stack>
 
-        {onOpenChat && (
-          <Tooltip label="Chat" placement="left">
-            <IconButton
-              aria-label="Open Chat"
-              icon={<ChatIcon color="white" boxSize={6} />}
-              size="md"
-              minW="44px"
-              minH="44px"
-              borderRadius="full"
-              bg="#5a7a6a"
-              color="white"
-              position="absolute"
-              bottom="calc(16px + var(--safe-bottom))"
-              right="16px"
-              boxShadow="0 4px 16px rgba(90, 122, 106, 0.4)"
-              _hover={{ bg: "#4d6b5d", transform: "scale(1.05)" }}
-              _active={{ bg: "#445d50", transform: "scale(0.95)" }}
-              onClick={onOpenChat}
-            />
-          </Tooltip>
-        )}
+      <Box sx={{ pt: 2, pb: 1 }}>
+        <Button
+          fullWidth
+          variant="contained"
+          size="medium"
+          disabled={selectedIds.length === 0}
+          sx={{
+            minHeight: 48,
+            borderRadius: 2,
+            fontWeight: 600,
+            bgcolor: PALETTE.warmBrown,
+            "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9 },
+            "&.Mui-disabled": { bgcolor: "action.disabledBackground", color: "text.secondary" },
+          }}
+          onClick={() => {
+            const names = ingredients.filter((i) => selectedIds.includes(i.id)).map((i) => i.name);
+            onNext?.(names);
+          }}
+        >
+          Next
+        </Button>
       </Box>
+
+      {onOpenChat && (
+        <Box sx={{ position: "fixed", bottom: 88, right: 24, zIndex: 10 }}>
+          <IconButton
+            aria-label="Open Chat"
+            sx={{
+              width: 48,
+              height: 48,
+              bgcolor: PALETTE.warmBrown,
+              color: "#fff",
+              boxShadow: "0 4px 16px rgba(212, 163, 115, 0.4)",
+              "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9, transform: "scale(1.05)" },
+            }}
+            onClick={onOpenChat}
+          >
+            <ChatIcon />
+          </IconButton>
+        </Box>
+      )}
     </Box>
   );
-};
-
-export default RecipeSelectionPage;
+}

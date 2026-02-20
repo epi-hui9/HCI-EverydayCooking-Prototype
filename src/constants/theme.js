@@ -1,7 +1,9 @@
-/** Homepage tile colors */
+import { PALETTE } from "../theme";
+
+/** Homepage tile colors — from app palette */
 export const HOMEPAGE_BUTTON_COLORS = {
-  yourFood: "#547757",
-  recipes: "#86A76A",
-  history: "#BAD07B",
-  weeklyPlan: "#BD645E",
+  yourFood: PALETTE.sage,
+  recipes: PALETTE.sageLight,
+  history: PALETTE.warmBeige,
+  weeklyPlan: PALETTE.warmBrown,
 };

@@ -1,15 +1,14 @@
-/* Mobile-first base: safe area, touch, no conflicting defaults */
+/* Earthplate palette: ccd5ae, e9edc9, fefae0, faedcd, d4a373 */
 :root {
-  --app-bg: #f5f2ed;
-  --card-bg: #fdfbf8;
+  --app-bg: #fefae0;
+  --card-bg: #faedcd;
   --card-border: rgba(0, 0, 0, 0.06);
-  --primary: #5a7a6a;
-  --primary-hover: #4d6b5d;
-  --primary-active: #445d50;
+  --primary: #d4a373;
+  --primary-hover: #b8864f;
+  --sage: #ccd5ae;
+  --sage-light: #e9edc9;
   --tap-min: 44px;
-  --radius-card: 24px;
-  --radius-touch: 16px;
-  /* Safe area for notches / home indicator */
+  --radius-card: 16px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -28,9 +27,11 @@ body,
   margin: 0;
 }
 
+/* Outer background: app frame is drawn by App.jsx; root can inherit or use fallback */
 body,
 #root {
-  background: #f5f2ed;
+  background: var(--app-bg);
+  min-height: 100%;
 }
 
 body {
@@ -39,10 +40,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: #1a202c;
   min-height: 100vh;
-  background: #f5f2ed;
 }
 
-/* Shared content entrance animation (used on all pages) */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -54,14 +53,12 @@ body {
   }
 }
 
-/* Prevent iOS zoom on input focus — use 16px where possible */
 input,
 textarea,
 select {
   font-size: 16px !important;
 }
 
-/* Touch-friendly: minimum tap target (optional helper) */
 button,
 [role="button"],
 a {

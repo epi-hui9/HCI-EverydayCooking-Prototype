@@ -1,25 +1,40 @@
+/**
+ * Fridge / Your Food: list of items with expiry, add/delete. Content fits inside app frame.
+ */
 import React, { useState } from "react";
 import {
   Box,
-  Container,
-  Heading,
-  Text,
-  VStack,
-  HStack,
   Button,
-  Input,
-  FormControl,
-  FormLabel,
-  useDisclosure,
+  Stack,
+  Typography,
+  TextField,
   IconButton,
-  Badge,
-  Flex,
-  Spacer,
-  Tooltip,
-} from "@chakra-ui/react";
-import { AddIcon, DeleteIcon, ChevronLeftIcon, CloseIcon, ChatIcon } from "@chakra-ui/icons";
+  Chip,
+} from "@mui/material";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import Close from "@mui/icons-material/Close";
+import Add from "@mui/icons-material/Add";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import ChatIcon from "@mui/icons-material/Chat";
+import { PALETTE } from "../theme";
 
-const FoodExpirationTracker = ({ onOpenChat, onBack }) => {
+const getDaysUntilExpiry = (expiryDate) => {
+  const today = new Date("2026-02-16");
+  const expiry = new Date(expiryDate);
+  return Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+};
+
+const getExpiryColor = (expiryDate) => {
+  const days = getDaysUntilExpiry(expiryDate);
+  if (days < 0) return { bg: "#8B7E74", text: "#FFF", label: "Expired" };
+  if (days <= 1) return { bg: "#E8958E", text: "#5C1F1B", label: "Expiring Today!" };
+  if (days <= 4) return { bg: "#F4C6A3", text: "#6B3E1F", label: "Expiring Soon" };
+  if (days <= 14) return { bg: "#E8D99F", text: "#5C5220", label: "Use This Week" };
+  if (days <= 90) return { bg: "#C8E6C9", text: "#2D5016", label: "Fresh" };
+  return { bg: "#B3E5B7", text: "#1B4D1F", label: "Very Fresh" };
+};
+
+export default function FridgeContent({ onOpenChat, onBack }) {
   const [foods, setFoods] = useState([
     { id: 1, name: "Tomatoes", expiryDate: "2026-02-17", category: "Produce" },
     { id: 2, name: "Eggplant", expiryDate: "2026-02-20", category: "Produce" },
@@ -28,259 +43,199 @@ const FoodExpirationTracker = ({ onOpenChat, onBack }) => {
     { id: 5, name: "Twizzlers", expiryDate: "2027-07-01", category: "Snacks" },
   ]);
   const [newFood, setNewFood] = useState({ name: "", expiryDate: "", category: "" });
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const getDaysUntilExpiry = (expiryDate) => {
-    const today = new Date("2026-02-16");
-    const expiry = new Date(expiryDate);
-    const diffTime = expiry - today;
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
-
-  const getExpiryColor = (expiryDate) => {
-    const days = getDaysUntilExpiry(expiryDate);
-    if (days < 0) return { bg: "#8B7E74", text: "#FFF", label: "Expired" };
-    if (days <= 1) return { bg: "#E8958E", text: "#5C1F1B", label: "Expiring Today!" };
-    if (days <= 4) return { bg: "#F4C6A3", text: "#6B3E1F", label: "Expiring Soon" };
-    if (days <= 14) return { bg: "#E8D99F", text: "#5C5220", label: "Use This Week" };
-    if (days <= 90) return { bg: "#C8E6C9", text: "#2D5016", label: "Fresh" };
-    return { bg: "#B3E5B7", text: "#1B4D1F", label: "Very Fresh" };
-  };
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleAddFood = () => {
     if (newFood.name && newFood.expiryDate) {
       setFoods([
         ...foods,
-        {
-          id: Date.now(),
-          name: newFood.name,
-          expiryDate: newFood.expiryDate,
-          category: newFood.category || "Other",
-        },
+        { id: Date.now(), name: newFood.name, expiryDate: newFood.expiryDate, category: newFood.category || "Other" },
       ]);
       setNewFood({ name: "", expiryDate: "", category: "" });
-      onClose();
+      setIsOpen(false);
     }
   };
 
   const handleDeleteFood = (id) => {
-    setFoods(foods.filter((food) => food.id !== id));
+    setFoods(foods.filter((f) => f.id !== id));
   };
 
   const sortedFoods = [...foods].sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
 
   return (
-    <Box minH="100vh" bg="#f5f2ed" display="flex" flexDirection="column" alignItems="stretch">
-      <Box
-        flex="1"
-        w="100%"
-        maxW="420px"
-        mx="auto"
-        pt={6}
-        pb={8}
-        px={5}
-        bg="#fdfbf8"
-        borderRadius="2xl"
-        boxShadow="0 4px 24px rgba(55, 45, 35, 0.06)"
-        overflow="hidden"
-        position="relative"
-        minH="100vh"
-      >
-          {isOpen && (
-            <Box
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              bg="#fdfbf8"
-              zIndex={10}
-              overflowY="auto"
-              px={5}
-              pt={6}
-              pb={6}
+    <Box sx={{ minHeight: "100%", display: "flex", flexDirection: "column" }}>
+      {isOpen ? (
+        <Box sx={{ px: 2.5, pt: 2, pb: 3 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Button startIcon={<ChevronLeft />} onClick={() => setIsOpen(false)} sx={{ color: "text.secondary" }}>
+              Back
+            </Button>
+            <Typography variant="overline" sx={{ letterSpacing: 0.6, color: "text.secondary" }}>
+              Add food
+            </Typography>
+            <IconButton size="small" onClick={() => setIsOpen(false)} aria-label="Close">
+              <Close />
+            </IconButton>
+          </Stack>
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            <TextField
+              label="Food Name"
+              required
+              placeholder="e.g., Strawberries"
+              value={newFood.name}
+              onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
+              size="small"
+              fullWidth
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
+            <TextField
+              label="Expiry Date"
+              required
+              type="date"
+              value={newFood.expiryDate}
+              onChange={(e) => setNewFood({ ...newFood, expiryDate: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              size="small"
+              fullWidth
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
+            <TextField
+              label="Category"
+              placeholder="e.g., Produce, Dairy, Snacks"
+              value={newFood.category}
+              onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
+              size="small"
+              fullWidth
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{ mt: 1, height: 46, borderRadius: 2, bgcolor: PALETTE.warmBrown, "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9 } }}
+              onClick={handleAddFood}
             >
-              <Flex align="center" mb={4}>
-                <Button
-                  leftIcon={<ChevronLeftIcon />}
-                  variant="ghost"
-                  color="gray.500"
-                  size="xs"
-                  _hover={{ bg: "rgba(0,0,0,0.04)" }}
-                  onClick={onClose}
-                >
-                  Back
-                </Button>
-                <Spacer />
-                <Heading fontSize="11px" fontWeight="500" letterSpacing="0.06em" textTransform="uppercase" color="gray.500">
-                  Add food
-                </Heading>
-                <Spacer />
-                <Box w="52px" display="flex" justifyContent="flex-end">
-                  <IconButton aria-label="Close" icon={<CloseIcon />} variant="ghost" size="xs" color="gray.500" _hover={{ bg: "rgba(0,0,0,0.04)" }} onClick={onClose} />
-                </Box>
-              </Flex>
-              <VStack spacing={4} align="stretch" mt={2}>
-                <FormControl isRequired>
-                  <FormLabel fontWeight="600" color="gray.700" fontSize="sm">Food Name</FormLabel>
-                  <Input
-                    placeholder="e.g., Strawberries"
-                    value={newFood.name}
-                    onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
-                    bg="white"
-                    borderColor="rgba(0,0,0,0.1)"
-                    borderWidth="1px"
-                    _focus={{ borderColor: "rgba(90, 122, 106, 0.6)", boxShadow: "0 0 0 1px rgba(90, 122, 106, 0.3)" }}
-                    size="md"
-                    borderRadius="xl"
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel fontWeight="600" color="gray.700" fontSize="sm">Expiry Date</FormLabel>
-                  <Input
-                    type="date"
-                    value={newFood.expiryDate}
-                    onChange={(e) => setNewFood({ ...newFood, expiryDate: e.target.value })}
-                    bg="white"
-                    borderColor="rgba(0,0,0,0.1)"
-                    borderWidth="1px"
-                    _focus={{ borderColor: "rgba(90, 122, 106, 0.6)", boxShadow: "0 0 0 1px rgba(90, 122, 106, 0.3)" }}
-                    size="md"
-                    borderRadius="xl"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontWeight="600" color="gray.700" fontSize="sm">Category</FormLabel>
-                  <Input
-                    placeholder="e.g., Produce, Dairy, Snacks"
-                    value={newFood.category}
-                    onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
-                    bg="white"
-                    borderColor="rgba(0,0,0,0.1)"
-                    borderWidth="1px"
-                    _focus={{ borderColor: "rgba(90, 122, 106, 0.6)", boxShadow: "0 0 0 1px rgba(90, 122, 106, 0.3)" }}
-                    size="md"
-                    borderRadius="xl"
-                  />
-                </FormControl>
-                <Button
-                  onClick={handleAddFood}
-                  bg="#5a7a6a"
-                  color="white"
-                  size="md"
-                  width="full"
-                  mt={2}
-                  h="46px"
-                  borderRadius="xl"
-                  fontWeight="500"
-                  _hover={{ bg: "#4d6b5d" }}
-                  _active={{ bg: "#445d50" }}
-                >
-                  Add to Fridge
-                </Button>
-              </VStack>
-            </Box>
-          )}
+              Add to Fridge
+            </Button>
+          </Stack>
+        </Box>
+      ) : (
+        <>
+          <Box sx={{ px: 2.5, pt: 3, pb: 2 }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+              <Button
+                startIcon={<ChevronLeft />}
+                onClick={onBack}
+                sx={{ color: "text.secondary", minHeight: 44, "&:hover": { bgcolor: "rgba(0,0,0,0.04)" } }}
+              >
+                Back
+              </Button>
+              <Typography variant="overline" sx={{ letterSpacing: 0.6, color: "text.secondary" }}>
+                Fridge
+              </Typography>
+              <Box sx={{ width: 52 }} />
+            </Stack>
 
-          <Container maxW="full" h="100%" py={0} px={0} overflowY="auto">
-            <Flex align="center" mb={4}>
-              <Button leftIcon={<ChevronLeftIcon />} variant="ghost" color="gray.500" size="sm" minH="44px" px={3} _hover={{ bg: "rgba(0,0,0,0.04)" }} _active={{ bg: "rgba(0,0,0,0.06)" }} onClick={onBack}>Back</Button>
-              <Spacer />
-              <Heading fontSize="11px" fontWeight="500" letterSpacing="0.06em" textTransform="uppercase" color="gray.500">Fridge</Heading>
-              <Spacer />
-              <Box w="52px" />
-            </Flex>
-
-            <VStack spacing={2} align="stretch" mb={5}>
-              <HStack justify="space-between" align="flex-start">
+            <Stack spacing={2} sx={{ mb: 2 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                 <Box>
-                  <Heading fontSize="lg" fontWeight="700" color="gray.700" letterSpacing="-0.01em" mb={1}>Expiring Soon</Heading>
-                  <Text fontSize="sm" color="gray.500" fontWeight="500">Keep track of your food freshness</Text>
+                  <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ mb: 0.5 }}>
+                    Expiring Soon
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Keep track of your food freshness
+                  </Typography>
                 </Box>
                 <IconButton
-                  icon={<AddIcon color="white" boxSize={5} />}
-                  onClick={onOpen}
-                  size="md"
-                  minW="44px"
-                  minH="44px"
-                  bg="#5a7a6a"
-                  color="white"
-                  _hover={{ bg: "#4d6b5d", transform: "scale(1.04)" }}
-                  _active={{ transform: "scale(0.98)" }}
-                  transition="all 0.2s"
+                  onClick={() => setIsOpen(true)}
                   aria-label="Add food"
-                  borderRadius="full"
-                  boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
-                />
-              </HStack>
-            </VStack>
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    bgcolor: PALETTE.warmBrown,
+                    color: "#fff",
+                    boxShadow: "0 8px 24px rgba(212, 163, 115, 0.3)",
+                    "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9, transform: "scale(1.04)" },
+                  }}
+                >
+                  <Add />
+                </IconButton>
+              </Stack>
+            </Stack>
 
-            <VStack spacing={3} align="stretch">
+            <Stack spacing={1.5}>
               {sortedFoods.map((food, index) => {
                 const colorScheme = getExpiryColor(food.expiryDate);
                 const daysLeft = getDaysUntilExpiry(food.expiryDate);
                 return (
                   <Box
                     key={food.id}
-                    bg={colorScheme.bg}
-                    borderRadius="xl"
-                    p={4}
-                    border="1px solid"
-                    borderColor="rgba(0,0,0,0.06)"
-                    boxShadow="0 2px 10px rgba(50, 45, 35, 0.06)"
-                    transition="all 0.2s ease"
-                    _hover={{ transform: "translateY(-1px)", boxShadow: "0 4px 14px rgba(50, 45, 35, 0.08)" }}
-                    style={{ animation: `slideIn 0.4s ease-out ${index * 0.05}s both` }}
+                    sx={{
+                      bgcolor: colorScheme.bg,
+                      borderRadius: 2,
+                      p: 2,
+                      border: "1px solid rgba(0,0,0,0.06)",
+                      boxShadow: "0 2px 10px rgba(50, 45, 35, 0.06)",
+                      transition: "all 0.2s ease",
+                      "&:hover": { transform: "translateY(-1px)", boxShadow: "0 4px 14px rgba(50, 45, 35, 0.08)" },
+                    }}
                   >
-                    <Flex justify="space-between" align="center">
-                      <Box flex="1">
-                        <HStack spacing={3} mb={2}>
-                          <Text fontSize="xl" fontWeight="700" color={colorScheme.text}>{food.name}</Text>
-                          <Badge colorScheme="whiteAlpha" bg="rgba(255, 255, 255, 0.4)" color={colorScheme.text} px={2} py={1} borderRadius="full" fontSize="xs" fontWeight="700">{food.category}</Badge>
-                        </HStack>
-                        <HStack spacing={4}>
-                          <Text fontSize="md" color={colorScheme.text} fontWeight="600" opacity={0.9}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Box sx={{ flex: 1 }}>
+                        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                          <Typography variant="h6" fontWeight={700} sx={{ color: colorScheme.text }}>
+                            {food.name}
+                          </Typography>
+                          <Chip label={food.category} size="small" sx={{ bgcolor: "rgba(255,255,255,0.4)", color: colorScheme.text, fontWeight: 700 }} />
+                        </Stack>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                          <Typography variant="body2" sx={{ color: colorScheme.text, fontWeight: 600, opacity: 0.9 }}>
                             {new Date(food.expiryDate).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "2-digit" })}
-                          </Text>
-                          <Badge bg="rgba(0, 0, 0, 0.15)" color={colorScheme.text} px={2} py={1} borderRadius="md" fontSize="xs" fontWeight="700">
-                            {daysLeft < 0 ? `Expired ${Math.abs(daysLeft)} days ago` : daysLeft === 0 ? "Expires today" : daysLeft === 1 ? "Expires tomorrow" : `${daysLeft} days left`}
-                          </Badge>
-                        </HStack>
+                          </Typography>
+                          <Chip
+                            size="small"
+                            label={
+                              daysLeft < 0
+                                ? `Expired ${Math.abs(daysLeft)} days ago`
+                                : daysLeft === 0
+                                  ? "Expires today"
+                                  : daysLeft === 1
+                                    ? "Expires tomorrow"
+                                    : `${daysLeft} days left`
+                            }
+                            sx={{ bgcolor: "rgba(0,0,0,0.15)", color: colorScheme.text, fontWeight: 700 }}
+                          />
+                        </Stack>
                       </Box>
-                      <IconButton icon={<DeleteIcon />} onClick={() => handleDeleteFood(food.id)} size="sm" variant="ghost" color={colorScheme.text} _hover={{ bg: "rgba(0, 0, 0, 0.1)", transform: "scale(1.1)" }} aria-label="Delete food" />
-                    </Flex>
+                      <IconButton size="small" onClick={() => handleDeleteFood(food.id)} sx={{ color: colorScheme.text }} aria-label="Delete food">
+                        <DeleteOutline />
+                      </IconButton>
+                    </Stack>
                   </Box>
                 );
               })}
-            </VStack>
-          </Container>
+            </Stack>
+          </Box>
 
           {onOpenChat && (
-            <Tooltip label="Chat" placement="left">
+            <Box sx={{ position: "fixed", bottom: 88, right: 24, zIndex: 10 }}>
               <IconButton
                 aria-label="Open Chat"
-                icon={<ChatIcon color="white" boxSize={6} />}
-                size="md"
-                minW="44px"
-                minH="44px"
-                borderRadius="full"
-                bg="#5a7a6a"
-                color="white"
-                position="absolute"
-                bottom="calc(16px + var(--safe-bottom))"
-                right="16px"
-                zIndex={5}
-                boxShadow="0 4px 16px rgba(90, 122, 106, 0.4)"
-                _hover={{ bg: "#4d6b5d", transform: "scale(1.05)" }}
-                _active={{ bg: "#445d50", transform: "scale(0.95)" }}
+                sx={{
+                  width: 48,
+                  height: 48,
+                  bgcolor: PALETTE.warmBrown,
+                  color: "#fff",
+                  boxShadow: "0 4px 16px rgba(212, 163, 115, 0.4)",
+                  "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9, transform: "scale(1.05)" },
+                }}
                 onClick={onOpenChat}
-              />
-            </Tooltip>
+              >
+                <ChatIcon />
+              </IconButton>
+            </Box>
           )}
-        </Box>
-
+        </>
+      )}
     </Box>
   );
-};
-
-export default FoodExpirationTracker;
+}

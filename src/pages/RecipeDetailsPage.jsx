@@ -1,28 +1,21 @@
+/**
+ * Recipe flow step 3: choose a recipe, then continue to chat for instructions. Content fits inside app frame.
+ */
 import React, { useState } from "react";
-import {
-  Box,
-  VStack,
-  Text,
-  Flex,
-  Heading,
-  Button,
-  Spacer,
-  IconButton,
-  Tooltip,
-} from "@chakra-ui/react";
-import { ChevronLeftIcon, ChatIcon } from "@chakra-ui/icons";
+import { Box, Button, Stack, Typography, IconButton } from "@mui/material";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import ChatIcon from "@mui/icons-material/Chat";
 import { ALL_RECIPES } from "../data/recipes";
 import { MAX_MINUTES_BY_ENERGY } from "../constants/energy";
 import { parseMinutes } from "../utils/recipe";
+import { PALETTE } from "../theme";
 
-const RecipeDetailsPage = ({ onOpenChat, onBack, selectedIngredientNames = [], selectedEnergy, onNext }) => {
+export default function RecipeDetailsPage({ onOpenChat, onBack, selectedIngredientNames = [], selectedEnergy, onNext }) {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const selectedSet = new Set(selectedIngredientNames.map((n) => n.trim()));
 
   let recipes =
-    selectedSet.size === 0
-      ? [...ALL_RECIPES]
-      : ALL_RECIPES.filter((r) => r.ingredients.every((ing) => selectedSet.has(ing)));
+    selectedSet.size === 0 ? [...ALL_RECIPES] : ALL_RECIPES.filter((r) => r.ingredients.every((ing) => selectedSet.has(ing)));
 
   if (selectedEnergy && MAX_MINUTES_BY_ENERGY[selectedEnergy] != null) {
     const maxMin = MAX_MINUTES_BY_ENERGY[selectedEnergy];
@@ -32,161 +25,107 @@ const RecipeDetailsPage = ({ onOpenChat, onBack, selectedIngredientNames = [], s
     });
   }
 
-  const handleNext = () => {
-    if (selectedRecipe) onNext?.(selectedRecipe);
-  };
-
   return (
-    <Box minH="100vh" bg="#f5f2ed" display="flex" flexDirection="column" alignItems="stretch">
-      <Box
-        flex="1"
-        w="100%"
-        maxW="420px"
-        mx="auto"
-        pt={6}
-        pb={8}
-        px={5}
-        bg="#fdfbf8"
-        borderRadius="2xl"
-        boxShadow="0 4px 24px rgba(55, 45, 35, 0.06)"
-        position="relative"
-        minH="100vh"
-        display="flex"
-        flexDirection="column"
-        overflow="hidden"
-      >
-        <Box pb={4} style={{ animation: "slideIn 0.4s ease-out forwards" }}>
-          <Flex align="center" mb={4}>
-            <Button
-              leftIcon={<ChevronLeftIcon />}
-              variant="ghost"
-              color="gray.500"
-              size="sm"
-              minH="44px"
-              px={3}
-              _hover={{ bg: "rgba(0,0,0,0.04)" }}
-              _active={{ bg: "rgba(0,0,0,0.06)" }}
-              onClick={onBack}
-            >
-              Back
-            </Button>
-            <Spacer />
-            <Heading
-              fontSize="11px"
-              fontWeight="500"
-              letterSpacing="0.06em"
-              textTransform="uppercase"
-              color="gray.500"
-            >
-              Recipe Details
-            </Heading>
-            <Spacer />
-            <Box w="52px" />
-          </Flex>
-        </Box>
-
-        <VStack
-          spacing={3}
-          align="stretch"
-          flex="1"
-          overflowY="auto"
-          pb={4}
-          css={{
-            "&::-webkit-scrollbar": { display: "none" },
-            WebkitOverflowScrolling: "touch",
-          }}
+    <Box sx={{ minHeight: "100%", display: "flex", flexDirection: "column", px: 2.5, pt: 3, pb: 2 }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Button
+          startIcon={<ChevronLeft />}
+          onClick={onBack}
+          sx={{ color: "text.secondary", minHeight: 44, "&:hover": { bgcolor: "rgba(0,0,0,0.04)" } }}
         >
-          {recipes.length === 0 ? (
-            <Text fontSize="sm" color="gray.500" textAlign="center" py={6}>
-              No recipes match your ingredients{selectedEnergy ? " and energy level" : ""}. Try different ingredients or energy on the previous steps.
-            </Text>
-          ) : (
-            recipes.map((recipe, index) => {
-              const isSelected = selectedRecipe?.id === recipe.id;
-              return (
-                <Flex
-                  key={recipe.id}
-                  align="flex-start"
-                  justify="space-between"
-                  minH="52px"
-                  style={{ animation: `slideIn 0.4s ease-out ${index * 0.04}s both` }}
-                  py={3}
-                  px={4}
-                  bg={isSelected ? "rgba(200, 220, 210, 0.4)" : "rgba(255,255,255,0.6)"}
-                  borderRadius="xl"
-                  border="1px solid"
-                  borderColor={isSelected ? "rgba(90, 122, 106, 0.3)" : "rgba(0,0,0,0.06)"}
-                  transition="all 0.2s ease"
-                  _hover={{ bg: isSelected ? "rgba(200, 220, 210, 0.5)" : "rgba(0,0,0,0.02)" }}
-                  cursor="pointer"
-                  onClick={() => setSelectedRecipe(recipe)}
-                  _active={{ transform: "scale(0.98)" }}
-                >
-                  <VStack align="start" spacing={1} flex="1" minW={0}>
-                    <Text fontWeight="600" fontSize="sm" color="gray.600">
-                      {recipe.name}
-                    </Text>
-                    <Text fontSize="xs" color="gray.500">
-                      {recipe.prepTime} prep / {recipe.cookTime} cook
-                    </Text>
-                  </VStack>
-                  <Text fontSize="sm" color="gray.600" flexShrink={0} pt={0}>
-                    {recipe.calories} cal
-                  </Text>
-                </Flex>
-              );
-            })
-          )}
-        </VStack>
+          Back
+        </Button>
+        <Typography variant="overline" sx={{ letterSpacing: 0.6, color: "text.secondary" }}>
+          Recipe Details
+        </Typography>
+        <Box sx={{ width: 52 }} />
+      </Stack>
 
-        {onNext && (
-          <Box pt={4} pb={2}>
-            <Button
-              w="full"
-              size="md"
-              minH="48px"
-              h="48px"
-              borderRadius="xl"
-              fontSize="sm"
-              fontWeight="600"
-              bg="#5a7a6a"
-              color="white"
-              boxShadow="0 8px 24px rgba(90, 122, 106, 0.22)"
-              onClick={handleNext}
-              isDisabled={!selectedRecipe}
-              _hover={{ bg: "#4d6b5d" }}
-              _active={{ bg: "#445d50", transform: "scale(0.98)" }}
-              _disabled={{ bg: "gray.300", color: "gray.700", opacity: 1 }}
-            >
-              Next
-            </Button>
-          </Box>
+      <Stack spacing={1.5} sx={{ flex: 1, pb: 2 }}>
+        {recipes.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 3 }}>
+            No recipes match your ingredients{selectedEnergy ? " and energy level" : ""}. Try different ingredients or energy on the previous steps.
+          </Typography>
+        ) : (
+          recipes.map((recipe) => {
+            const isSelected = selectedRecipe?.id === recipe.id;
+            return (
+              <Box
+                key={recipe.id}
+                onClick={() => setSelectedRecipe(recipe)}
+                sx={{
+                  minHeight: 52,
+                  py: 1.5,
+                  px: 2,
+                  bgcolor: isSelected ? PALETTE.sageLight : "rgba(255,255,255,0.6)",
+                  borderRadius: 2,
+                  border: "1px solid",
+                  borderColor: isSelected ? PALETTE.sage : "rgba(0,0,0,0.06)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": { bgcolor: isSelected ? PALETTE.sageLight : "rgba(0,0,0,0.02)" },
+                }}
+              >
+                <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
+                  <Typography fontWeight={600} variant="body2" color="text.secondary">
+                    {recipe.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.disabled">
+                    {recipe.prepTime} prep / {recipe.cookTime} cook
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.secondary">
+                  {recipe.calories} cal
+                </Typography>
+              </Box>
+            );
+          })
         )}
+      </Stack>
 
-        {onOpenChat && (
-          <Tooltip label="Chat" placement="left">
-            <IconButton
-              aria-label="Open Chat"
-              icon={<ChatIcon color="white" boxSize={6} />}
-              size="md"
-              minW="44px"
-              minH="44px"
-              borderRadius="full"
-              bg="#5a7a6a"
-              color="white"
-              position="absolute"
-              bottom="calc(16px + var(--safe-bottom))"
-              right="16px"
-              boxShadow="0 4px 16px rgba(90, 122, 106, 0.4)"
-              _hover={{ bg: "#4d6b5d", transform: "scale(1.05)" }}
-              _active={{ bg: "#445d50", transform: "scale(0.95)" }}
-              onClick={onOpenChat}
-            />
-          </Tooltip>
-        )}
-      </Box>
+      {onNext && (
+        <Box sx={{ pt: 2, pb: 1 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            size="medium"
+            disabled={!selectedRecipe}
+            sx={{
+              minHeight: 48,
+              borderRadius: 2,
+              fontWeight: 600,
+              bgcolor: PALETTE.warmBrown,
+              "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9 },
+              "&.Mui-disabled": { bgcolor: "action.disabledBackground", color: "text.secondary" },
+            }}
+            onClick={() => selectedRecipe && onNext?.(selectedRecipe)}
+          >
+            Next
+          </Button>
+        </Box>
+      )}
+
+      {onOpenChat && (
+        <Box sx={{ position: "fixed", bottom: 88, right: 24, zIndex: 10 }}>
+          <IconButton
+            aria-label="Open Chat"
+            sx={{
+              width: 48,
+              height: 48,
+              bgcolor: PALETTE.warmBrown,
+              color: "#fff",
+              boxShadow: "0 4px 16px rgba(212, 163, 115, 0.4)",
+              "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9, transform: "scale(1.05)" },
+            }}
+            onClick={onOpenChat}
+          >
+            <ChatIcon />
+          </IconButton>
+        </Box>
+      )}
     </Box>
   );
-};
-
-export default RecipeDetailsPage;
+}

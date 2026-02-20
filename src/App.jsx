@@ -1,5 +1,9 @@
+/**
+ * Root layout: outer background, app frame (phone-like), content area, bottom tab bar.
+ * Navigation state and flow (Recipe → Energy → Recipe Details, Chat from anywhere).
+ */
 import { useState } from "react";
-import { Box, Button, HStack } from "@chakra-ui/react";
+import { Box } from "@mui/material";
 import {
   Homepage,
   RecipeSelectionPage,
@@ -9,8 +13,15 @@ import {
   ChatbotInterface,
   PlaceholderPage,
 } from "./pages";
-import { NAV_ORDER, getNavLabel } from "./constants/navigation";
+import { BottomNav, BOTTOM_NAV_HEIGHT } from "./components/BottomNav";
 import { ENERGY_BACKGROUNDS } from "./constants/energy";
+import { PALETTE } from "./theme";
+
+/** Phone frame: strict 393×852 rectangle, small corner radius so it looks like a phone, not an oval. */
+const APP_FRAME_WIDTH = 393;
+const APP_FRAME_HEIGHT = 852;
+const APP_FRAME_BORDER_RADIUS = 4;
+const OUTER_BG = "linear-gradient(160deg, #e8e4dc 0%, #d4cfc4 100%)";
 
 function App() {
   const [page, setPage] = useState("Home");
@@ -42,6 +53,11 @@ function App() {
     setPage("Recipe Details");
   };
 
+  const handleBottomNavNavigate = (tab) => {
+    if (tab === "Recipe") setPage("Recipe");
+    else setPage(tab);
+  };
+
   const pages = {
     Home: <Homepage onNavigate={setPage} onOpenChat={goToChat} />,
     Fridge: <FridgeContent onOpenChat={goToChat} onBack={() => setPage("Home")} />,
@@ -65,83 +81,61 @@ function App() {
       />
     ),
     Chat: <ChatbotInterface onBack={() => setPage(returnToOnChatBack)} instructionRecipe={selectedRecipeForInstructions} />,
-    History: <PlaceholderPage title="History" onOpenChat={goToChat} />,
-    WeeklyPlan: <PlaceholderPage title="Weekly Plan" onOpenChat={goToChat} />,
+    History: <PlaceholderPage title="History" onOpenChat={goToChat} onBack={() => setPage("Home")} />,
+    WeeklyPlan: <PlaceholderPage title="Weekly Plan" onOpenChat={goToChat} onBack={() => setPage("Home")} />,
   };
 
-  const pageBg = page === "Energy" ? (ENERGY_BACKGROUNDS[selectedEnergy ?? "medium"] ?? "#f5f2ed") : "#f5f2ed";
+  const pageBg = page === "Energy" ? (ENERGY_BACKGROUNDS[selectedEnergy ?? "medium"] ?? PALETTE.cream) : PALETTE.cream;
 
   return (
-    <Box minH="100vh" h="100%" w="100%" style={{ backgroundColor: pageBg, transition: "background-color 0.4s ease" }}>
+    <Box
+      sx={{
+        minHeight: "100dvh",
+        width: "100%",
+        background: OUTER_BG,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        py: 2,
+        px: 1,
+        transition: "background 0.4s ease",
+      }}
+    >
+      {/* App frame: no padding; content area has inset, nav bar is full-width to edges */}
       <Box
-        position="fixed"
-        top={0}
-        left={0}
-        right={0}
-        zIndex={50}
-        pt="calc(12px + env(safe-area-inset-top, 0px))"
-        px={2}
-        pb={2}
-        style={{ background: `linear-gradient(to bottom, ${pageBg} 0%, ${pageBg} 60%, transparent)` }}
-        pointerEvents="none"
-      >
-        <Box
-          pointerEvents="auto"
-          maxW="min(96vw, 420px)"
-          mx="auto"
-          overflowX="auto"
-          overflowY="hidden"
-          borderRadius="full"
-          bg="rgba(255, 255, 255, 0.95)"
-          border="1px solid rgba(0,0,0,0.06)"
-          boxShadow="0 10px 30px rgba(0,0,0,0.08)"
-          backdropFilter="blur(12px)"
-          css={{
-            "&::-webkit-scrollbar": { display: "none" },
-            scrollbarWidth: "none",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
-          <HStack spacing={1} py={1.5} px={1.5} flexWrap="nowrap" display="inline-flex">
-            {NAV_ORDER.map((key) => (
-              <Button
-                key={key}
-                size="sm"
-                minH="40px"
-                minW="max-content"
-                px={4}
-                borderRadius="full"
-                variant={page === key ? "solid" : "ghost"}
-                colorScheme={page === key ? "green" : "gray"}
-                onClick={() => setPage(key)}
-                _active={{ transform: "scale(0.97)" }}
-                transition="transform 0.15s ease, background 0.2s"
-                fontWeight={page === key ? "600" : "500"}
-              >
-                {getNavLabel(key)}
-              </Button>
-            ))}
-          </HStack>
-        </Box>
-      </Box>
-
-      <Box
-        pt="56px"
-        pb="env(safe-area-inset-bottom, 0)"
-        height="calc(100dvh - 56px)"
-        maxHeight="calc(100vh - 56px)"
-        overflowY="auto"
-        overflowX="hidden"
-        w="100%"
-        bg="transparent"
-        css={{
-          WebkitOverflowScrolling: "touch",
-          "&::-webkit-scrollbar": { display: "none" },
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
+        sx={{
+          width: APP_FRAME_WIDTH,
+          height: APP_FRAME_HEIGHT,
+          maxHeight: "calc(100dvh - 24px)",
+          borderRadius: APP_FRAME_BORDER_RADIUS,
+          overflow: "hidden",
+          boxShadow: "0 25px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04)",
+          bgcolor: pageBg,
+          transition: "background-color 0.4s ease",
+          display: "flex",
+          flexDirection: "column",
+          flexShrink: 0,
         }}
       >
-        {pages[page]}
+        {/* Scrollable content area: inset from edges so corners aren't clipped */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            minHeight: 0,
+            pt: 1.5,
+            px: 1.5,
+            "&::-webkit-scrollbar": { display: "none" },
+            scrollbarWidth: "none",
+          }}
+        >
+          <Box sx={{ pb: `${BOTTOM_NAV_HEIGHT}px` }}>
+            {pages[page]}
+          </Box>
+        </Box>
+
+        <BottomNav currentPage={page} onNavigate={handleBottomNavNavigate} />
       </Box>
     </Box>
   );
