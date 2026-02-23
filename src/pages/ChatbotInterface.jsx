@@ -1,19 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  Box,
-  Stack,
-  TextField,
-  IconButton,
-  Typography,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
+import { Box, Stack, TextField, IconButton, Typography, Button } from "@mui/material";
 import ArrowUpwardRounded from "@mui/icons-material/ArrowUpwardRounded";
 import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import SmartToyRounded from "@mui/icons-material/SmartToyRounded";
-import EmojiEventsRounded from "@mui/icons-material/EmojiEventsRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
 import { streamAnswer } from "../utils/chatbotAnswers";
 import { RECIPE_INSTRUCTIONS } from "../data/recipeInstructions";
@@ -25,9 +14,11 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [isCompleteOpen, setIsCompleteOpen] = useState(false);
-  const chatEndRef = useRef(null);
 
+  // Complete flow overlay
+  const [isCompleteOpen, setIsCompleteOpen] = useState(false);
+
+  const chatEndRef = useRef(null);
   const { addSavedMeal, getAchievements } = useGamification();
 
   const scrollToBottom = useCallback(() => {
@@ -107,10 +98,11 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
   };
 
   // --- Complete Cooking flow ---
-  const [unlockedBefore, setUnlockedBefore] = useState(() => new Set(getAchievements().filter(a => a.unlocked).map(a => a.id)));
+  const [unlockedBefore, setUnlockedBefore] = useState(
+    () => new Set(getAchievements().filter((a) => a.unlocked).map((a) => a.id))
+  );
 
   const handleCompleteCooking = () => {
-    // snapshot unlocked achievements BEFORE update
     const before = new Set(getAchievements().filter((a) => a.unlocked).map((a) => a.id));
     setUnlockedBefore(before);
 
@@ -128,7 +120,18 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
   const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:3001";
 
   return (
-    <Box sx={{ px: 2, pt: 1, pb: 1, display: "flex", flexDirection: "column", minHeight: "100%", animation: "fadeIn 0.25s ease" }}>
+    <Box
+      sx={{
+        px: 2,
+        pt: 1,
+        pb: 1,
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100%",
+        animation: "fadeIn 0.25s ease",
+        position: "relative", // ✅ IMPORTANT: overlay is confined inside the app frame
+      }}
+    >
       {/* Nav */}
       <Stack direction="row" alignItems="center" sx={{ mb: 0.5 }}>
         <IconButton onClick={onBack} sx={{ color: PALETTE.accent, ml: -1 }}>
@@ -141,7 +144,7 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
         <Box sx={{ width: 40 }} />
       </Stack>
 
-      {/* DEBUG (optional): shows API base being used */}
+      {/* DEBUG (optional) */}
       <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.textTertiary, mb: 1 }}>
         API: {apiBase}
       </Typography>
@@ -149,15 +152,30 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
       {/* Messages */}
       <Box
         sx={{
-          flex: 1, minHeight: 200, overflowY: "auto",
-          borderRadius: "16px", bgcolor: PALETTE.surfaceTinted, p: 2,
+          flex: 1,
+          minHeight: 200,
+          overflowY: "auto",
+          borderRadius: "16px",
+          bgcolor: PALETTE.surfaceTinted,
+          p: 2,
           "&::-webkit-scrollbar": { display: "none" },
         }}
       >
         {messages.length === 0 ? (
           <Stack spacing={2} sx={{ py: 3, animation: "fadeIn 0.4s ease" }}>
             <Box sx={{ textAlign: "center", mb: 1 }}>
-              <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: PALETTE.sageLight, display: "inline-flex", alignItems: "center", justifyContent: "center", mb: 1 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: "14px",
+                  bgcolor: PALETTE.sageLight,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mb: 1,
+                }}
+              >
                 <SmartToyRounded sx={{ fontSize: 24, color: PALETTE.ecoMedium }} />
               </Box>
               <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: PALETTE.textPrimary }}>
@@ -170,12 +188,19 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
             <Stack spacing={1}>
               {SUGGESTED_QUESTIONS.map((question, i) => (
                 <Button
-                  key={i} fullWidth onClick={() => sendMessage(question)}
+                  key={i}
+                  fullWidth
+                  onClick={() => sendMessage(question)}
                   sx={{
-                    justifyContent: "space-between", textAlign: "left",
-                    borderRadius: "12px", border: `1px solid ${PALETTE.separator}`,
-                    bgcolor: PALETTE.surface, color: PALETTE.textPrimary,
-                    px: 2, py: 1.25, minHeight: 44,
+                    justifyContent: "space-between",
+                    textAlign: "left",
+                    borderRadius: "12px",
+                    border: `1px solid ${PALETTE.separator}`,
+                    bgcolor: PALETTE.surface,
+                    color: PALETTE.textPrimary,
+                    px: 2,
+                    py: 1.25,
+                    minHeight: 44,
                     "&:hover": { bgcolor: PALETTE.accentLight, borderColor: PALETTE.accentRaw },
                     transition: "all 0.15s",
                   }}
@@ -192,8 +217,19 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
               if (msg.type === "user") {
                 return (
                   <Stack key={msg.id} direction="row" justifyContent="flex-end">
-                    <Box sx={{ maxWidth: "80%", px: 2, py: 1.25, borderRadius: "18px 18px 4px 18px", bgcolor: PALETTE.accent, color: "#fff" }}>
-                      <Typography sx={{ fontSize: "0.875rem", fontWeight: 500, lineHeight: 1.45 }}>{msg.text}</Typography>
+                    <Box
+                      sx={{
+                        maxWidth: "80%",
+                        px: 2,
+                        py: 1.25,
+                        borderRadius: "18px 18px 4px 18px",
+                        bgcolor: PALETTE.accent,
+                        color: "#fff",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "0.875rem", fontWeight: 500, lineHeight: 1.45 }}>
+                        {msg.text}
+                      </Typography>
                     </Box>
                   </Stack>
                 );
@@ -202,17 +238,41 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
               const isEmpty = !msg.text;
               return (
                 <Stack key={msg.id} direction="row" alignItems="flex-end" spacing={1}>
-                  <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: PALETTE.sageLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "8px",
+                      bgcolor: PALETTE.sageLight,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
                     <SmartToyRounded sx={{ fontSize: 16, color: PALETTE.ecoMedium }} />
                   </Box>
-                  <Box sx={{ maxWidth: "80%", px: 2, py: 1.25, borderRadius: "18px 18px 18px 4px", bgcolor: PALETTE.surface, color: PALETTE.textPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+                  <Box
+                    sx={{
+                      maxWidth: "80%",
+                      px: 2,
+                      py: 1.25,
+                      borderRadius: "18px 18px 18px 4px",
+                      bgcolor: PALETTE.surface,
+                      color: PALETTE.textPrimary,
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                    }}
+                  >
                     {isEmpty ? (
                       <Stack direction="row" spacing={0.5} alignItems="center" sx={{ py: 0.25 }}>
                         {[0, 1, 2].map((i) => (
                           <Box
                             key={i}
                             sx={{
-                              width: 6, height: 6, borderRadius: "50%", bgcolor: PALETTE.textTertiary,
+                              width: 6,
+                              height: 6,
+                              borderRadius: "50%",
+                              bgcolor: PALETTE.textTertiary,
                               animation: "pulse 1.2s ease-in-out infinite",
                               animationDelay: `${i * 0.15}s`,
                               "@keyframes pulse": {
@@ -265,21 +325,27 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
-          size="small" fullWidth
+          size="small"
+          fullWidth
           disabled={isStreaming}
           sx={{
             "& .MuiOutlinedInput-root": {
-              borderRadius: "22px", bgcolor: PALETTE.surfaceSecondary,
+              borderRadius: "22px",
+              bgcolor: PALETTE.surfaceSecondary,
               "& fieldset": { borderColor: PALETTE.separator },
               "&.Mui-focused fieldset": { borderColor: PALETTE.accent, borderWidth: 1.5 },
             },
           }}
         />
         <IconButton
-          aria-label="Send message" onClick={() => sendMessage(inputValue)}
+          aria-label="Send message"
+          onClick={() => sendMessage(inputValue)}
           disabled={!inputValue.trim() || isStreaming}
           sx={{
-            width: 38, height: 38, bgcolor: PALETTE.accent, color: "#fff",
+            width: 38,
+            height: 38,
+            bgcolor: PALETTE.accent,
+            color: "#fff",
             "&:hover": { bgcolor: PALETTE.accentDark },
             "&.Mui-disabled": { bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textTertiary },
             transition: "all 0.15s",
@@ -289,109 +355,127 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
         </IconButton>
       </Stack>
 
-      {/* Complete dialog */}
-      <Dialog
-        open={isCompleteOpen}
-        onClose={() => setIsCompleteOpen(false)}
-        fullScreen
-        disablePortal
-        keepMounted={false} 
-      >
-        <DialogContent sx={{ pt: 3 }}>
-          <Stack spacing={1.25} alignItems="center" sx={{ textAlign: "center" }}>
-            <Box
-              sx={{
-                width: 54,
-                height: 54,
-                borderRadius: "16px",
-                bgcolor: PALETTE.sageLight,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <EmojiEventsRounded sx={{ fontSize: 28, color: PALETTE.ecoMedium }} />
-            </Box>
-
-            <Typography sx={{ fontSize: "1.125rem", fontWeight: 800, color: PALETTE.textPrimary }}>
-              Nice work 🌿
-            </Typography>
-
-            <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textSecondary, lineHeight: 1.45 }}>
-              +10 pts · +0.5 kg CO₂ saved
-            </Typography>
-
-            {newlyUnlocked.length > 0 && (
-              <Box sx={{ width: "100%", mt: 1.25 }}>
-                <Typography sx={{ fontSize: "0.75rem", fontWeight: 700, color: PALETTE.textSecondary, mb: 1 }}>
-                  New achievement
-                </Typography>
-                <Stack spacing={0.75}>
-                  {newlyUnlocked.slice(0, 2).map((a) => (
-                    <Box
-                      key={a.id}
-                      sx={{
-                        borderRadius: "14px",
-                        border: `1px solid ${PALETTE.separator}`,
-                        bgcolor: PALETTE.surface,
-                        px: 1.5,
-                        py: 1.25,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: "12px",
-                          bgcolor: PALETTE.sageLight,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "1.1rem",
-                        }}
-                      >
-                        {a.icon}
-                      </Box>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography sx={{ fontSize: "0.875rem", fontWeight: 800, color: PALETTE.textPrimary }}>
-                          {a.name}
-                        </Typography>
-                        <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary }}>
-                          {a.desc}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-            )}
-          </Stack>
-        </DialogContent>
-
-        <DialogActions sx={{ px: 2, pb: 2 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={() => {
-              setIsCompleteOpen(false);
-              onBack?.(); // back to previous page; your nav already has Home access
-            }}
+      {/* ✅ In-frame overlay (no portal, no fullscreen) */}
+      {isCompleteOpen && (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 30,
+            bgcolor: "rgba(0,0,0,0.28)",
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            p: 2,
+          }}
+          onClick={() => setIsCompleteOpen(false)}
+        >
+          <Box
+            onClick={(e) => e.stopPropagation()}
             sx={{
-              height: 46,
-              borderRadius: "14px",
-              bgcolor: PALETTE.accent,
-              fontWeight: 800,
-              textTransform: "none",
-              "&:hover": { bgcolor: PALETTE.accentDark },
+              width: "100%",
+              maxWidth: 420,
+              borderRadius: "18px",
+              bgcolor: "#fff",
+              p: 2,
+              boxShadow: "0 20px 60px rgba(0,0,0,0.22)",
             }}
           >
-            Back
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Stack spacing={1.25} alignItems="center" sx={{ textAlign: "center" }}>
+              <Box
+                sx={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: "16px",
+                  bgcolor: PALETTE.sageLight,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.25rem",
+                }}
+              >
+                🏆
+              </Box>
+
+              <Typography sx={{ fontSize: "1.125rem", fontWeight: 800, color: PALETTE.textPrimary }}>
+                Nice work 🌿
+              </Typography>
+
+              <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textSecondary, lineHeight: 1.45 }}>
+                +10 pts · +0.5 kg CO₂ saved
+              </Typography>
+
+              {newlyUnlocked.length > 0 && (
+                <Box sx={{ width: "100%", mt: 0.5 }}>
+                  <Typography sx={{ fontSize: "0.75rem", fontWeight: 800, color: PALETTE.textSecondary, mb: 1 }}>
+                    New achievement
+                  </Typography>
+                  <Stack spacing={0.75}>
+                    {newlyUnlocked.slice(0, 2).map((a) => (
+                      <Box
+                        key={a.id}
+                        sx={{
+                          borderRadius: "14px",
+                          border: `1px solid ${PALETTE.separator}`,
+                          bgcolor: PALETTE.surface,
+                          px: 1.5,
+                          py: 1.25,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: "12px",
+                            bgcolor: PALETTE.sageLight,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "1.1rem",
+                          }}
+                        >
+                          {a.icon}
+                        </Box>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography sx={{ fontSize: "0.875rem", fontWeight: 800, color: PALETTE.textPrimary }}>
+                            {a.name}
+                          </Typography>
+                          <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary }}>
+                            {a.desc}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  setIsCompleteOpen(false);
+                  onBack?.();
+                }}
+                sx={{
+                  mt: 0.75,
+                  height: 46,
+                  borderRadius: "14px",
+                  bgcolor: PALETTE.accent,
+                  fontWeight: 800,
+                  textTransform: "none",
+                  "&:hover": { bgcolor: PALETTE.accentDark },
+                }}
+              >
+                Back
+              </Button>
+            </Stack>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 }
