@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, Stack, Typography, IconButton } from "@mui/material";
+import { Box, Button, Stack, Typography, IconButton, Chip } from "@mui/material";
 import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
@@ -11,18 +11,64 @@ import { PALETTE } from "../theme";
 
 export default function RecipeDetailsPage({ onBack, selectedIngredientNames = [], selectedEnergy, onNext }) {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const selectedSet = new Set(selectedIngredientNames.map((n) => n.trim()));
 
-  let recipes =
-    selectedSet.size === 0 ? [...ALL_RECIPES] : ALL_RECIPES.filter((r) => r.ingredients.every((ing) => selectedSet.has(ing)));
+  const selectedSet = new Set(
+    (selectedIngredientNames || [])
+      .filter(Boolean)
+      .map((n) => String(n).trim())
+      .filter((n) => n.length > 0)
+  );
 
+  // 1) Apply energy filter first
+  let baseRecipes = [...ALL_RECIPES];
   if (selectedEnergy && MAX_MINUTES_BY_ENERGY[selectedEnergy] != null) {
     const maxMin = MAX_MINUTES_BY_ENERGY[selectedEnergy];
-    recipes = recipes.filter((r) => {
+    baseRecipes = baseRecipes.filter((r) => {
       const total = parseMinutes(r.prepTime) + parseMinutes(r.cookTime);
       return total <= maxMin;
     });
   }
+
+  // 2) Build match meta
+  const withMeta = baseRecipes.map((r) => {
+    const overlap = r.ingredients.filter((ing) => selectedSet.has(ing));
+    const missing = r.ingredients.filter((ing) => !selectedSet.has(ing));
+    const perfect = missing.length === 0;
+    return { recipe: r, overlapCount: overlap.length, missing, perfect };
+  });
+
+  // 3) Decide what to show:
+  // - if user selected nothing -> show all (energy-filtered)
+  // - else show perfect matches; if none, show partial matches (overlap > 0) sorted by overlap desc
+  let showMode = "all"; // all | perfect | partial
+  let shown = withMeta;
+
+  if (selectedSet.size === 0) {
+    showMode = "all";
+    shown = withMeta;
+  } else {
+    const perfect = withMeta.filter((x) => x.perfect);
+    if (perfect.length > 0) {
+      showMode = "perfect";
+      shown = perfect;
+    } else {
+      const partial = withMeta
+        .filter((x) => x.overlapCount > 0)
+        .sort((a, b) => b.overlapCount - a.overlapCount);
+      showMode = "partial";
+      shown = partial;
+    }
+  }
+
+  const titleText = "Choose a Recipe";
+  const subtitleText =
+    selectedSet.size === 0
+      ? `${shown.length} recipes available`
+      : showMode === "perfect"
+        ? `${shown.length} recipes match your ingredients`
+        : showMode === "partial"
+          ? `${shown.length} suggestions using some of your ingredients`
+          : "No matches found";
 
   return (
     <Box sx={{ px: 2, pt: 1, pb: 3, display: "flex", flexDirection: "column", minHeight: "100%", animation: "fadeIn 0.25s ease" }}>
@@ -34,58 +80,81 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
       </Stack>
 
       <Typography sx={{ fontSize: "1.75rem", fontWeight: 700, letterSpacing: "-0.02em", mb: 0.25 }}>
-        Choose a Recipe
+        {titleText}
       </Typography>
       <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary, mb: 2 }}>
-        {recipes.length} recipe{recipes.length !== 1 ? "s" : ""} match your selection
+        {subtitleText}
       </Typography>
 
-      <Stack spacing={1.5} sx={{ flex: 1, pb: 2 }}>
-        {recipes.length === 0 ? (
-          <Box sx={{ textAlign: "center", py: 6 }}>
+      <Stack spacing={1.25} sx={{ flex: 1, pb: 2 }}>
+        {shown.length === 0 ? (
+          <Box sx={{ textAlign: "center", py: 6, color: PALETTE.textSecondary }}>
             <Typography sx={{ fontSize: "2rem", mb: 1 }}>🍽️</Typography>
-            <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: PALETTE.textPrimary, mb: 0.5 }}>
+            <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: PALETTE.textPrimary }}>
               No matches found
             </Typography>
-            <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary, lineHeight: 1.5 }}>
+            <Typography sx={{ fontSize: "0.875rem", mt: 0.75 }}>
               Try selecting different ingredients or adjusting your energy level.
             </Typography>
           </Box>
         ) : (
-          recipes.map((recipe) => {
+          shown.map(({ recipe, missing, perfect }, idx) => {
             const isSelected = selectedRecipe?.id === recipe.id;
-            const totalTime = parseMinutes(recipe.prepTime) + parseMinutes(recipe.cookTime);
+
             return (
               <Box
-                key={recipe.id} component="button" type="button"
+                key={recipe.id}
+                component="button"
+                type="button"
                 onClick={() => setSelectedRecipe(recipe)}
                 sx={{
-                  border: "none", cursor: "pointer", textAlign: "left", width: "100%",
+                  border: `1px solid ${isSelected ? PALETTE.accentRaw : PALETTE.separator}`,
                   borderRadius: "16px",
-                  bgcolor: isSelected ? PALETTE.surface : PALETTE.surfaceSecondary,
-                  boxShadow: isSelected ? "0 2px 12px rgba(0,0,0,0.06)" : "none",
-                  outline: isSelected ? `2px solid ${PALETTE.accent}` : "none",
-                  p: 2, transition: "all 0.2s cubic-bezier(.4,0,.2,1)",
-                  "&:hover": { bgcolor: PALETTE.surface, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" },
-                  "&:active": { transform: "scale(0.98)" },
+                  bgcolor: PALETTE.surface,
+                  textAlign: "left",
+                  px: 2,
+                  py: 1.5,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  boxShadow: isSelected ? "0 6px 18px rgba(0,0,0,0.08)" : "0 1px 3px rgba(0,0,0,0.04)",
                 }}
               >
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1.5}>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: PALETTE.textPrimary, mb: 0.5 }}>
+                    <Typography sx={{ fontSize: "0.975rem", fontWeight: 700, color: PALETTE.textPrimary, mb: 0.75 }}>
                       {recipe.name}
                     </Typography>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <AccessTimeRounded sx={{ fontSize: 14, color: PALETTE.textTertiary }} />
-                        <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary }}>{totalTime} min</Typography>
-                      </Stack>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <LocalFireDepartmentRounded sx={{ fontSize: 14, color: PALETTE.textTertiary }} />
-                        <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary }}>{recipe.calories} cal</Typography>
-                      </Stack>
+
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: perfect ? 0.75 : 0.5, flexWrap: "wrap" }}>
+                      <Chip
+                        icon={<AccessTimeRounded sx={{ fontSize: 16 }} />}
+                        label={`${recipe.prepTime} + ${recipe.cookTime}`}
+                        size="small"
+                        sx={{ bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textSecondary, fontWeight: 600 }}
+                      />
+                      <Chip
+                        icon={<LocalFireDepartmentRounded sx={{ fontSize: 16 }} />}
+                        label={`${recipe.calories} cal`}
+                        size="small"
+                        sx={{ bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textSecondary, fontWeight: 600 }}
+                      />
+
+                      {!perfect && (
+                        <Chip
+                          label="Suggested"
+                          size="small"
+                          sx={{ bgcolor: PALETTE.accentLight, color: PALETTE.accentRaw, fontWeight: 700 }}
+                        />
+                      )}
                     </Stack>
+
+                    {!perfect && missing?.length > 0 && (
+                      <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, lineHeight: 1.35 }}>
+                        Missing: {missing.slice(0, 4).join(", ")}{missing.length > 4 ? "…" : ""}
+                      </Typography>
+                    )}
                   </Box>
+
                   {isSelected && <CheckCircleRounded sx={{ fontSize: 22, color: PALETTE.accent }} />}
                 </Stack>
               </Box>
@@ -96,12 +165,18 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
 
       {onNext && (
         <Button
-          fullWidth variant="contained" size="large"
+          fullWidth
+          variant="contained"
+          size="large"
           disabled={!selectedRecipe}
           onClick={() => selectedRecipe && onNext?.(selectedRecipe)}
           sx={{
-            height: 50, borderRadius: "14px", fontSize: "1.0625rem", fontWeight: 600,
-            bgcolor: PALETTE.accent, "&:hover": { bgcolor: PALETTE.accentDark },
+            height: 50,
+            borderRadius: "14px",
+            fontSize: "1.0625rem",
+            fontWeight: 600,
+            bgcolor: PALETTE.accent,
+            "&:hover": { bgcolor: PALETTE.accentDark },
             "&.Mui-disabled": { bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textTertiary },
           }}
         >
