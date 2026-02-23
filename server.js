@@ -8,19 +8,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Simple health check (useful for deployment debugging)
+app.get("/health", (req, res) => {
+  res.status(200).json({ ok: true });
+});
+
 app.post("/api/chat", async (req, res) => {
   try {
     const { prompt } = req.body ?? {};
     if (!prompt) return res.status(400).json({ error: "Missing prompt" });
 
+    const token = process.env.HF_API_KEY || process.env.VITE_HF_API_KEY;
+    if (!token) return res.status(500).json({ error: "Missing HF API key (HF_API_KEY)" });
+
     const hfResp = await fetch("https://router.huggingface.co/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.VITE_HF_API_KEY}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // 你可以先用这个模型；如果后面报 “model not supported”，我再帮你换成可用的
         model: "mistralai/Mistral-7B-Instruct-v0.2",
         messages: [{ role: "user", content: prompt }],
         stream: false,
@@ -52,6 +59,7 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log("Server running on http://localhost:3001");
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
