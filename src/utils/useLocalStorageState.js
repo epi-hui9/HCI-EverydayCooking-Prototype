@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function useLocalStorageState(key, defaultValue) {
-  const [value, setValue] = useState(() => {
+  const [value, _setValue] = useState(() => {
     try {
       const raw = localStorage.getItem(key);
       if (raw == null) return defaultValue;
@@ -11,11 +11,28 @@ export function useLocalStorageState(key, defaultValue) {
     }
   });
 
+  // ✅ Synchronous persist: guarantees save even if component unmounts immediately
+  const setValue = useCallback(
+    (updater) => {
+      _setValue((prev) => {
+        const next = typeof updater === "function" ? updater(prev) : updater;
+        try {
+          localStorage.setItem(key, JSON.stringify(next));
+        } catch {
+          // ignore quota / private mode failures
+        }
+        return next;
+      });
+    },
+    [key]
+  );
+
+  // Keep a safety net (covers cases like key changes)
   useEffect(() => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
-      // ignore quota / private mode failures
+      // ignore
     }
   }, [key, value]);
 
