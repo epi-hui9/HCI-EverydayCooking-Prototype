@@ -88,24 +88,30 @@ function App() {
       sx={{
         minHeight: "100dvh",
         width: "100%",
-        background: "linear-gradient(160deg, #E2DFD9 0%, #D6D3CC 50%, #CBC7BF 100%)",
+        background: {
+          xs: pageBg, // 手机端：不要外层背景渐变，直接用 app 背景
+          sm: "linear-gradient(160deg, #E2DFD9 0%, #D6D3CC 50%, #CBC7BF 100%)", // 桌面端：保留展示背景
+        },
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        py: 2,
-        px: 1,
+        py: { xs: 0, sm: 2 },
+        px: { xs: 0, sm: 1 },
       }}
     >
-      {/* iPhone shell */}
+      {/* iPhone shell (desktop only) / Fullscreen app (mobile) */}
       <Box
         sx={{
-          width: FRAME_W,
-          height: FRAME_H,
-          maxHeight: "calc(100dvh - 24px)",
-          borderRadius: "44px",
+          width: { xs: "100vw", sm: FRAME_W },
+          height: { xs: "100dvh", sm: FRAME_H },
+          maxHeight: { xs: "100dvh", sm: "calc(100dvh - 24px)" },
+          borderRadius: { xs: 0, sm: "44px" },
           overflow: "hidden",
-          boxShadow:
-            "0 0 0 1px rgba(0,0,0,0.08), 0 30px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.10), inset 0 0 0 1.5px rgba(255,255,255,0.15)",
+          boxShadow: {
+            xs: "none",
+            sm:
+              "0 0 0 1px rgba(0,0,0,0.08), 0 30px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.10), inset 0 0 0 1.5px rgba(255,255,255,0.15)",
+          },
           bgcolor: pageBg,
           transition: "background-color 0.5s cubic-bezier(.4,0,.2,1)",
           display: "flex",
@@ -114,12 +120,12 @@ function App() {
           position: "relative",
         }}
       >
-        {/* Status bar area */}
+        {/* Status bar area (hide on mobile) */}
         <Box
           sx={{
+            display: { xs: "none", sm: "flex" },
             height: 54,
             flexShrink: 0,
-            display: "flex",
             alignItems: "flex-end",
             justifyContent: "center",
             pb: 0.5,
@@ -159,9 +165,10 @@ function App() {
         {/* Bottom nav */}
         <BottomNav currentPage={page} onNavigate={handleBottomNavNavigate} />
 
-        {/* Home indicator */}
+        {/* Home indicator (hide on mobile) */}
         <Box
           sx={{
+            display: { xs: "none", sm: "block" },
             position: "absolute",
             bottom: 6,
             left: "50%",
