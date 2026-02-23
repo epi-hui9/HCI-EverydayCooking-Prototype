@@ -290,7 +290,13 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
       </Stack>
 
       {/* Complete dialog */}
-      <Dialog open={isCompleteOpen} onClose={() => setIsCompleteOpen(false)} fullWidth maxWidth="xs">
+      <Dialog
+        open={isCompleteOpen}
+        onClose={() => setIsCompleteOpen(false)}
+        fullScreen
+        disablePortal
+        keepMounted={false} 
+      >
         <DialogContent sx={{ pt: 3 }}>
           <Stack spacing={1.25} alignItems="center" sx={{ textAlign: "center" }}>
             <Box
