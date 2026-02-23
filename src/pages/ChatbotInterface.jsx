@@ -42,28 +42,22 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
     setIsStreaming(true);
 
     try {
-      const stream = streamAnswer(text.trim(), recipeContext);
-      for await (const chunk of stream) {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === botId ? { ...m, text: m.text + chunk } : m)),
-        );
-      }
+      const responseText = await streamAnswer(text.trim(), recipeContext);
+    
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === botId && !m.text ? { ...m, text: "No response received. Please try again." } : m,
-        ),
+          m.id === botId ? { ...m, text: responseText } : m
+        )
       );
     } catch (err) {
       console.error("[Chat error]", err);
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === botId && !m.text
+          m.id === botId
             ? { ...m, text: `Something went wrong: ${err.message || "unknown error"}` }
-            : m,
-        ),
+            : m
+        )
       );
-    } finally {
-      setIsStreaming(false);
     }
   }, [isStreaming, recipeContext]);
 
