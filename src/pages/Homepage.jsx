@@ -1,4 +1,4 @@
-import { Box, Stack, IconButton, Typography, LinearProgress } from "@mui/material";
+import { Box, Stack, IconButton, Typography, LinearProgress, Button } from "@mui/material";
 import ChatRounded from "@mui/icons-material/ChatRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
 import EmojiEventsRounded from "@mui/icons-material/EmojiEventsRounded";
@@ -20,7 +20,7 @@ export default function Homepage({ onNavigate, onOpenChat }) {
   const {
     co2SavedKg, level, points, streakDays,
     pointsInCurrentLevel, pointsToNextLevel, POINTS_PER_LEVEL,
-    getAchievements,
+    getAchievements, addSavedMeal,
   } = useGamification();
 
   const achievements = getAchievements().filter((a) => a.unlocked).slice(0, 4);
@@ -36,7 +36,29 @@ export default function Homepage({ onNavigate, onOpenChat }) {
           <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary, fontWeight: 500, mt: 0.25, letterSpacing: "0.01em" }}>
             Cook smart. Waste less.
           </Typography>
+
+          {/* DEV-ONLY: test persistence quickly */}
+          {import.meta.env.DEV && (
+            <Button
+              onClick={() => addSavedMeal?.(1)}
+              sx={{
+                mt: 1,
+                borderRadius: "999px",
+                px: 2,
+                py: 0.75,
+                fontSize: "0.75rem",
+                bgcolor: PALETTE.surface,
+                border: `1px solid ${PALETTE.separator}`,
+                color: PALETTE.textSecondary,
+                "&:hover": { bgcolor: PALETTE.accentLight, borderColor: PALETTE.accentRaw },
+                textTransform: "none",
+              }}
+            >
+              Debug: +1 saved meal
+            </Button>
+          )}
         </Box>
+
         {onOpenChat && (
           <IconButton
             aria-label="Open Chat"

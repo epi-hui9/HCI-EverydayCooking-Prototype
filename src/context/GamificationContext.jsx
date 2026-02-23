@@ -2,7 +2,8 @@
  * Food waste gamification: points, CO₂ saved, level, streak, achievements.
  * Used across the app to show impact and encourage reducing waste.
  */
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useCallback } from "react";
+import { useLocalStorageState } from "../utils/useLocalStorageState";
 
 const CO2_PER_MEAL_SAVED_KG = 0.5;
 const POINTS_PER_MEAL_SAVED = 10;
@@ -20,37 +21,82 @@ const ACHIEVEMENTS = [
 const GamificationContext = createContext(null);
 
 export function GamificationProvider({ children }) {
-  const [points, setPoints] = useState(340);
-  const [co2SavedKg, setCo2SavedKg] = useState(12.4);
-  const [mealsSaved, setMealsSaved] = useState(28);
-  const [streakDays, setStreakDays] = useState(5);
-  const [lastActivityDate, setLastActivityDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    return d.toDateString();
-  });
-  const [unlockedAchievements, setUnlockedAchievements] = useState(["first_save", "eco_10", "streak_3"]);
+  const [points, setPoints] = useLocalStorageState("ep.points", 340);
+  const [co2SavedKg, setCo2SavedKg] = useLocalStorageState("ep.co2SavedKg", 12.4);
+  const [mealsSaved, setMealsSaved] = useLocalStorageState("ep.mealsSaved", 28);
+  const [streakDays, setStreakDays] = useLocalStorageState("ep.streakDays", 5);
+  const [lastActivityDate, setLastActivityDate] = useLocalStorageState(
+    "ep.lastActivityDate",
+    (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d.toDateString();
+    })()
+  );
+  const [unlockedAchievements, setUnlockedAchievements] = useLocalStorageState(
+    "ep.unlockedAchievements",
+    ["first_save", "eco_10", "streak_3"]
+  );
 
   const level = Math.floor(points / POINTS_PER_LEVEL) + 1;
   const pointsInCurrentLevel = points % POINTS_PER_LEVEL;
   const pointsToNextLevel = POINTS_PER_LEVEL - pointsInCurrentLevel;
 
-  const addSavedMeal = useCallback((count = 1) => {
-    setMealsSaved((n) => n + count);
-    setCo2SavedKg((c) => Math.round((c + CO2_PER_MEAL_SAVED_KG * count) * 10) / 10);
-    setPoints((p) => p + POINTS_PER_MEAL_SAVED * count);
-    const today = new Date().toDateString();
-    setLastActivityDate(today);
-    // Streak logic: if last activity was yesterday, increment; if not, reset to 1
-    setStreakDays((s) => {
-      const last = lastActivityDate;
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      if (last === yesterday.toDateString()) return s + 1;
-      if (last === today) return s;
-      return 1;
-    });
-  }, [lastActivityDate]);
+  const addSavedMeal = useCallback(
+    (count = 1) => {
+      const today = new Date().toDateString();
+
+      setMealsSaved((n) => n + count);
+      setCo2SavedKg((c) => Math.round((c + CO2_PER_MEAL_SAVED_KG * count) * 10) / 10);
+      setPoints((p) => p + POINTS_PER_MEAL_SAVED * count);
+
+      // Streak logic: if last activity was yesterday, increment; if not, reset to 1
+      setStreakDays((s) => {
+        const last = lastActivityDate;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (last === yesterday.toDateString()) return s + 1;
+        if (last === today) return s;
+        return 1;
+      });
+
+      setLastActivityDate(today);
+
+      // Unlock achievements (minimal, deterministic)
+      setUnlockedAchievements((prev) => {
+        const next = new Set(prev);
+
+        // first save
+        if (mealsSaved + count >= 1) next.add("first_save");
+
+        // co2 milestones
+        const nextCo2 = Math.round((co2SavedKg + CO2_PER_MEAL_SAVED_KG * count) * 10) / 10;
+        if (nextCo2 >= 10) next.add("eco_10");
+
+        // streak milestones (based on updated streakDays calculation approximation)
+        const last = lastActivityDate;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        let nextStreak = 1;
+        if (last === yesterday.toDateString()) nextStreak = streakDays + 1;
+        else if (last === today) nextStreak = streakDays;
+
+        if (nextStreak >= 3) next.add("streak_3");
+        if (nextStreak >= 7) next.add("streak_7");
+
+        // level milestones (based on updated points)
+        const nextPoints = points + POINTS_PER_MEAL_SAVED * count;
+        const nextLevel = Math.floor(nextPoints / POINTS_PER_LEVEL) + 1;
+        if (nextLevel >= 3) next.add("level_3");
+        if (nextLevel >= 5) next.add("level_5");
+
+        return Array.from(next);
+      });
+    },
+    [lastActivityDate, mealsSaved, co2SavedKg, streakDays, points, setMealsSaved, setCo2SavedKg, setPoints, setStreakDays, setLastActivityDate, setUnlockedAchievements]
+  );
 
   const getAchievements = useCallback(() => {
     return ACHIEVEMENTS.map((a) => ({
@@ -72,11 +118,7 @@ export function GamificationProvider({ children }) {
     getAchievements,
   };
 
-  return (
-    <GamificationContext.Provider value={value}>
-      {children}
-    </GamificationContext.Provider>
-  );
+  return <GamificationContext.Provider value={value}>{children}</GamificationContext.Provider>;
 }
 
 export function useGamification() {
