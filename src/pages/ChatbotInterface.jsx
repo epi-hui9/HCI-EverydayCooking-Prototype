@@ -18,10 +18,14 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
 
   const recipeContext = instructionRecipe?.name
-    ? `The user selected the recipe "${instructionRecipe.name}". Here are the instructions:\n${RECIPE_INSTRUCTIONS[instructionRecipe.name] ?? "No instructions available."}`
+    ? `The user selected the recipe "${instructionRecipe.name}". Here are the instructions:\n${
+        RECIPE_INSTRUCTIONS[instructionRecipe.name] ?? "No instructions available."
+      }`
     : null;
 
   useEffect(() => {
@@ -32,37 +36,40 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
     }
   }, [instructionRecipe?.name, instructionRecipe]);
 
-  const sendMessage = useCallback(async (text) => {
-    if (!text?.trim() || isStreaming) return;
-    const userMsg = { id: Date.now(), text: text.trim(), type: "user" };
-    const botId = Date.now() + 1;
+  const sendMessage = useCallback(
+    async (text) => {
+      if (!text?.trim() || isStreaming) return;
 
-    setMessages((prev) => [...prev, userMsg, { id: botId, text: "", type: "bot" }]);
-    setInputValue("");
-    setIsStreaming(true);
+      const userMsg = { id: Date.now(), text: text.trim(), type: "user" };
+      const botId = Date.now() + 1;
 
-    try {
-      const responseText = await streamAnswer(text.trim(), recipeContext);
-    
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === botId ? { ...m, text: responseText } : m
-        )
-      );
-    } catch (err) {
-      console.error("[Chat error]", err);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === botId
-            ? { ...m, text: `Something went wrong: ${err.message || "unknown error"}` }
-            : m
-        )
-      );
-    }
-  }, [isStreaming, recipeContext]);
+      setMessages((prev) => [...prev, userMsg, { id: botId, text: "", type: "bot" }]);
+      setInputValue("");
+      setIsStreaming(true);
+
+      try {
+        const responseText = await streamAnswer(text.trim(), recipeContext);
+
+        setMessages((prev) => prev.map((m) => (m.id === botId ? { ...m, text: responseText } : m)));
+      } catch (err) {
+        console.error("[Chat error]", err);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === botId ? { ...m, text: `Something went wrong: ${err.message || "unknown error"}` } : m
+          )
+        );
+      } finally {
+        setIsStreaming(false);
+      }
+    },
+    [isStreaming, recipeContext]
+  );
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(inputValue); }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(inputValue);
+    }
   };
 
   const renderText = (text) => {
@@ -70,21 +77,36 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
     return text.split("\n").map((line, i) => {
       const parts = line.split(/(\*\*[^*]+\*\*)/g);
       return (
-        <Typography key={i} component="span" display="block" sx={{ mt: i > 0 ? 0.75 : 0, fontSize: "0.875rem", lineHeight: 1.55, color: "inherit" }}>
+        <Typography
+          key={i}
+          component="span"
+          display="block"
+          sx={{ mt: i > 0 ? 0.75 : 0, fontSize: "0.875rem", lineHeight: 1.55, color: "inherit" }}
+        >
           {parts.map((part, j) =>
-            part.startsWith("**") && part.endsWith("**")
-              ? <strong key={j}>{part.slice(2, -2)}</strong>
-              : part
+            part.startsWith("**") && part.endsWith("**") ? <strong key={j}>{part.slice(2, -2)}</strong> : part
           )}
         </Typography>
       );
     });
   };
 
+  const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:3001";
+
   return (
-    <Box sx={{ px: 2, pt: 1, pb: 1, display: "flex", flexDirection: "column", minHeight: "100%", animation: "fadeIn 0.25s ease" }}>
+    <Box
+      sx={{
+        px: 2,
+        pt: 1,
+        pb: 1,
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100%",
+        animation: "fadeIn 0.25s ease",
+      }}
+    >
       {/* Nav */}
-      <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
+      <Stack direction="row" alignItems="center" sx={{ mb: 0.5 }}>
         <IconButton onClick={onBack} sx={{ color: PALETTE.accent, ml: -1 }}>
           <ChevronLeftRounded />
         </IconButton>
@@ -95,23 +117,41 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
         <Box sx={{ width: 40 }} />
       </Stack>
 
+      {/* DEBUG: show API base being used */}
+      <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.textTertiary, mb: 1 }}>
+        API: {apiBase}
+      </Typography>
+
       {/* Messages */}
       <Box
         sx={{
-          flex: 1, minHeight: 200, overflowY: "auto",
-          borderRadius: "16px", bgcolor: PALETTE.surfaceTinted, p: 2,
+          flex: 1,
+          minHeight: 200,
+          overflowY: "auto",
+          borderRadius: "16px",
+          bgcolor: PALETTE.surfaceTinted,
+          p: 2,
           "&::-webkit-scrollbar": { display: "none" },
         }}
       >
         {messages.length === 0 ? (
           <Stack spacing={2} sx={{ py: 3, animation: "fadeIn 0.4s ease" }}>
             <Box sx={{ textAlign: "center", mb: 1 }}>
-              <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: PALETTE.sageLight, display: "inline-flex", alignItems: "center", justifyContent: "center", mb: 1 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: "14px",
+                  bgcolor: PALETTE.sageLight,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mb: 1,
+                }}
+              >
                 <SmartToyRounded sx={{ fontSize: 24, color: PALETTE.ecoMedium }} />
               </Box>
-              <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: PALETTE.textPrimary }}>
-                How can I help?
-              </Typography>
+              <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: PALETTE.textPrimary }}>How can I help?</Typography>
               <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary, mt: 0.5 }}>
                 Ask about ingredients, recipes, or cooking tips
               </Typography>
@@ -119,12 +159,19 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
             <Stack spacing={1}>
               {SUGGESTED_QUESTIONS.map((question, i) => (
                 <Button
-                  key={i} fullWidth onClick={() => sendMessage(question)}
+                  key={i}
+                  fullWidth
+                  onClick={() => sendMessage(question)}
                   sx={{
-                    justifyContent: "space-between", textAlign: "left",
-                    borderRadius: "12px", border: `1px solid ${PALETTE.separator}`,
-                    bgcolor: PALETTE.surface, color: PALETTE.textPrimary,
-                    px: 2, py: 1.25, minHeight: 44,
+                    justifyContent: "space-between",
+                    textAlign: "left",
+                    borderRadius: "12px",
+                    border: `1px solid ${PALETTE.separator}`,
+                    bgcolor: PALETTE.surface,
+                    color: PALETTE.textPrimary,
+                    px: 2,
+                    py: 1.25,
+                    minHeight: 44,
                     "&:hover": { bgcolor: PALETTE.accentLight, borderColor: PALETTE.accentRaw },
                     transition: "all 0.15s",
                   }}
@@ -141,7 +188,16 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
               if (msg.type === "user") {
                 return (
                   <Stack key={msg.id} direction="row" justifyContent="flex-end">
-                    <Box sx={{ maxWidth: "80%", px: 2, py: 1.25, borderRadius: "18px 18px 4px 18px", bgcolor: PALETTE.accent, color: "#fff" }}>
+                    <Box
+                      sx={{
+                        maxWidth: "80%",
+                        px: 2,
+                        py: 1.25,
+                        borderRadius: "18px 18px 4px 18px",
+                        bgcolor: PALETTE.accent,
+                        color: "#fff",
+                      }}
+                    >
                       <Typography sx={{ fontSize: "0.875rem", fontWeight: 500, lineHeight: 1.45 }}>{msg.text}</Typography>
                     </Box>
                   </Stack>
@@ -151,17 +207,41 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
               const isEmpty = !msg.text;
               return (
                 <Stack key={msg.id} direction="row" alignItems="flex-end" spacing={1}>
-                  <Box sx={{ width: 28, height: 28, borderRadius: "8px", bgcolor: PALETTE.sageLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "8px",
+                      bgcolor: PALETTE.sageLight,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
                     <SmartToyRounded sx={{ fontSize: 16, color: PALETTE.ecoMedium }} />
                   </Box>
-                  <Box sx={{ maxWidth: "80%", px: 2, py: 1.25, borderRadius: "18px 18px 18px 4px", bgcolor: PALETTE.surface, color: PALETTE.textPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
+                  <Box
+                    sx={{
+                      maxWidth: "80%",
+                      px: 2,
+                      py: 1.25,
+                      borderRadius: "18px 18px 18px 4px",
+                      bgcolor: PALETTE.surface,
+                      color: PALETTE.textPrimary,
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                    }}
+                  >
                     {isEmpty ? (
                       <Stack direction="row" spacing={0.5} alignItems="center" sx={{ py: 0.25 }}>
                         {[0, 1, 2].map((i) => (
                           <Box
                             key={i}
                             sx={{
-                              width: 6, height: 6, borderRadius: "50%", bgcolor: PALETTE.textTertiary,
+                              width: 6,
+                              height: 6,
+                              borderRadius: "50%",
+                              bgcolor: PALETTE.textTertiary,
                               animation: "pulse 1.2s ease-in-out infinite",
                               animationDelay: `${i * 0.15}s`,
                               "@keyframes pulse": {
@@ -191,21 +271,27 @@ export default function ChatbotInterface({ onBack, instructionRecipe }) {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
-          size="small" fullWidth
+          size="small"
+          fullWidth
           disabled={isStreaming}
           sx={{
             "& .MuiOutlinedInput-root": {
-              borderRadius: "22px", bgcolor: PALETTE.surfaceSecondary,
+              borderRadius: "22px",
+              bgcolor: PALETTE.surfaceSecondary,
               "& fieldset": { borderColor: PALETTE.separator },
               "&.Mui-focused fieldset": { borderColor: PALETTE.accent, borderWidth: 1.5 },
             },
           }}
         />
         <IconButton
-          aria-label="Send message" onClick={() => sendMessage(inputValue)}
+          aria-label="Send message"
+          onClick={() => sendMessage(inputValue)}
           disabled={!inputValue.trim() || isStreaming}
           sx={{
-            width: 38, height: 38, bgcolor: PALETTE.accent, color: "#fff",
+            width: 38,
+            height: 38,
+            bgcolor: PALETTE.accent,
+            color: "#fff",
             "&:hover": { bgcolor: PALETTE.accentDark },
             "&.Mui-disabled": { bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textTertiary },
             transition: "all 0.15s",
