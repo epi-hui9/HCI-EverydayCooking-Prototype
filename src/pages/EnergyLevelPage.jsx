@@ -1,148 +1,95 @@
-/**
- * Recipe flow step 2: energy check-in. Content fits inside app frame.
- */
-import React from "react";
 import { Box, Button, Stack, Typography, IconButton } from "@mui/material";
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
-import ChatIcon from "@mui/icons-material/Chat";
+import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import { ENERGY_OPTIONS } from "../constants/energy";
 import { PALETTE } from "../theme";
 
-export default function EnergyLevelPage({ onOpenChat, onBack, onContinue, selectedEnergy = "medium", onEnergyChange }) {
+const ENERGY_ICONS = { low: "🍃", medium: "🍳", high: "🔥" };
+
+export default function EnergyLevelPage({ onBack, onContinue, selectedEnergy = "medium", onEnergyChange }) {
   return (
-    <Box sx={{ minHeight: "100%", width: "100%", display: "flex", flexDirection: "column", px: 2.5, pt: 3, pb: 2 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Button
-          startIcon={<ChevronLeft />}
-          onClick={onBack}
-          sx={{ color: "text.secondary", minHeight: 44, "&:hover": { bgcolor: "rgba(0,0,0,0.04)" } }}
-        >
-          Back
-        </Button>
-        <Typography variant="overline" sx={{ letterSpacing: 0.6, color: "text.secondary" }}>
-          Energy check-in
-        </Typography>
-        <Box sx={{ width: 52 }} />
+    <Box sx={{ px: 2, pt: 1, pb: 3, display: "flex", flexDirection: "column", minHeight: "100%", animation: "fadeIn 0.25s ease" }}>
+      <Stack direction="row" alignItems="center" sx={{ mb: 0.5 }}>
+        <IconButton onClick={onBack} sx={{ color: PALETTE.accent, ml: -1 }}>
+          <ChevronLeftRounded />
+        </IconButton>
+        <Typography sx={{ fontSize: "1.0625rem", fontWeight: 600, color: PALETTE.accent }}>Back</Typography>
       </Stack>
 
-      <Stack alignItems="center" spacing={1} sx={{ mt: 2 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            bgcolor: PALETTE.sageLight,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography>🥘</Typography>
-        </Box>
-        <Typography variant="body2" fontWeight={500} textAlign="center" color="text.secondary">
-          How much energy do you have right now?
+      <Box sx={{ textAlign: "center", pt: 4, pb: 4 }}>
+        <Typography sx={{ fontSize: "2.5rem", lineHeight: 1, mb: 1.5 }}>🥘</Typography>
+        <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em", mb: 0.5 }}>
+          How's your energy?
         </Typography>
-        <Typography variant="caption" textAlign="center" color="text.disabled">
-          Your kitchen will follow your pace.
+        <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textSecondary }}>
+          We'll match recipes to your pace
         </Typography>
-      </Stack>
+      </Box>
 
-      <Stack spacing={1.5} sx={{ flex: 1, pb: 2, pt: 1, justifyContent: "center" }}>
-        {ENERGY_OPTIONS.map((option, index) => {
+      <Stack spacing={1.5} sx={{ flex: 1, justifyContent: "center", pb: 2 }}>
+        {ENERGY_OPTIONS.map((option) => {
           const isActive = option.id === selectedEnergy;
-          const isLow = option.id === "low";
-          const isHigh = option.id === "high";
           return (
             <Box
               key={option.id}
+              component="button" type="button"
               onClick={() => onEnergyChange?.(option.id)}
               sx={{
-                minHeight: 52,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                borderRadius: 2,
-                border: "1px solid",
-                borderColor: isActive ? PALETTE.sage : "transparent",
-                bgcolor: isActive ? PALETTE.sageLight : "transparent",
-                px: 1.5,
-                py: 1,
-                transition: "all 0.26s ease",
-                "&:hover": {
-                  bgcolor: isActive ? PALETTE.sageLight : "rgba(0,0,0,0.03)",
-                  transform: "translateY(-2px)",
-                },
+                border: "none", cursor: "pointer", display: "flex", alignItems: "center",
+                borderRadius: "16px",
+                bgcolor: isActive ? PALETTE.surface : "transparent",
+                boxShadow: isActive ? "0 2px 12px rgba(0,0,0,0.06)" : "none",
+                outline: isActive ? `2px solid ${PALETTE.accent}` : `1.5px solid ${PALETTE.separator}`,
+                px: 2, py: 1.75,
+                transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
+                "&:hover": { bgcolor: isActive ? PALETTE.surface : "rgba(0,0,0,0.02)" },
+                "&:active": { transform: "scale(0.98)" },
               }}
             >
-              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: "100%" }}>
-                <Box
-                  sx={{
-                    width: option.size,
-                    height: option.size,
-                    borderRadius: "50%",
-                    bgcolor: "#fff",
-                    border: "2px solid",
-                    borderColor: isHigh ? PALETTE.sage : isLow ? PALETTE.sageLight : PALETTE.sage,
-                    boxShadow: isActive ? "0 12px 28px rgba(0,0,0,0.08)" : "0 4px 14px rgba(0,0,0,0.04)",
-                    transform: isActive ? "translateY(-2px) scale(1.03)" : "scale(1)",
-                  }}
-                />
-                <Stack spacing={0}>
-                  <Typography variant="body2" fontWeight={isActive ? 600 : 500} color="text.primary">
-                    {option.label}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {option.description}
-                  </Typography>
-                </Stack>
-              </Stack>
+              <Box
+                sx={{
+                  width: 44, height: 44, borderRadius: "12px",
+                  bgcolor: isActive ? PALETTE.accentLight : PALETTE.surfaceSecondary,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.25rem", flexShrink: 0, mr: 1.5,
+                  transition: "all 0.25s",
+                }}
+              >
+                {ENERGY_ICONS[option.id]}
+              </Box>
+              <Box sx={{ flex: 1, textAlign: "left" }}>
+                <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: isActive ? PALETTE.accent : PALETTE.textPrimary }}>
+                  {option.label}
+                </Typography>
+                <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary }}>
+                  {option.description}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  width: 22, height: 22, borderRadius: "50%",
+                  border: isActive ? `6px solid ${PALETTE.accent}` : `2px solid ${PALETTE.textTertiary}`,
+                  transition: "all 0.2s",
+                }}
+              />
             </Box>
           );
         })}
-        <Typography variant="caption" textAlign="center" color="text.disabled" sx={{ pt: 0 }}>
-          No right answer — this is just for right now.
+
+        <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textTertiary, textAlign: "center", pt: 1 }}>
+          No right answer — just for right now.
         </Typography>
       </Stack>
 
-      <Stack spacing={1} sx={{ pt: 2, pb: 1 }}>
-        <Button
-          fullWidth
-          variant="contained"
-          size="medium"
-          sx={{
-            minHeight: 48,
-            borderRadius: 2,
-            fontWeight: 600,
-            bgcolor: PALETTE.warmBrown,
-            "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9 },
-          }}
-          onClick={() => onContinue?.(selectedEnergy)}
-        >
-          Continue
-        </Button>
-        <Button size="small" sx={{ color: "text.disabled" }}>
-          Skip for now
-        </Button>
-      </Stack>
-
-      {onOpenChat && (
-        <Box sx={{ position: "fixed", bottom: 88, right: 24, zIndex: 10 }}>
-          <IconButton
-            aria-label="Open Chat"
-            sx={{
-              width: 48,
-              height: 48,
-              bgcolor: PALETTE.warmBrown,
-              color: "#fff",
-              boxShadow: "0 4px 16px rgba(212, 163, 115, 0.4)",
-              "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9, transform: "scale(1.05)" },
-            }}
-            onClick={onOpenChat}
-          >
-            <ChatIcon />
-          </IconButton>
-        </Box>
-      )}
+      <Button
+        fullWidth variant="contained" size="large"
+        onClick={() => onContinue?.(selectedEnergy)}
+        sx={{
+          height: 50, borderRadius: "14px", fontSize: "1.0625rem", fontWeight: 600,
+          bgcolor: PALETTE.accent, "&:hover": { bgcolor: PALETTE.accentDark },
+        }}
+      >
+        Continue
+      </Button>
     </Box>
   );
 }

@@ -1,7 +1,3 @@
-/**
- * Mobile-style bottom tab bar: Home, Fridge, Recipes, Chat.
- * Placed inside the app frame; active tab reflects current (or logical) page.
- */
 import { Box, Typography } from "@mui/material";
 import HomeRounded from "@mui/icons-material/HomeRounded";
 import KitchenRounded from "@mui/icons-material/KitchenRounded";
@@ -17,23 +13,24 @@ const ICONS = {
   Chat: ChatRounded,
 };
 
-const TAB_HEIGHT = 64;
+const TAB_HEIGHT = 56;
 
 export function BottomNav({ currentPage, onNavigate }) {
   const activeTab = getActiveTabForPage(currentPage);
 
   return (
     <Box
+      className="glass-heavy"
       sx={{
         flexShrink: 0,
         height: TAB_HEIGHT,
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
-        paddingTop: 8,
-        background: "#fff",
-        borderTop: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 -1px 0 rgba(0,0,0,0.06)",
+        pb: "max(env(safe-area-inset-bottom, 0px), 4px)",
+        pt: "6px",
+        borderTop: `0.5px solid ${PALETTE.separator}`,
         display: "flex",
         alignItems: "stretch",
+        position: "relative",
+        zIndex: 15,
       }}
     >
       {BOTTOM_NAV_TABS.map((tab) => {
@@ -42,35 +39,22 @@ export function BottomNav({ currentPage, onNavigate }) {
         return (
           <Box
             key={tab}
-            component="button"
-            type="button"
+            component="button" type="button"
             onClick={() => onNavigate(tab === "Recipe" ? "Recipe" : tab)}
             aria-label={getNavLabel(tab)}
             aria-current={isActive ? "page" : undefined}
             sx={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 0.25,
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: isActive ? PALETTE.warmBrown : "text.secondary",
-              transition: "color 0.2s ease",
-              minWidth: 0,
-              "&:hover": { color: isActive ? PALETTE.warmBrown : "text.primary" },
-              "&:active": { opacity: 0.85 },
+              flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
+              justifyContent: "center", gap: "2px",
+              border: "none", background: "transparent", cursor: "pointer",
+              color: isActive ? PALETTE.accent : PALETTE.textTertiary,
+              transition: "color 0.2s ease", minWidth: 0, p: 0,
+              "&:hover": { color: isActive ? PALETTE.accent : PALETTE.textSecondary },
+              "&:active": { transform: "scale(0.92)", transition: "transform 0.1s" },
             }}
           >
-            <Icon
-              sx={{
-                fontSize: 26,
-                color: "inherit",
-              }}
-            />
-            <Typography variant="caption" sx={{ fontWeight: isActive ? 600 : 500, fontSize: "0.7rem", color: "inherit" }}>
+            <Icon sx={{ fontSize: 24, color: "inherit" }} />
+            <Typography sx={{ fontWeight: isActive ? 600 : 500, fontSize: "0.625rem", color: "inherit", letterSpacing: "0.01em" }}>
               {getNavLabel(tab)}
             </Typography>
           </Box>

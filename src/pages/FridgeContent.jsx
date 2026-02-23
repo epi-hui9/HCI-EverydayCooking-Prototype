@@ -1,241 +1,125 @@
-/**
- * Fridge / Your Food: list of items with expiry, add/delete. Content fits inside app frame.
- */
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Stack,
-  Typography,
-  TextField,
-  IconButton,
-  Chip,
-} from "@mui/material";
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
-import Close from "@mui/icons-material/Close";
-import Add from "@mui/icons-material/Add";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
-import ChatIcon from "@mui/icons-material/Chat";
+import { useState } from "react";
+import { Box, Button, Stack, Typography, TextField, IconButton, Chip } from "@mui/material";
+import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
+import AddRounded from "@mui/icons-material/AddRounded";
+import DeleteOutlineRounded from "@mui/icons-material/DeleteOutlineRounded";
+import CloseRounded from "@mui/icons-material/CloseRounded";
 import { PALETTE } from "../theme";
 
 const getDaysUntilExpiry = (expiryDate) => {
-  const today = new Date("2026-02-16");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const expiry = new Date(expiryDate);
   return Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
 };
 
-const getExpiryColor = (expiryDate) => {
+const getExpiryStyle = (expiryDate) => {
   const days = getDaysUntilExpiry(expiryDate);
-  if (days < 0) return { bg: "#8B7E74", text: "#FFF", label: "Expired" };
-  if (days <= 1) return { bg: "#E8958E", text: "#5C1F1B", label: "Expiring Today!" };
-  if (days <= 4) return { bg: "#F4C6A3", text: "#6B3E1F", label: "Expiring Soon" };
-  if (days <= 14) return { bg: "#E8D99F", text: "#5C5220", label: "Use This Week" };
-  if (days <= 90) return { bg: "#C8E6C9", text: "#2D5016", label: "Fresh" };
-  return { bg: "#B3E5B7", text: "#1B4D1F", label: "Very Fresh" };
+  if (days < 0) return { accent: "#B8423A", bg: "#FEF0EF", label: "Expired" };
+  if (days <= 1) return { accent: "#D4603A", bg: "#FFF4EC", label: "Today" };
+  if (days <= 4) return { accent: PALETTE.accent, bg: PALETTE.accentLight, label: "Soon" };
+  if (days <= 14) return { accent: PALETTE.ecoMedium, bg: PALETTE.sageLight, label: "Good" };
+  return { accent: PALETTE.ecoDeep, bg: PALETTE.sageLight, label: "Fresh" };
 };
 
-export default function FridgeContent({ onOpenChat, onBack }) {
+export default function FridgeContent({ onBack }) {
   const [foods, setFoods] = useState([
-    { id: 1, name: "Tomatoes", expiryDate: "2026-02-17", category: "Produce" },
-    { id: 2, name: "Eggplant", expiryDate: "2026-02-20", category: "Produce" },
-    { id: 3, name: "Corn", expiryDate: "2026-02-20", category: "Produce" },
+    { id: 1, name: "Tomatoes", expiryDate: "2026-02-23", category: "Produce" },
+    { id: 2, name: "Eggplant", expiryDate: "2026-02-26", category: "Produce" },
+    { id: 3, name: "Corn", expiryDate: "2026-02-26", category: "Produce" },
     { id: 4, name: "Chips", expiryDate: "2026-07-01", category: "Snacks" },
     { id: 5, name: "Twizzlers", expiryDate: "2027-07-01", category: "Snacks" },
   ]);
   const [newFood, setNewFood] = useState({ name: "", expiryDate: "", category: "" });
-  const [isOpen, setIsOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleAddFood = () => {
     if (newFood.name && newFood.expiryDate) {
-      setFoods([
-        ...foods,
-        { id: Date.now(), name: newFood.name, expiryDate: newFood.expiryDate, category: newFood.category || "Other" },
-      ]);
+      setFoods((prev) => [...prev, { id: Date.now(), ...newFood, category: newFood.category || "Other" }]);
       setNewFood({ name: "", expiryDate: "", category: "" });
-      setIsOpen(false);
+      setIsAdding(false);
     }
   };
 
-  const handleDeleteFood = (id) => {
-    setFoods(foods.filter((f) => f.id !== id));
-  };
+  const sorted = [...foods].sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
 
-  const sortedFoods = [...foods].sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+  if (isAdding) {
+    return (
+      <Box sx={{ px: 2, pt: 1, pb: 3, animation: "fadeIn 0.25s ease" }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+          <IconButton onClick={() => setIsAdding(false)} sx={{ color: PALETTE.accent }}>
+            <ChevronLeftRounded />
+          </IconButton>
+          <Typography sx={{ fontSize: "1.0625rem", fontWeight: 600 }}>Add Food</Typography>
+          <IconButton onClick={() => setIsAdding(false)} sx={{ color: PALETTE.textTertiary }}>
+            <CloseRounded />
+          </IconButton>
+        </Stack>
+        <Stack spacing={2}>
+          <TextField label="Food Name" required placeholder="e.g. Strawberries" value={newFood.name} onChange={(e) => setNewFood({ ...newFood, name: e.target.value })} size="small" fullWidth />
+          <TextField label="Expiry Date" required type="date" value={newFood.expiryDate} onChange={(e) => setNewFood({ ...newFood, expiryDate: e.target.value })} InputLabelProps={{ shrink: true }} size="small" fullWidth />
+          <TextField label="Category" placeholder="e.g. Produce, Dairy" value={newFood.category} onChange={(e) => setNewFood({ ...newFood, category: e.target.value })} size="small" fullWidth />
+          <Button
+            fullWidth variant="contained" onClick={handleAddFood}
+            sx={{ mt: 1, height: 48, borderRadius: "12px", bgcolor: PALETTE.accent, fontWeight: 600, fontSize: "1rem", "&:hover": { bgcolor: PALETTE.accentDark } }}
+          >
+            Add to Fridge
+          </Button>
+        </Stack>
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ minHeight: "100%", display: "flex", flexDirection: "column" }}>
-      {isOpen ? (
-        <Box sx={{ px: 2.5, pt: 2, pb: 3 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-            <Button startIcon={<ChevronLeft />} onClick={() => setIsOpen(false)} sx={{ color: "text.secondary" }}>
-              Back
-            </Button>
-            <Typography variant="overline" sx={{ letterSpacing: 0.6, color: "text.secondary" }}>
-              Add food
-            </Typography>
-            <IconButton size="small" onClick={() => setIsOpen(false)} aria-label="Close">
-              <Close />
-            </IconButton>
-          </Stack>
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            <TextField
-              label="Food Name"
-              required
-              placeholder="e.g., Strawberries"
-              value={newFood.name}
-              onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
-              size="small"
-              fullWidth
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
-            <TextField
-              label="Expiry Date"
-              required
-              type="date"
-              value={newFood.expiryDate}
-              onChange={(e) => setNewFood({ ...newFood, expiryDate: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              size="small"
-              fullWidth
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
-            <TextField
-              label="Category"
-              placeholder="e.g., Produce, Dairy, Snacks"
-              value={newFood.category}
-              onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
-              size="small"
-              fullWidth
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{ mt: 1, height: 46, borderRadius: 2, bgcolor: PALETTE.warmBrown, "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9 } }}
-              onClick={handleAddFood}
-            >
-              Add to Fridge
-            </Button>
-          </Stack>
-        </Box>
-      ) : (
-        <>
-          <Box sx={{ px: 2.5, pt: 3, pb: 2 }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-              <Button
-                startIcon={<ChevronLeft />}
-                onClick={onBack}
-                sx={{ color: "text.secondary", minHeight: 44, "&:hover": { bgcolor: "rgba(0,0,0,0.04)" } }}
-              >
-                Back
-              </Button>
-              <Typography variant="overline" sx={{ letterSpacing: 0.6, color: "text.secondary" }}>
-                Fridge
-              </Typography>
-              <Box sx={{ width: 52 }} />
-            </Stack>
+    <Box sx={{ px: 2, pt: 1, pb: 3, animation: "fadeIn 0.25s ease" }}>
+      <Stack direction="row" alignItems="center" sx={{ mb: 0.5 }}>
+        <IconButton onClick={onBack} sx={{ color: PALETTE.accent, ml: -1 }}>
+          <ChevronLeftRounded />
+        </IconButton>
+        <Typography sx={{ fontSize: "1.0625rem", fontWeight: 600, color: PALETTE.accent }}>Back</Typography>
+      </Stack>
 
-            <Stack spacing={2} sx={{ mb: 2 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                <Box>
-                  <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ mb: 0.5 }}>
-                    Expiring Soon
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Keep track of your food freshness
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2.5 }}>
+        <Box>
+          <Typography sx={{ fontSize: "1.75rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Your Food</Typography>
+          <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary, mt: 0.25 }}>{foods.length} items tracked</Typography>
+        </Box>
+        <IconButton
+          onClick={() => setIsAdding(true)} aria-label="Add food"
+          sx={{ width: 38, height: 38, bgcolor: PALETTE.accent, color: "#fff", "&:hover": { bgcolor: PALETTE.accentDark }, "&:active": { transform: "scale(0.93)" } }}
+        >
+          <AddRounded sx={{ fontSize: 20 }} />
+        </IconButton>
+      </Stack>
+
+      <Box sx={{ bgcolor: PALETTE.surface, borderRadius: "16px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+        {sorted.map((food, index) => {
+          const style = getExpiryStyle(food.expiryDate);
+          const days = getDaysUntilExpiry(food.expiryDate);
+          const daysText = days < 0 ? `${Math.abs(days)}d ago` : days === 0 ? "Today" : days === 1 ? "Tomorrow" : `${days}d left`;
+          return (
+            <Box key={food.id}>
+              <Stack direction="row" alignItems="center" sx={{ px: 2, py: 1.5 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: style.accent, flexShrink: 0, mr: 1.5 }} />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: PALETTE.textPrimary }}>{food.name}</Typography>
+                    <Chip label={food.category} size="small" sx={{ height: 20, fontSize: "0.6875rem", fontWeight: 500, bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textSecondary }} />
+                  </Stack>
+                  <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, mt: 0.25 }}>
+                    {new Date(food.expiryDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </Typography>
                 </Box>
-                <IconButton
-                  onClick={() => setIsOpen(true)}
-                  aria-label="Add food"
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    bgcolor: PALETTE.warmBrown,
-                    color: "#fff",
-                    boxShadow: "0 8px 24px rgba(212, 163, 115, 0.3)",
-                    "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9, transform: "scale(1.04)" },
-                  }}
-                >
-                  <Add />
+                <Chip label={daysText} size="small" sx={{ height: 24, fontSize: "0.6875rem", fontWeight: 600, bgcolor: style.bg, color: style.accent, mr: 1 }} />
+                <IconButton size="small" onClick={() => setFoods((f) => f.filter((x) => x.id !== food.id))} sx={{ color: PALETTE.textTertiary, "&:hover": { color: "#B8423A" } }} aria-label={`Delete ${food.name}`}>
+                  <DeleteOutlineRounded sx={{ fontSize: 18 }} />
                 </IconButton>
               </Stack>
-            </Stack>
-
-            <Stack spacing={1.5}>
-              {sortedFoods.map((food, index) => {
-                const colorScheme = getExpiryColor(food.expiryDate);
-                const daysLeft = getDaysUntilExpiry(food.expiryDate);
-                return (
-                  <Box
-                    key={food.id}
-                    sx={{
-                      bgcolor: colorScheme.bg,
-                      borderRadius: 2,
-                      p: 2,
-                      border: "1px solid rgba(0,0,0,0.06)",
-                      boxShadow: "0 2px 10px rgba(50, 45, 35, 0.06)",
-                      transition: "all 0.2s ease",
-                      "&:hover": { transform: "translateY(-1px)", boxShadow: "0 4px 14px rgba(50, 45, 35, 0.08)" },
-                    }}
-                  >
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Box sx={{ flex: 1 }}>
-                        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-                          <Typography variant="h6" fontWeight={700} sx={{ color: colorScheme.text }}>
-                            {food.name}
-                          </Typography>
-                          <Chip label={food.category} size="small" sx={{ bgcolor: "rgba(255,255,255,0.4)", color: colorScheme.text, fontWeight: 700 }} />
-                        </Stack>
-                        <Stack direction="row" spacing={2} alignItems="center">
-                          <Typography variant="body2" sx={{ color: colorScheme.text, fontWeight: 600, opacity: 0.9 }}>
-                            {new Date(food.expiryDate).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "2-digit" })}
-                          </Typography>
-                          <Chip
-                            size="small"
-                            label={
-                              daysLeft < 0
-                                ? `Expired ${Math.abs(daysLeft)} days ago`
-                                : daysLeft === 0
-                                  ? "Expires today"
-                                  : daysLeft === 1
-                                    ? "Expires tomorrow"
-                                    : `${daysLeft} days left`
-                            }
-                            sx={{ bgcolor: "rgba(0,0,0,0.15)", color: colorScheme.text, fontWeight: 700 }}
-                          />
-                        </Stack>
-                      </Box>
-                      <IconButton size="small" onClick={() => handleDeleteFood(food.id)} sx={{ color: colorScheme.text }} aria-label="Delete food">
-                        <DeleteOutline />
-                      </IconButton>
-                    </Stack>
-                  </Box>
-                );
-              })}
-            </Stack>
-          </Box>
-
-          {onOpenChat && (
-            <Box sx={{ position: "fixed", bottom: 88, right: 24, zIndex: 10 }}>
-              <IconButton
-                aria-label="Open Chat"
-                sx={{
-                  width: 48,
-                  height: 48,
-                  bgcolor: PALETTE.warmBrown,
-                  color: "#fff",
-                  boxShadow: "0 4px 16px rgba(212, 163, 115, 0.4)",
-                  "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9, transform: "scale(1.05)" },
-                }}
-                onClick={onOpenChat}
-              >
-                <ChatIcon />
-              </IconButton>
+              {index < sorted.length - 1 && <Box sx={{ mx: 2, borderBottom: `0.5px solid ${PALETTE.separator}` }} />}
             </Box>
-          )}
-        </>
-      )}
+          );
+        })}
+      </Box>
     </Box>
   );
 }

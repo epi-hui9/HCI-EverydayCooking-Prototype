@@ -9,11 +9,10 @@ export const MAX_MINUTES_BY_ENERGY = {
 
 import { PALETTE } from "../theme";
 
-/** Page background color per energy level (used for full-page background in App) */
 export const ENERGY_BACKGROUNDS = {
-  low: PALETTE.sageLight,
+  low: "#F0F2EB",
   medium: PALETTE.cream,
-  high: PALETTE.warmBeige,
+  high: "#F5F0E8",
 };
 
 /** Options for the energy check-in page */

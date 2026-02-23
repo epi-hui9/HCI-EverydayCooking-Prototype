@@ -1,66 +1,69 @@
-/* Earthplate palette: ccd5ae, e9edc9, fefae0, faedcd, d4a373 */
 :root {
-  --app-bg: #fefae0;
-  --card-bg: #faedcd;
-  --card-border: rgba(0, 0, 0, 0.06);
-  --primary: #d4a373;
-  --primary-hover: #b8864f;
-  --sage: #ccd5ae;
-  --sage-light: #e9edc9;
+  --app-bg: #FAFAF5;
+  --surface: #FFFFFF;
+  --surface-secondary: #F5F3EE;
+  --surface-tinted: #FEFAE0;
+  --accent: #B8864F;
+  --accent-raw: #D4A373;
+  --eco: #CCD5AE;
+  --text-primary: #1C1C1E;
+  --text-secondary: #6E6E73;
+  --text-tertiary: #AEAEB2;
+  --separator: rgba(60, 60, 67, 0.12);
+  --glass: rgba(255, 255, 255, 0.78);
+  --glass-heavy: rgba(255, 255, 255, 0.92);
   --tap-min: 44px;
-  --radius-card: 16px;
+  --radius: 14px;
+  --radius-sm: 10px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
 }
+
+* { box-sizing: border-box; }
 
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-}
-
-/* Outer background: app frame is drawn by App.jsx; root can inherit or use fallback */
-body,
-#root {
-  background: var(--app-bg);
-  min-height: 100%;
-}
+html, body, #root { height: 100%; margin: 0; }
 
 body {
-  font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    system-ui, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #1a202c;
-  min-height: 100vh;
+  color: var(--text-primary);
+  background: #E8E4DC;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+#root { background: transparent; }
+
+input, textarea, select { font-size: 16px !important; }
+button, [role="button"], a { -webkit-tap-highlight-color: transparent; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-input,
-textarea,
-select {
-  font-size: 16px !important;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-button,
-[role="button"],
-a {
-  -webkit-tap-highlight-color: transparent;
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
 }
+
+.glass-heavy {
+  background: var(--glass-heavy);
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
+}
+
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }

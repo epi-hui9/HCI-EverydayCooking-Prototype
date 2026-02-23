@@ -1,48 +1,33 @@
-/**
- * Placeholder for History and Weekly Plan. Content fits inside app frame.
- */
-import React from "react";
-import { Box, Button, Stack, Typography, IconButton } from "@mui/material";
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
-import ChatIcon from "@mui/icons-material/Chat";
+import { Box, Stack, Typography, IconButton } from "@mui/material";
+import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
+import ConstructionRounded from "@mui/icons-material/ConstructionRounded";
 import { PALETTE } from "../theme";
 
-export default function PlaceholderPage({ title, onOpenChat, onBack }) {
+export default function PlaceholderPage({ title, onBack }) {
   return (
-    <Box sx={{ minHeight: "100%", display: "flex", flexDirection: "column", px: 2.5, pt: 3, pb: 2 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Button startIcon={<ChevronLeft />} onClick={onBack} sx={{ color: "text.secondary", minHeight: 44 }}>
-          Back
-        </Button>
-        <Typography variant="overline" sx={{ letterSpacing: 0.6, color: "text.secondary" }}>
-          {title}
-        </Typography>
-        <Box sx={{ width: 52 }} />
+    <Box sx={{ px: 2, pt: 1, pb: 3, display: "flex", flexDirection: "column", minHeight: "100%", animation: "fadeIn 0.25s ease" }}>
+      <Stack direction="row" alignItems="center" sx={{ mb: 0.5 }}>
+        <IconButton onClick={onBack} sx={{ color: PALETTE.accent, ml: -1 }}>
+          <ChevronLeftRounded />
+        </IconButton>
+        <Typography sx={{ fontSize: "1.0625rem", fontWeight: 600, color: PALETTE.accent }}>Back</Typography>
       </Stack>
-      <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", py: 6 }}>
-        <Typography variant="body2" color="text.secondary">
-          Coming soon
+
+      <Typography sx={{ fontSize: "1.75rem", fontWeight: 700, letterSpacing: "-0.02em", mb: 4 }}>
+        {title}
+      </Typography>
+
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pb: 8 }}>
+        <Box sx={{ width: 56, height: 56, borderRadius: "16px", bgcolor: PALETTE.surfaceSecondary, display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
+          <ConstructionRounded sx={{ fontSize: 28, color: PALETTE.textTertiary }} />
+        </Box>
+        <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: PALETTE.textPrimary, mb: 0.5 }}>
+          Coming Soon
+        </Typography>
+        <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary, textAlign: "center", maxWidth: 200 }}>
+          We're working on this feature. Check back later!
         </Typography>
       </Box>
-
-      {onOpenChat && (
-        <Box sx={{ position: "fixed", bottom: 88, right: 24, zIndex: 10 }}>
-          <IconButton
-            aria-label="Open Chat"
-            sx={{
-              width: 48,
-              height: 48,
-              bgcolor: PALETTE.warmBrown,
-              color: "#fff",
-              boxShadow: "0 4px 16px rgba(212, 163, 115, 0.4)",
-              "&:hover": { bgcolor: PALETTE.warmBrown, opacity: 0.9, transform: "scale(1.05)" },
-            }}
-            onClick={onOpenChat}
-          >
-            <ChatIcon />
-          </IconButton>
-        </Box>
-      )}
     </Box>
   );
 }

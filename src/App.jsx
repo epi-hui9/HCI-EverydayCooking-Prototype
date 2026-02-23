@@ -1,7 +1,3 @@
-/**
- * Root layout: outer background, app frame (phone-like), content area, bottom tab bar.
- * Navigation state and flow (Recipe → Energy → Recipe Details, Chat from anywhere).
- */
 import { useState } from "react";
 import { Box } from "@mui/material";
 import {
@@ -17,11 +13,8 @@ import { BottomNav, BOTTOM_NAV_HEIGHT } from "./components/BottomNav";
 import { ENERGY_BACKGROUNDS } from "./constants/energy";
 import { PALETTE } from "./theme";
 
-/** Phone frame: strict 393×852 rectangle, small corner radius so it looks like a phone, not an oval. */
-const APP_FRAME_WIDTH = 393;
-const APP_FRAME_HEIGHT = 852;
-const APP_FRAME_BORDER_RADIUS = 4;
-const OUTER_BG = "linear-gradient(160deg, #e8e4dc 0%, #d4cfc4 100%)";
+const FRAME_W = 393;
+const FRAME_H = 852;
 
 function App() {
   const [page, setPage] = useState("Home");
@@ -85,57 +78,101 @@ function App() {
     WeeklyPlan: <PlaceholderPage title="Weekly Plan" onOpenChat={goToChat} onBack={() => setPage("Home")} />,
   };
 
-  const pageBg = page === "Energy" ? (ENERGY_BACKGROUNDS[selectedEnergy ?? "medium"] ?? PALETTE.cream) : PALETTE.cream;
+  const pageBg =
+    page === "Energy"
+      ? (ENERGY_BACKGROUNDS[selectedEnergy ?? "medium"] ?? PALETTE.background)
+      : PALETTE.background;
 
   return (
     <Box
       sx={{
         minHeight: "100dvh",
         width: "100%",
-        background: OUTER_BG,
+        background: "linear-gradient(160deg, #E2DFD9 0%, #D6D3CC 50%, #CBC7BF 100%)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         py: 2,
         px: 1,
-        transition: "background 0.4s ease",
       }}
     >
-      {/* App frame: no padding; content area has inset, nav bar is full-width to edges */}
+      {/* iPhone shell */}
       <Box
         sx={{
-          width: APP_FRAME_WIDTH,
-          height: APP_FRAME_HEIGHT,
+          width: FRAME_W,
+          height: FRAME_H,
           maxHeight: "calc(100dvh - 24px)",
-          borderRadius: APP_FRAME_BORDER_RADIUS,
+          borderRadius: "44px",
           overflow: "hidden",
-          boxShadow: "0 25px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04)",
+          boxShadow:
+            "0 0 0 1px rgba(0,0,0,0.08), 0 30px 80px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.10), inset 0 0 0 1.5px rgba(255,255,255,0.15)",
           bgcolor: pageBg,
-          transition: "background-color 0.4s ease",
+          transition: "background-color 0.5s cubic-bezier(.4,0,.2,1)",
           display: "flex",
           flexDirection: "column",
           flexShrink: 0,
+          position: "relative",
         }}
       >
-        {/* Scrollable content area: inset from edges so corners aren't clipped */}
+        {/* Status bar area */}
+        <Box
+          sx={{
+            height: 54,
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            pb: 0.5,
+            px: 4,
+            position: "relative",
+            zIndex: 10,
+          }}
+        >
+          <Box
+            sx={{
+              width: 126,
+              height: 34,
+              borderRadius: "20px",
+              bgcolor: "#000",
+              position: "absolute",
+              top: 10,
+            }}
+          />
+        </Box>
+
+        {/* Scrollable content */}
         <Box
           sx={{
             flex: 1,
             overflowY: "auto",
             overflowX: "hidden",
             minHeight: 0,
-            pt: 1.5,
-            px: 1.5,
             "&::-webkit-scrollbar": { display: "none" },
             scrollbarWidth: "none",
           }}
         >
-          <Box sx={{ pb: `${BOTTOM_NAV_HEIGHT}px` }}>
+          <Box sx={{ pb: `${BOTTOM_NAV_HEIGHT + 8}px`, minHeight: "100%" }}>
             {pages[page]}
           </Box>
         </Box>
 
+        {/* Bottom nav */}
         <BottomNav currentPage={page} onNavigate={handleBottomNavNavigate} />
+
+        {/* Home indicator */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 6,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 134,
+            height: 5,
+            borderRadius: 3,
+            bgcolor: "rgba(0,0,0,0.18)",
+            zIndex: 20,
+          }}
+        />
       </Box>
     </Box>
   );
