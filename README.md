@@ -26,6 +26,8 @@ This principle applies to code too: when in doubt, choose the simpler solution t
   - **From Home / Recipes tab:** Energy level first → Recipe Recommendation (3 AI-suggested recipes) → pick one or **Browse more recipes** → Recipe Details → **Recipe Preview** (ingredients + steps) → **Start Cooking with AI** → Chat.
   - **From Fridge:** Select ingredients → Energy → Recipe Details → Recipe Preview → Chat.
 - **Food waste indicators:** Recipes and ingredients show "Uses soon-expiring" / "Use soon" when they help reduce waste.
+- **History:** Cooking journey timeline — meals saved, CO₂ impact, "Saved from waste" count. Each completed meal logs recipe, date, and impact. Empty state with Start Cooking CTA.
+- **Weekly Plan:** Plan meals for the week (Mon–Sun). Tap a day to add/change recipe; modal stays inside phone frame on desktop. Shows "X expiring soon" from fridge.
 - **Chat:** OpenAI-powered assistant; suggested prompts when no recipe selected; recipe context when cooking; **Complete cooking** overlay with Done → Home.
 - **Navigation:** Four-tab bottom bar (Home, Fridge, Recipes, Chat). Back buttons return to previous screen; Chat Back returns to Recipe Preview when in cooking flow.
 
@@ -97,7 +99,9 @@ src/
     ├── RecipeDetailsPage.jsx # Recipe list/details + Start Cooking
     ├── RecipePreviewPage.jsx # Ingredients + steps preview before Chat
     ├── ChatbotInterface.jsx  # Chat UI + Complete cooking overlay
-    └── PlaceholderPage.jsx   # History, Weekly Plan (coming soon)
+    ├── HistoryPage.jsx       # Cooking journey, impact timeline
+    ├── WeeklyPlanPage.jsx    # Week view, plan meals per day
+    └── PlaceholderPage.jsx   # Placeholder for future features
 
 api/
 └── chat.js                   # Vercel serverless function (OpenAI proxy)
@@ -185,6 +189,7 @@ Logic lives in `GamificationContext`; the home page consumes it for the impact c
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v0.1.4 | 2026-03 | History page (cooking journey), Weekly Plan (plan meals per day), Recipe Details steps fix, flow deduplication (skip Recipe Details from Recommendation), modal inside phone frame on desktop |
 | v0.1.2 | 2026-03 | Recipes flow redesign (Energy first, Recipe Recommendation, Recipe Preview), Start Cooking hero tile, OpenAI chat fix for mobile, food waste indicators, Complete cooking overlay |
 | v0.1.1 | 2026-02 | LLM chat (OpenAI/gpt-4o-mini), fridge persistence, recipe suggestions, gamification completion flow |
 | — | — | iOS-style UI, brand palette (Tea Green + Light Bronze + Cornsilk), "Comfort First" design principle |
