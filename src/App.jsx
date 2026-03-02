@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Box } from "@mui/material";
 import {
   Homepage,
@@ -9,6 +9,8 @@ import {
   FridgeContent,
   ChatbotInterface,
   PlaceholderPage,
+  HistoryPage,
+  WeeklyPlanPage,
 } from "./pages";
 import { BottomNav, BOTTOM_NAV_HEIGHT } from "./components/BottomNav";
 import { ENERGY_BACKGROUNDS } from "./constants/energy";
@@ -79,6 +81,8 @@ function App() {
     if (tab === "Recipe") setPage("Recipe");
     else setPage(tab);
   };
+
+  const phoneFrameRef = useRef(null);
 
   const pages = {
     Home: <Homepage onNavigate={setPage} onOpenChat={goToChat} />,
@@ -158,8 +162,8 @@ function App() {
         bottomNavHeight={BOTTOM_NAV_HEIGHT}
       />
     ),
-    History: <PlaceholderPage title="History" onOpenChat={goToChat} onBack={() => setPage("Home")} />,
-    WeeklyPlan: <PlaceholderPage title="Weekly Plan" onOpenChat={goToChat} onBack={() => setPage("Home")} />,
+    History: <HistoryPage onBack={() => setPage("Home")} onNavigate={setPage} />,
+    WeeklyPlan: <WeeklyPlanPage onBack={() => setPage("Home")} onNavigate={setPage} modalContainerRef={phoneFrameRef} />,
   };
 
   const pageBg =
@@ -186,12 +190,15 @@ function App() {
       }}
     >
       <Box
+        ref={phoneFrameRef}
         sx={{
           width: { xs: "100vw", sm: FRAME_W },
           height: { xs: "100dvh", sm: FRAME_H },
           maxHeight: { xs: "100dvh", sm: "calc(100dvh - 24px)" },
           borderRadius: { xs: 0, sm: "44px" },
           overflow: "hidden",
+          position: "relative",
+          transform: "translateZ(0)",
           boxShadow: {
             xs: "none",
             sm:

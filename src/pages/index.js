@@ -10,3 +10,5 @@ export { default as RecipePreviewPage } from "./RecipePreviewPage";
 export { default as FridgeContent } from "./FridgeContent";
 export { default as ChatbotInterface } from "./ChatbotInterface";
 export { default as PlaceholderPage } from "./PlaceholderPage";
+export { default as HistoryPage } from "./HistoryPage";
+export { default as WeeklyPlanPage } from "./WeeklyPlanPage";

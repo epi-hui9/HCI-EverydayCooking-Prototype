@@ -37,6 +37,7 @@ export function GamificationProvider({ children }) {
     "ep.unlockedAchievements",
     ["first_save", "eco_10", "streak_3"]
   );
+  const [cookingHistory, setCookingHistory] = useLocalStorageState("ep.cookingHistory", []);
 
   const level = Math.floor(points / POINTS_PER_LEVEL) + 1;
   const pointsInCurrentLevel = points % POINTS_PER_LEVEL;
@@ -105,6 +106,25 @@ export function GamificationProvider({ children }) {
     }));
   }, [unlockedAchievements]);
 
+  const addToHistory = useCallback(
+    (entry) => {
+      const item = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        recipeName: entry.recipeName ?? "Meal",
+        co2Saved: entry.co2Saved ?? CO2_PER_MEAL_SAVED_KG,
+        pointsEarned: entry.pointsEarned ?? POINTS_PER_MEAL_SAVED,
+        savedFromWaste: entry.savedFromWaste ?? false,
+      };
+      setCookingHistory((prev) => [item, ...(Array.isArray(prev) ? prev : [])].slice(0, 100));
+    },
+    [setCookingHistory]
+  );
+
+  const getCookingHistory = useCallback(() => {
+    return Array.isArray(cookingHistory) ? cookingHistory : [];
+  }, [cookingHistory]);
+
   const value = {
     points,
     level,
@@ -115,7 +135,9 @@ export function GamificationProvider({ children }) {
     pointsToNextLevel,
     POINTS_PER_LEVEL,
     addSavedMeal,
+    addToHistory,
     getAchievements,
+    getCookingHistory,
   };
 
   return <GamificationContext.Provider value={value}>{children}</GamificationContext.Provider>;

@@ -22,7 +22,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
 
   const chatEndRef = useRef(null);
-  const { addSavedMeal, getAchievements } = useGamification();
+  const { addSavedMeal, addToHistory, getAchievements } = useGamification();
   const [foods, setFoods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);
 
   const scrollToBottom = useCallback(() => {
@@ -122,6 +122,12 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
     });
     setDeductionDetails(details);
     addSavedMeal?.(1);
+    addToHistory?.({
+      recipeName: recipe?.name ?? "Meal",
+      co2Saved: 0.5,
+      pointsEarned: 10,
+      savedFromWaste: details.some((d) => d.savedFromWaste),
+    });
     setIsCompleteOpen(true);
   };
 
