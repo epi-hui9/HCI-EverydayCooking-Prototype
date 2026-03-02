@@ -8,6 +8,8 @@ import { ALL_RECIPES } from "../data/recipes";
 import { toCanonicalIngredient, getEmoji, getDaysUntilExpiry, getExpiryStyle } from "../data/ingredients";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
 import { DEFAULT_FRIDGE } from "../data/ingredients";
+import { RECIPE_INSTRUCTIONS } from "../data/recipeInstructions";
+import { parseRecipeSteps } from "../utils/recipeInstructions";
 import { MAX_MINUTES_BY_ENERGY } from "../constants/energy";
 import { parseMinutes } from "../utils/recipe";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
@@ -152,6 +154,62 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
             ))}
           </Box>
         </Box>
+
+        {/* Steps */}
+        {(() => {
+          const rawInstructions = RECIPE_INSTRUCTIONS[initialRecipe.name];
+          const steps = parseRecipeSteps(rawInstructions);
+          return (
+            <Box sx={{ mb: 2 }}>
+              <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, color: PALETTE.textSecondary, mb: 1, letterSpacing: "0.02em" }}>
+                STEPS
+              </Typography>
+              <Box sx={{ bgcolor: PALETTE.surface, borderRadius: "14px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                {steps.length === 0 ? (
+                  <Box sx={{ px: 2, py: 2, textAlign: "center" }}>
+                    <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textTertiary }}>No steps available. Open Chat for AI help.</Typography>
+                  </Box>
+                ) : (
+                  steps.map(({ num, text }) => (
+                    <Box
+                      key={num}
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        px: 2,
+                        py: 1.5,
+                        borderBottom: `0.5px solid ${PALETTE.separator}`,
+                        "&:last-of-type": { borderBottom: "none" },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: "50%",
+                          bgcolor: PALETTE.accentLight,
+                          color: PALETTE.accent,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.8125rem",
+                          fontWeight: 700,
+                          flexShrink: 0,
+                          mr: 1.5,
+                        }}
+                      >
+                        {num}
+                      </Box>
+                      <Typography sx={{ fontSize: "0.9375rem", lineHeight: 1.5, color: PALETTE.textPrimary, pt: 0.25 }}>
+                        {text}
+                      </Typography>
+                    </Box>
+                  ))
+                )}
+              </Box>
+            </Box>
+          );
+        })()}
 
         <Box sx={{ flex: 1 }} />
 
