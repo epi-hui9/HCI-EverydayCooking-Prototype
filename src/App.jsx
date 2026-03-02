@@ -65,7 +65,8 @@ function App() {
     setSelectedIngredientNames([]);
     setRecipeFromRecipesTab(recipe);
     setFromBrowseMore(false);
-    setPage("Recipe Details");
+    setSelectedRecipeForInstructions(recipe);
+    setPage("Recipe Preview");
   };
 
   const handleBrowseMoreRecipes = () => {
@@ -117,7 +118,14 @@ function App() {
     "Recipe Preview": (
       <RecipePreviewPage
         recipe={selectedRecipeForInstructions}
-        onBack={() => setPage("Recipe Details")}
+        onBack={() => {
+          if (recipeFromRecipesTab) {
+            setRecipeFromRecipesTab(null);
+            setPage("RecipeRecommendation");
+          } else {
+            setPage("Recipe Details");
+          }
+        }}
         onStartCooking={goToChatFromPreview}
       />
     ),
