@@ -1,3 +1,5 @@
+const API_TIMEOUT_MS = 28000;
+
 export async function streamAnswer(prompt, recipeContext) {
   const finalPrompt = `
 You are a calm minimalist cooking assistant.
@@ -12,28 +14,43 @@ User question:
 ${prompt}
 `;
 
-  const base = import.meta.env.VITE_API_BASE || "http://localhost:3001";
+  // Production (Vercel): use same-origin /api/chat. Dev: use Express on localhost:3001.
+  const base =
+    import.meta.env.VITE_API_BASE ??
+    (import.meta.env.DEV ? "http://localhost:3001" : "");
+
+  const url = base ? `${base}/api/chat` : "/api/chat";
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   let response;
   try {
-    response = await fetch(`${base}/api/chat`, {
+    response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: finalPrompt }),
+      signal: controller.signal,
     });
   } catch (e) {
-    throw new Error(`Network error. Can't reach API. (${base})`);
+    if (e.name === "AbortError") {
+      throw new Error("Request timed out. Please try again.");
+    }
+    throw new Error(
+      "Unable to reach the server. Check your connection and try again."
+    );
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   let data;
   try {
     data = await response.json();
   } catch {
-    throw new Error(`API returned non-JSON (status ${response.status}).`);
+    throw new Error(`Server returned invalid response (${response.status}).`);
   }
 
   if (!response.ok) {
-    throw new Error(data?.error || `API error ${response.status}`);
+    throw new Error(data?.error || `Server error (${response.status}).`);
   }
   return data.text;
 }

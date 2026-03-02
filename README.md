@@ -20,11 +20,14 @@ This principle applies to code too: when in doubt, choose the simpler solution t
 
 ## Features
 
-- **Home:** Gamification dashboard (CO₂ saved, level, points, streak, progress to next level, achievements) and quick access to Fridge, Recipes, History, and Weekly Plan.
-- **Fridge (Your Food):** List items with expiry dates; add and delete items; sort by expiring soon.
-- **Recipes flow:** Select ingredients → set energy level → pick a recipe → open Chat for instructions.
-- **Chat:** Ask questions about ingredients and recipes; suggested prompts; optional recipe context when coming from Recipe Details.
-- **Navigation:** Four-tab bottom bar (Home, Fridge, Recipes, Chat), like a native mobile app. The active tab reflects the current (or logical) page; stack screens (Energy, Recipe Details) keep Recipes selected.
+- **Home:** Gamification dashboard (CO₂ saved, level, points, streak, progress to next level, achievements). **Start Cooking** hero tile (primary entry to recipe flow) plus quick access to Fridge, Recipes, History, and Weekly Plan.
+- **Fridge (Your Food):** List items with expiry dates; add and delete items; sort by expiring soon. **Next** → Energy → Recipe Details (filtered by fridge).
+- **Recipes flow (two entry points):**
+  - **From Home / Recipes tab:** Energy level first → Recipe Recommendation (3 AI-suggested recipes) → pick one or **Browse more recipes** → Recipe Details → **Recipe Preview** (ingredients + steps) → **Start Cooking with AI** → Chat.
+  - **From Fridge:** Select ingredients → Energy → Recipe Details → Recipe Preview → Chat.
+- **Food waste indicators:** Recipes and ingredients show "Uses soon-expiring" / "Use soon" when they help reduce waste.
+- **Chat:** OpenAI-powered assistant; suggested prompts when no recipe selected; recipe context when cooking; **Complete cooking** overlay with Done → Home.
+- **Navigation:** Four-tab bottom bar (Home, Fridge, Recipes, Chat). Back buttons return to previous screen; Chat Back returns to Recipe Preview when in cooking flow.
 
 ## Design
 
@@ -68,7 +71,8 @@ src/
 ├── index.css                  # Global styles and CSS variables
 ├── theme.js                   # MUI theme and PALETTE
 ├── components/
-│   └── BottomNav.jsx          # Four-tab bottom navigation (Home, Fridge, Recipes, Chat)
+│   ├── BottomNav.jsx         # Four-tab bottom navigation (Home, Fridge, Recipes, Chat)
+│   └── PageHeader.jsx        # Shared page header component
 ├── context/
 │   └── GamificationContext.jsx  # Food waste points, CO₂, level, streak, achievements
 ├── constants/
@@ -76,25 +80,30 @@ src/
 │   ├── energy.js             # MAX_MINUTES_BY_ENERGY, ENERGY_OPTIONS, ENERGY_BACKGROUNDS
 │   └── theme.js              # HOMEPAGE_BUTTON_COLORS
 ├── data/
-│   ├── ingredients.js        # INITIAL_INGREDIENTS
+│   ├── ingredients.js       # INITIAL_INGREDIENTS, getDaysUntilExpiry, isExpiringSoon
 │   ├── recipes.js            # ALL_RECIPES
 │   ├── recipeInstructions.js # RECIPE_INSTRUCTIONS (for chat)
 │   └── chatSuggestions.js    # SUGGESTED_QUESTIONS
 ├── utils/
 │   ├── recipe.js             # parseMinutes
+│   ├── recipeInstructions.js # parseRecipeSteps (step parsing)
 │   └── chatbotAnswers.js     # Chat → backend API (prompt + recipe context)
 └── pages/
     ├── index.js              # Barrel export
-    ├── Homepage.jsx          # Gamification + quick nav tiles
+    ├── Homepage.jsx          # Gamification + Start Cooking hero + quick nav tiles
     ├── FridgeContent.jsx     # Fridge list and add form
-    ├── RecipeSelectionPage.jsx   # Ingredient selection
-    ├── EnergyLevelPage.jsx   # Energy check-in
-    ├── RecipeDetailsPage.jsx # Recipe list and continue to chat
-    ├── ChatbotInterface.jsx  # Chat UI
+    ├── EnergyLevelPage.jsx   # Energy check-in (shared by both flows)
+    ├── RecipeRecommendationPage.jsx  # 3 recommended recipes + Browse more
+    ├── RecipeDetailsPage.jsx # Recipe list/details + Start Cooking
+    ├── RecipePreviewPage.jsx # Ingredients + steps preview before Chat
+    ├── ChatbotInterface.jsx  # Chat UI + Complete cooking overlay
     └── PlaceholderPage.jsx   # History, Weekly Plan (coming soon)
 
+api/
+└── chat.js                   # Vercel serverless function (OpenAI proxy)
+
 docs/
-└── GAMIFICATION.md            # Gamification design documentation
+└── GAMIFICATION.md           # Gamification design documentation
 ```
 
 ## Setup
@@ -105,37 +114,40 @@ npm install
 
 ### AI chat (backend + OpenAI)
 
-The chatbot calls a local Express backend (`server.js`) that proxies to **OpenAI** (gpt-4o-mini by default). Paid API — faster and higher quality than free-tier alternatives.
+The chatbot uses **OpenAI** (gpt-4o-mini by default) via:
+
+- **Local dev:** Express backend (`server.js`) on port 3001
+- **Vercel production:** Serverless function `api/chat.js` on the same domain
 
 1. Get an OpenAI API key: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 2. Create a `.env` file in the project root:
    ```
    OPENAI_API_KEY=sk-your_openai_key_here
    ```
-3. Start the backend: `npm run start` (runs on port 3001)
-4. In another terminal, start the frontend: `npm run dev`
-5. The frontend uses `VITE_API_BASE` (default `http://localhost:3001`) to reach the backend. For production, set `VITE_API_BASE` to your deployed backend URL.
+3. **Local dev:** Start backend `npm run start` (port 3001), then frontend `npm run dev`. The frontend uses `VITE_API_BASE` (default `http://localhost:3001`).
+4. **Vercel deploy:** Set `OPENAI_API_KEY` in Vercel project environment variables. The frontend automatically uses same-origin `/api/chat` in production — no `VITE_API_BASE` needed.
 
-Optional: set `OPENAI_MODEL=gpt-4o` or `gpt-3.5-turbo` in `.env` to change the model.
+Optional: set `OPENAI_MODEL=gpt-4o` or `gpt-3.5-turbo` in `.env` (or Vercel env) to change the model.
 
-If the backend is unreachable, the chat shows a network error.
+Error handling: timeout (28s), clearer messages for network/server errors.
 
 ## Scripts
 
-| Command           | Description              |
-|-------------------|--------------------------|
-| `npm run dev`     | Start development server |
-| `npm run build`   | Production build         |
-| `npm run preview` | Preview production build|
-| `npm run lint`    | Run ESLint               |
+| Command           | Description                    |
+|-------------------|--------------------------------|
+| `npm run dev`     | Start Vite dev server          |
+| `npm run build`   | Production build (output: dist)|
+| `npm run start`   | Start Express backend (port 3001) for local chat API |
+| `npm run preview` | Preview production build       |
+| `npm run lint`    | Run ESLint                     |
 
 ## Main user flow
 
-1. **Home** → Tap Fridge, Recipes, History, or Weekly Plan; or open Chat from the header.
-2. **Fridge** → Add/remove items; Back goes to Home.
-3. **Recipes** → Select ingredients → Next → **Energy** → **Recipe Details** → Next opens **Chat** with that recipe context. Back at each step goes to the previous screen.
-4. **Chat** → Back returns to the page you came from (or Home).
-5. Bottom bar is always visible; on Energy or Recipe Details, the **Recipes** tab stays selected.
+1. **Home** → **Start Cooking** (hero tile) or Fridge, Recipes, History, Weekly Plan; or open Chat from the header.
+2. **Recipes flow (from Home):** Energy → Recipe Recommendation (3 recipes) → pick one or Browse more → Recipe Details → Recipe Preview → Start Cooking with AI → Chat.
+3. **Fridge flow:** Add/remove items → Next → Energy → Recipe Details (filtered by fridge) → Recipe Preview → Chat.
+4. **Chat** → Back returns to Recipe Preview (when cooking) or previous page; **Complete cooking** → Done → Home.
+5. Bottom bar is always visible; Recipes tab stays selected through Energy, Recipe Recommendation, Recipe Details.
 
 ## Gamification (food waste impact)
 
@@ -155,17 +167,24 @@ Logic lives in `GamificationContext`; the home page consumes it for the impact c
 **Key files:**
 - `src/App.jsx` — routing, page state
 - `src/theme.js` — colors, typography (PALETTE)
-- `src/utils/chatbotAnswers.js` — chat → backend API
-- `server.js` — Express backend, OpenAI proxy
+- `src/utils/chatbotAnswers.js` — chat → backend API (same-origin in prod)
+- `server.js` — Express backend (local); `api/chat.js` — Vercel serverless
 - `src/context/GamificationContext.jsx` — points, CO₂, streak
 
 **Design:** Follow "Comfort First" (see above). Use PALETTE from `theme.js` for all colors. No new colors without updating README palette table.
 
 ---
 
+## Deployment (Vercel)
+
+- **Frontend + API:** Single Vercel project. `vercel.json` configures SPA rewrites and `api/chat.js` as a serverless function.
+- **Environment:** Set `OPENAI_API_KEY` in Vercel project settings.
+- **Build:** `npm run build` → `dist/`; API at `/api/chat` on the same domain.
+
 ## Changelog
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v0.1.2 | 2026-03 | Recipes flow redesign (Energy first, Recipe Recommendation, Recipe Preview), Start Cooking hero tile, OpenAI chat fix for mobile, food waste indicators, Complete cooking overlay |
 | v0.1.1 | 2026-02 | LLM chat (OpenAI/gpt-4o-mini), fridge persistence, recipe suggestions, gamification completion flow |
 | — | — | iOS-style UI, brand palette (Tea Green + Light Bronze + Cornsilk), "Comfort First" design principle |

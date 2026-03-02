@@ -156,29 +156,98 @@ export default function Homepage({ onNavigate, onOpenChat }) {
         </Stack>
       )}
 
-      {/* Quick access — fills remaining space */}
+      {/* Quick access — Start Cooking as hero tile, then 2×2 grid */}
       <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: PALETTE.textSecondary, mb: 1, px: 0.5, letterSpacing: "0.01em", flexShrink: 0 }}>
         Quick access
       </Typography>
       <Box sx={{ flex: 1, minHeight: 0, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.25, alignContent: "start" }}>
+        {/* Start Cooking — hero tile, full width, primary action */}
+        <Box
+          component="button"
+          type="button"
+          onClick={() => onNavigate?.("Recipe")}
+          sx={{
+            gridColumn: "1 / -1",
+            border: "none",
+            cursor: "pointer",
+            height: 72,
+            borderRadius: "16px",
+            background: `linear-gradient(135deg, ${PALETTE.sageLight} 0%, ${PALETTE.surface} 100%)`,
+            borderLeft: `4px solid ${PALETTE.ecoMedium}`,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.03)",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 1.5,
+            px: 2,
+            transition: "all 0.2s cubic-bezier(.4,0,.2,1)",
+            "&:hover": {
+              transform: "translateY(-1px)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+              background: `linear-gradient(135deg, ${PALETTE.sageLight} 0%, ${PALETTE.surface} 100%)`,
+            },
+            "&:active": { transform: "scale(0.99)" },
+          }}
+        >
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: "12px",
+              bgcolor: `${PALETTE.ecoMedium}22`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <LocalFireDepartmentRounded sx={{ fontSize: 20, color: PALETTE.ecoDeep }} />
+          </Box>
+          <Box sx={{ flex: 1, textAlign: "left", minWidth: 0 }}>
+            <Typography sx={{ fontSize: "0.9375rem", fontWeight: 700, color: PALETTE.textPrimary, letterSpacing: "-0.01em" }}>
+              Start Cooking
+            </Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, mt: 0.25 }}>
+              Energy level → recipes
+            </Typography>
+          </Box>
+        </Box>
+
         {TILES.map((item) => {
           const Icon = item.icon;
           return (
             <Box
               key={item.label}
-              component="button" type="button"
+              component="button"
+              type="button"
               onClick={() => onNavigate?.(item.nav)}
               sx={{
-                border: "none", cursor: "pointer", height: 80, borderRadius: "16px",
+                border: "none",
+                cursor: "pointer",
+                height: 80,
+                borderRadius: "16px",
                 bgcolor: PALETTE.surface,
                 boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)",
-                display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "space-between",
-                p: 2, transition: "all 0.2s cubic-bezier(.4,0,.2,1)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                p: 2,
+                transition: "all 0.2s cubic-bezier(.4,0,.2,1)",
                 "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" },
                 "&:active": { transform: "scale(0.97)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" },
               }}
             >
-              <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: `${item.color}14`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "8px",
+                  bgcolor: `${item.color}14`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <Icon sx={{ fontSize: 18, color: item.color }} />
               </Box>
               <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: PALETTE.textPrimary, textAlign: "left" }}>
