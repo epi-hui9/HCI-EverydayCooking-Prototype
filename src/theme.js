@@ -1,11 +1,5 @@
 import { createTheme } from "@mui/material/styles";
 
-/*
- * Earthplate palette — chosen from original 5-color swatch:
- *   CCD5AE  Tea Green      ← eco / nature accent
- *   D4A373  Light Bronze   ← primary action & brand warmth
- *   FEFAE0  Cornsilk       ← warm background base
- */
 export const PALETTE = {
   sage: "#CCD5AE",
   sageLight: "#E2E8D0",
@@ -37,6 +31,17 @@ export const PALETTE = {
   glassBorder: "rgba(255, 255, 255, 0.45)",
 };
 
+/** Unified full-width CTA (Next, Start Cooking, Continue, Add to Fridge) */
+export const PRIMARY_CTA_SX = {
+  height: 50,
+  borderRadius: "14px",
+  fontSize: "1.0625rem",
+  fontWeight: 600,
+  bgcolor: PALETTE.accent,
+  "&:hover": { bgcolor: PALETTE.accentDark },
+  "&.Mui-disabled": { bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textTertiary },
+};
+
 const SF_FONT =
   '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Helvetica Neue", Arial, sans-serif';
 
@@ -66,7 +71,7 @@ export const appTheme = createTheme({
   components: {
     MuiButton: {
       styleOverrides: {
-        root: { borderRadius: 12, textTransform: "none", fontWeight: 600, boxShadow: "none", "&:hover": { boxShadow: "none" } },
+        root: { borderRadius: 14, textTransform: "none", fontWeight: 600, boxShadow: "none", "&:hover": { boxShadow: "none" } },
         contained: { boxShadow: "none", "&:hover": { boxShadow: "none" } },
       },
     },

@@ -18,37 +18,34 @@ app.post("/api/chat", async (req, res) => {
     const { prompt } = req.body ?? {};
     if (!prompt) return res.status(400).json({ error: "Missing prompt" });
 
-    const token = process.env.HF_API_KEY || process.env.VITE_HF_API_KEY;
-    if (!token) return res.status(500).json({ error: "Missing HF API key (HF_API_KEY)" });
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: "Missing OpenAI API key (OPENAI_API_KEY in .env)" });
 
-    const hfResp = await fetch("https://router.huggingface.co/v1/chat/completions", {
+    const openaiResp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "mistralai/Mistral-7B-Instruct-v0.2",
+        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
-        stream: false,
-        max_tokens: 140,
-        temperature: 0.5,
+        max_tokens: 200,
+        temperature: 0.6,
       }),
     });
 
-    const data = await hfResp.json();
+    const data = await openaiResp.json();
 
-    if (!hfResp.ok) {
-      console.log("[HF ERROR]", data);
-      return res.status(hfResp.status).json({
-        error: data?.error || data?.message || "HF request failed",
-        raw: data,
-      });
+    if (!openaiResp.ok) {
+      console.log("[OpenAI ERROR]", data);
+      const errMsg = data?.error?.message || data?.message || "OpenAI request failed";
+      return res.status(openaiResp.status).json({ error: errMsg, raw: data });
     }
 
     const text = data?.choices?.[0]?.message?.content;
     if (!text) {
-      console.log("[HF UNEXPECTED RESPONSE]", data);
+      console.log("[OpenAI UNEXPECTED RESPONSE]", data);
       return res.status(500).json({ error: "Unexpected response shape", raw: data });
     }
 

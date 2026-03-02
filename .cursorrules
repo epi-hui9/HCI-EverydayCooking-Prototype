@@ -1,0 +1,29 @@
+# Earthplate — Cursor Rules
+
+## Design principle (always apply)
+**Comfort First.** Every interaction should feel comfortable, not impressive.
+- Short over thorough. 2 sentences > 10 paragraphs.
+- Obvious over clever. User must never wonder "where do I tap?"
+- Calm over exciting. No flashy animations, no dark patterns.
+
+## Tech stack
+- React 19, Vite 7, MUI 7 (customized for iOS)
+- Backend: Express (server.js), Hugging Face API
+- Colors: src/theme.js → PALETTE
+
+## Brand colors (use only these)
+- Primary action: #B8864F (Bronze)
+- Brand warmth: #D4A373 (Light Bronze)
+- Eco: #CCD5AE (Tea Green)
+- Surface: #FEFAE0 (Cornsilk), #FFFFFF (surface)
+
+## Key files
+- App.jsx: routing, page state
+- theme.js: PALETTE, typography
+- chatbotAnswers.js: chat → backend
+- GamificationContext: points, CO₂, streak
+
+## Conventions
+- Use PALETTE from theme.js for all colors
+- Chat responses: short, actionable, kitchen-post-it style
+- No new colors without updating README palette table

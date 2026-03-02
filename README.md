@@ -82,7 +82,7 @@ src/
 │   └── chatSuggestions.js    # SUGGESTED_QUESTIONS
 ├── utils/
 │   ├── recipe.js             # parseMinutes
-│   └── chatbotAnswers.js     # Gemini AI streaming chat (+ fallback stub)
+│   └── chatbotAnswers.js     # Chat → backend API (prompt + recipe context)
 └── pages/
     ├── index.js              # Barrel export
     ├── Homepage.jsx          # Gamification + quick nav tiles
@@ -103,18 +103,22 @@ docs/
 npm install
 ```
 
-### AI chat (Gemini — free tier)
+### AI chat (backend + OpenAI)
 
-The chatbot uses **Google Gemini 2.0 Flash** (free: 1,500 requests/day, 15 req/min).
+The chatbot calls a local Express backend (`server.js`) that proxies to **OpenAI** (gpt-4o-mini by default). Paid API — faster and higher quality than free-tier alternatives.
 
-1. Go to [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey) and create a free API key.
+1. Get an OpenAI API key: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 2. Create a `.env` file in the project root:
    ```
-   VITE_GEMINI_API_KEY=your_key_here
+   OPENAI_API_KEY=sk-your_openai_key_here
    ```
-3. Restart the dev server. The chat will stream real AI responses.
+3. Start the backend: `npm run start` (runs on port 3001)
+4. In another terminal, start the frontend: `npm run dev`
+5. The frontend uses `VITE_API_BASE` (default `http://localhost:3001`) to reach the backend. For production, set `VITE_API_BASE` to your deployed backend URL.
 
-If no key is set the chat still works — it shows a setup reminder instead of crashing.
+Optional: set `OPENAI_MODEL=gpt-4o` or `gpt-3.5-turbo` in `.env` to change the model.
+
+If the backend is unreachable, the chat shows a network error.
 
 ## Scripts
 
@@ -141,3 +145,27 @@ If no key is set the chat still works — it shows a setup reminder instead of c
 - **Achievements:** Badges (e.g. First Save, Eco Starter, streaks, levels); unlocked ones appear on the home card.
 
 Logic lives in `GamificationContext`; the home page consumes it for the impact card and achievement badges. See **docs/GAMIFICATION.md** for full design documentation.
+
+---
+
+## For new contributors
+
+**Quick start:** `npm install` → add `OPENAI_API_KEY` to `.env` → `npm run start` (terminal 1) → `npm run dev` (terminal 2) → open http://localhost:5173
+
+**Key files:**
+- `src/App.jsx` — routing, page state
+- `src/theme.js` — colors, typography (PALETTE)
+- `src/utils/chatbotAnswers.js` — chat → backend API
+- `server.js` — Express backend, OpenAI proxy
+- `src/context/GamificationContext.jsx` — points, CO₂, streak
+
+**Design:** Follow "Comfort First" (see above). Use PALETTE from `theme.js` for all colors. No new colors without updating README palette table.
+
+---
+
+## Changelog
+
+| Version | Date | Changes |
+|---------|------|---------|
+| v0.1.1 | 2026-02 | LLM chat (OpenAI/gpt-4o-mini), fridge persistence, recipe suggestions, gamification completion flow |
+| — | — | iOS-style UI, brand palette (Tea Green + Light Bronze + Cornsilk), "Comfort First" design principle |

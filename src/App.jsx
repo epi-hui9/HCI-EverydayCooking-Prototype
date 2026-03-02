@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Box } from "@mui/material";
 import {
   Homepage,
-  RecipeSelectionPage,
+  RecipeRecommendationPage,
   EnergyLevelPage,
   RecipeDetailsPage,
+  RecipePreviewPage,
   FridgeContent,
   ChatbotInterface,
   PlaceholderPage,
@@ -16,12 +17,16 @@ import { PALETTE } from "./theme";
 const FRAME_W = 393;
 const FRAME_H = 852;
 
+const FLEX_PAGES = ["Home", "Fridge", "Recipe", "RecipeRecommendation", "Chat"];
+
 function App() {
   const [page, setPage] = useState("Home");
   const [returnToOnChatBack, setReturnToOnChatBack] = useState("Home");
   const [selectedIngredientNames, setSelectedIngredientNames] = useState([]);
   const [selectedEnergy, setSelectedEnergy] = useState(null);
   const [selectedRecipeForInstructions, setSelectedRecipeForInstructions] = useState(null);
+  const [recipeFromRecipesTab, setRecipeFromRecipesTab] = useState(null);
+  const [fromBrowseMore, setFromBrowseMore] = useState(false);
 
   const goToChat = () => {
     setReturnToOnChatBack(page);
@@ -29,9 +34,13 @@ function App() {
     setPage("Chat");
   };
 
-  const goToChatWithRecipe = (recipe) => {
+  const goToRecipePreview = (recipe) => {
     setSelectedRecipeForInstructions(recipe ?? null);
-    setReturnToOnChatBack("Recipe Details");
+    setPage("Recipe Preview");
+  };
+
+  const goToChatFromPreview = () => {
+    setReturnToOnChatBack("Recipe Preview");
     setPage("Chat");
   };
 
@@ -41,8 +50,27 @@ function App() {
     setPage("Energy");
   };
 
-  const handleEnergyContinue = (energy) => {
+  const handleEnergyContinueFromFridge = (energy) => {
     setSelectedEnergy(energy ?? "medium");
+    setRecipeFromRecipesTab(null);
+    setPage("Recipe Details");
+  };
+
+  const handleEnergyContinueFromRecipesTab = (energy) => {
+    setSelectedEnergy(energy ?? "medium");
+    setPage("RecipeRecommendation");
+  };
+
+  const handleRecipeFromRecipesTab = (recipe) => {
+    setSelectedIngredientNames([]);
+    setRecipeFromRecipesTab(recipe);
+    setFromBrowseMore(false);
+    setPage("Recipe Details");
+  };
+
+  const handleBrowseMoreRecipes = () => {
+    setRecipeFromRecipesTab(null);
+    setFromBrowseMore(true);
     setPage("Recipe Details");
   };
 
@@ -53,35 +81,85 @@ function App() {
 
   const pages = {
     Home: <Homepage onNavigate={setPage} onOpenChat={goToChat} />,
-    Fridge: <FridgeContent onOpenChat={goToChat} onBack={() => setPage("Home")} />,
-    Recipe: <RecipeSelectionPage onOpenChat={goToChat} onNext={handleIngredientsNext} onBack={() => setPage("Home")} />,
+    Fridge: (
+      <FridgeContent
+        onOpenChat={goToChat}
+        onBack={() => setPage("Home")}
+        onNext={handleIngredientsNext}
+      />
+    ),
+    Recipe: (
+      <EnergyLevelPage
+        onOpenChat={goToChat}
+        onBack={() => setPage("Home")}
+        onContinue={handleEnergyContinueFromRecipesTab}
+        selectedEnergy={selectedEnergy ?? "medium"}
+        onEnergyChange={setSelectedEnergy}
+      />
+    ),
+    RecipeRecommendation: (
+      <RecipeRecommendationPage
+        selectedEnergy={selectedEnergy ?? "medium"}
+        onSelectRecipe={handleRecipeFromRecipesTab}
+        onBack={() => setPage("Recipe")}
+        onBrowseMore={handleBrowseMoreRecipes}
+      />
+    ),
     Energy: (
       <EnergyLevelPage
         onOpenChat={goToChat}
-        onBack={() => setPage("Recipe")}
-        onContinue={handleEnergyContinue}
+        onBack={() => setPage("Fridge")}
+        onContinue={handleEnergyContinueFromFridge}
         selectedEnergy={selectedEnergy ?? "medium"}
         onEnergyChange={setSelectedEnergy}
+      />
+    ),
+    "Recipe Preview": (
+      <RecipePreviewPage
+        recipe={selectedRecipeForInstructions}
+        onBack={() => setPage("Recipe Details")}
+        onStartCooking={goToChatFromPreview}
       />
     ),
     "Recipe Details": (
       <RecipeDetailsPage
         onOpenChat={goToChat}
-        onBack={() => setPage("Energy")}
+        onBack={() => {
+          if (recipeFromRecipesTab) {
+            setRecipeFromRecipesTab(null);
+            setPage("RecipeRecommendation");
+          } else if (fromBrowseMore) {
+            setFromBrowseMore(false);
+            setPage("RecipeRecommendation");
+          } else {
+            setPage("Energy");
+          }
+        }}
         selectedIngredientNames={selectedIngredientNames}
         selectedEnergy={selectedEnergy}
-        onNext={goToChatWithRecipe}
+        initialRecipe={recipeFromRecipesTab}
+        onNext={goToRecipePreview}
       />
     ),
-    Chat: <ChatbotInterface onBack={() => setPage(returnToOnChatBack)} instructionRecipe={selectedRecipeForInstructions} />,
+    Chat: (
+      <ChatbotInterface
+        onBack={() => setPage(returnToOnChatBack)}
+        onGoHome={() => setPage("Home")}
+        instructionRecipe={selectedRecipeForInstructions}
+        returnToOnChatBack={returnToOnChatBack}
+        bottomNavHeight={BOTTOM_NAV_HEIGHT}
+      />
+    ),
     History: <PlaceholderPage title="History" onOpenChat={goToChat} onBack={() => setPage("Home")} />,
     WeeklyPlan: <PlaceholderPage title="Weekly Plan" onOpenChat={goToChat} onBack={() => setPage("Home")} />,
   };
 
   const pageBg =
-    page === "Energy"
+    ["Energy", "Recipe"].includes(page)
       ? (ENERGY_BACKGROUNDS[selectedEnergy ?? "medium"] ?? PALETTE.background)
       : PALETTE.background;
+
+  const isFlex = FLEX_PAGES.includes(page);
 
   return (
     <Box
@@ -89,8 +167,8 @@ function App() {
         minHeight: "100dvh",
         width: "100%",
         background: {
-          xs: pageBg, // 手机端：不要外层背景渐变，直接用 app 背景
-          sm: "linear-gradient(160deg, #E2DFD9 0%, #D6D3CC 50%, #CBC7BF 100%)", // 桌面端：保留展示背景
+          xs: pageBg,
+          sm: "linear-gradient(160deg, #E2DFD9 0%, #D6D3CC 50%, #CBC7BF 100%)",
         },
         display: "flex",
         justifyContent: "center",
@@ -99,7 +177,6 @@ function App() {
         px: { xs: 0, sm: 1 },
       }}
     >
-      {/* iPhone shell (desktop only) / Fullscreen app (mobile) */}
       <Box
         sx={{
           width: { xs: "100vw", sm: FRAME_W },
@@ -120,7 +197,7 @@ function App() {
           position: "relative",
         }}
       >
-        {/* Status bar area (hide on mobile) */}
+        {/* Dynamic Island */}
         <Box
           sx={{
             display: { xs: "none", sm: "flex" },
@@ -146,40 +223,30 @@ function App() {
           />
         </Box>
 
-        {/* Scrollable content */}
+        {/* Content area */}
         <Box
           sx={{
             flex: 1,
-            overflowY: "auto",
+            overflowY: isFlex ? "hidden" : "auto",
             overflowX: "hidden",
             minHeight: 0,
             "&::-webkit-scrollbar": { display: "none" },
             scrollbarWidth: "none",
           }}
         >
-          <Box sx={{ pb: `${BOTTOM_NAV_HEIGHT + 8}px`, minHeight: "100%" }}>
+          <Box
+            sx={{
+              minHeight: "100%",
+              ...(isFlex
+                ? { height: "100%", overflow: "hidden", display: "flex", flexDirection: "column" }
+                : { display: "block", pb: `${BOTTOM_NAV_HEIGHT + 8}px` }),
+            }}
+          >
             {pages[page]}
           </Box>
         </Box>
 
-        {/* Bottom nav */}
         <BottomNav currentPage={page} onNavigate={handleBottomNavNavigate} />
-
-        {/* Home indicator (hide on mobile) */}
-        <Box
-          sx={{
-            display: { xs: "none", sm: "block" },
-            position: "absolute",
-            bottom: 6,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: 134,
-            height: 5,
-            borderRadius: 3,
-            bgcolor: "rgba(0,0,0,0.18)",
-            zIndex: 20,
-          }}
-        />
       </Box>
     </Box>
   );

@@ -1,7 +1,7 @@
 import { Box, Button, Stack, Typography, IconButton } from "@mui/material";
 import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import { ENERGY_OPTIONS } from "../constants/energy";
-import { PALETTE } from "../theme";
+import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 
 const ENERGY_ICONS = { low: "🍃", medium: "🍳", high: "🔥" };
 
@@ -17,11 +17,11 @@ export default function EnergyLevelPage({ onBack, onContinue, selectedEnergy = "
 
       <Box sx={{ textAlign: "center", pt: 4, pb: 4 }}>
         <Typography sx={{ fontSize: "2.5rem", lineHeight: 1, mb: 1.5 }}>🥘</Typography>
-        <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em", mb: 0.5 }}>
-          How's your energy?
+        <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, letterSpacing: "-0.02em", mb: 0.5, color: PALETTE.textPrimary }}>
+          How&apos;s your energy?
         </Typography>
-        <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textSecondary }}>
-          We'll match recipes to your pace
+        <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary }}>
+          We&apos;ll match recipes to your pace
         </Typography>
       </Box>
 
@@ -30,12 +30,11 @@ export default function EnergyLevelPage({ onBack, onContinue, selectedEnergy = "
           const isActive = option.id === selectedEnergy;
           return (
             <Box
-              key={option.id}
-              component="button" type="button"
+              key={option.id} component="button" type="button"
               onClick={() => onEnergyChange?.(option.id)}
               sx={{
                 border: "none", cursor: "pointer", display: "flex", alignItems: "center",
-                borderRadius: "16px",
+                borderRadius: "14px",
                 bgcolor: isActive ? PALETTE.surface : "transparent",
                 boxShadow: isActive ? "0 2px 12px rgba(0,0,0,0.06)" : "none",
                 outline: isActive ? `2px solid ${PALETTE.accent}` : `1.5px solid ${PALETTE.separator}`,
@@ -45,49 +44,23 @@ export default function EnergyLevelPage({ onBack, onContinue, selectedEnergy = "
                 "&:active": { transform: "scale(0.98)" },
               }}
             >
-              <Box
-                sx={{
-                  width: 44, height: 44, borderRadius: "12px",
-                  bgcolor: isActive ? PALETTE.accentLight : PALETTE.surfaceSecondary,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "1.25rem", flexShrink: 0, mr: 1.5,
-                  transition: "all 0.25s",
-                }}
-              >
+              <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: isActive ? PALETTE.accentLight : PALETTE.surfaceSecondary, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", flexShrink: 0, mr: 1.5, transition: "all 0.25s" }}>
                 {ENERGY_ICONS[option.id]}
               </Box>
               <Box sx={{ flex: 1, textAlign: "left" }}>
-                <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: isActive ? PALETTE.accent : PALETTE.textPrimary }}>
-                  {option.label}
-                </Typography>
-                <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary }}>
-                  {option.description}
-                </Typography>
+                <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: isActive ? PALETTE.accent : PALETTE.textPrimary }}>{option.label}</Typography>
+                <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary }}>{option.description}</Typography>
               </Box>
-              <Box
-                sx={{
-                  width: 22, height: 22, borderRadius: "50%",
-                  border: isActive ? `6px solid ${PALETTE.accent}` : `2px solid ${PALETTE.textTertiary}`,
-                  transition: "all 0.2s",
-                }}
-              />
+              <Box sx={{ width: 22, height: 22, borderRadius: "50%", border: isActive ? `6px solid ${PALETTE.accent}` : `2px solid ${PALETTE.textTertiary}`, transition: "all 0.2s" }} />
             </Box>
           );
         })}
-
         <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textTertiary, textAlign: "center", pt: 1 }}>
           No right answer — just for right now.
         </Typography>
       </Stack>
 
-      <Button
-        fullWidth variant="contained" size="large"
-        onClick={() => onContinue?.(selectedEnergy)}
-        sx={{
-          height: 50, borderRadius: "14px", fontSize: "1.0625rem", fontWeight: 600,
-          bgcolor: PALETTE.accent, "&:hover": { bgcolor: PALETTE.accentDark },
-        }}
-      >
+      <Button fullWidth variant="contained" size="large" onClick={() => onContinue?.(selectedEnergy)} sx={PRIMARY_CTA_SX}>
         Continue
       </Button>
     </Box>
