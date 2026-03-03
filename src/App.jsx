@@ -215,7 +215,6 @@ function App() {
           display: "flex",
           flexDirection: "column",
           flexShrink: 0,
-          position: "relative",
         }}
       >
         {/* Dynamic Island */}

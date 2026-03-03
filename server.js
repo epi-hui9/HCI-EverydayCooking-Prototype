@@ -19,7 +19,7 @@ app.post("/api/chat", async (req, res) => {
     if (!prompt) return res.status(400).json({ error: "Missing prompt" });
 
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: "Missing OpenAI API key (OPENAI_API_KEY in .env)" });
+    if (!apiKey) return res.status(500).json({ error: "Missing OpenAI API key. Add OPENAI_API_KEY to .env for local dev." });
 
     const openaiResp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",

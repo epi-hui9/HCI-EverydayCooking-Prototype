@@ -129,7 +129,10 @@ The chatbot uses **OpenAI** (gpt-4o-mini by default) via:
    OPENAI_API_KEY=sk-your_openai_key_here
    ```
 3. **Local dev:** Start backend `npm run start` (port 3001), then frontend `npm run dev`. The frontend uses `VITE_API_BASE` (default `http://localhost:3001`).
-4. **Vercel deploy:** Set `OPENAI_API_KEY` in Vercel project environment variables. The frontend automatically uses same-origin `/api/chat` in production — no `VITE_API_BASE` needed.
+4. **Vercel deploy:** Set `OPENAI_API_KEY` in Vercel project environment variables:
+   - Vercel Dashboard → Your Project → **Settings** → **Environment Variables**
+   - Add `OPENAI_API_KEY` with your key, enable **Production**, **Preview**, **Development**
+   - Redeploy after adding. Without it, Chat uses a demo fallback (pre-written responses) so the app still works on mobile.
 
 Optional: set `OPENAI_MODEL=gpt-4o` or `gpt-3.5-turbo` in `.env` (or Vercel env) to change the model.
 

@@ -4,7 +4,11 @@ export default async function handler(req, res) {
     if (!prompt) return res.status(400).json({ error: "Missing prompt" });
 
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: "Missing OPENAI_API_KEY" });
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "Chat requires OpenAI API key. Add OPENAI_API_KEY in Vercel Project Settings → Environment Variables, then redeploy.",
+      });
+    }
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
