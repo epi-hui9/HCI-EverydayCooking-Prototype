@@ -236,7 +236,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
       <Box sx={{ flexShrink: 0, pt: 0.75, pb: 0.5, mx: -2, px: 2, bgcolor: PALETTE.surface, borderTop: `0.5px solid ${PALETTE.separator}` }}>
         {instructionRecipe?.name && (
           <Button
-            fullWidth onClick={handleCompleteCooking} disabled={isStreaming}
+            fullWidth onClick={handleCompleteCooking}
             startIcon={<LocalFireDepartmentRounded />}
             sx={{
               mb: 0.75, borderRadius: "14px", height: 44,
