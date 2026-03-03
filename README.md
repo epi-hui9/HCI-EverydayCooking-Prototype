@@ -20,13 +20,13 @@ This principle applies to code too: when in doubt, choose the simpler solution t
 
 ## Features
 
-- **Home:** Gamification dashboard (CO₂ saved, level, points, streak, progress to next level, achievements). **Start Cooking** hero tile (primary entry to recipe flow) plus quick access to Fridge, Recipes, History, and Weekly Plan.
-- **Fridge (Your Food):** List items with expiry dates; add and delete items; sort by expiring soon. **Next** → Energy → Recipe Details (filtered by fridge).
+- **Home:** Gamification dashboard (CO₂ saved, level, points, streak, progress to next level, achievements). **Start Cooking** hero tile (primary entry → Fridge) plus quick access to History and Weekly Plan. Money saved from waste shown subtly below the impact card.
+- **Fridge (Your Food):** List items with expiry dates; add and delete items; sort by expiring soon. **Add Food** with autocomplete and auto-fill (category, expiry from ingredient name). **Next** → Energy → Recipe Details (filtered by fridge).
 - **Recipes flow (two entry points):**
-  - **From Home / Recipes tab:** Energy level first → Recipe Recommendation (3 AI-suggested recipes) → pick one or **Browse more recipes** → Recipe Details → **Recipe Preview** (ingredients + steps) → **Start Cooking with AI** → Chat.
-  - **From Fridge:** Select ingredients → Energy → Recipe Details → Recipe Preview → Chat.
+  - **From bottom nav Recipes tab:** Energy level first → Recipe Recommendation (3 AI-suggested recipes) → tap recipe → **Recipe Preview** (ingredients + steps) → **Start Cooking with AI** → Chat.
+  - **From Start Cooking / Fridge:** Select ingredients → Energy → Recipe Details (tap recipe) → Recipe Preview → Chat.
 - **Food waste indicators:** Recipes and ingredients show "Uses soon-expiring" / "Use soon" when they help reduce waste.
-- **History:** Cooking journey timeline — meals saved, CO₂ impact, "Saved from waste" count. Each completed meal logs recipe, date, and impact. Empty state with Start Cooking CTA.
+- **History:** Cooking journey timeline — meals saved, CO₂ impact, $ saved. Each completed meal logs recipe, date, and impact. Empty state with Start Cooking CTA.
 - **Weekly Plan:** Plan meals for the week (Mon–Sun). Tap a day to add/change recipe; modal stays inside phone frame on desktop. Shows "X expiring soon" from fridge.
 - **Chat:** OpenAI-powered assistant; suggested prompts when no recipe selected; recipe context when cooking; **Complete cooking** overlay with Done → Home.
 - **Navigation:** Four-tab bottom bar (Home, Fridge, Recipes, Chat). Back buttons return to previous screen; Chat Back returns to Recipe Preview when in cooking flow.
@@ -140,6 +140,7 @@ Error handling: timeout (28s), clearer messages for network/server errors.
 | Command           | Description                    |
 |-------------------|--------------------------------|
 | `npm run dev`     | Start Vite dev server          |
+| `npm run dev:all` | Start both backend + frontend (concurrently) |
 | `npm run build`   | Production build (output: dist)|
 | `npm run start`   | Start Express backend (port 3001) for local chat API |
 | `npm run preview` | Preview production build       |
@@ -147,8 +148,8 @@ Error handling: timeout (28s), clearer messages for network/server errors.
 
 ## Main user flow
 
-1. **Home** → **Start Cooking** (hero tile) or Fridge, Recipes, History, Weekly Plan; or open Chat from the header.
-2. **Recipes flow (from Home):** Energy → Recipe Recommendation (3 recipes) → pick one or Browse more → Recipe Details → Recipe Preview → Start Cooking with AI → Chat.
+1. **Home** → **Start Cooking** (hero tile) or History, Weekly Plan; or open Chat from the header. **Bottom nav** for Fridge, Recipes, Chat.
+2. **Recipes flow (from bottom nav):** Energy → Recipe Recommendation (3 recipes) → tap recipe → Recipe Preview → Start Cooking with AI → Chat.
 3. **Fridge flow:** Add/remove items → Next → Energy → Recipe Details (filtered by fridge) → Recipe Preview → Chat.
 4. **Chat** → Back returns to Recipe Preview (when cooking) or previous page; **Complete cooking** → Done → Home.
 5. Bottom bar is always visible; Recipes tab stays selected through Energy, Recipe Recommendation, Recipe Details.
@@ -156,6 +157,7 @@ Error handling: timeout (28s), clearer messages for network/server errors.
 ## Gamification (food waste impact)
 
 - **CO₂ saved:** Shown in kg for the current week (using food before it expires reduces waste-related emissions).
+- **Money saved:** Estimated $ saved when using ingredients within 3 days of expiry; shown subtly below impact card and in History.
 - **Level & points:** Points from “saved meals”; level increases every 100 points.
 - **Streak:** Consecutive days with activity.
 - **Achievements:** Badges (e.g. First Save, Eco Starter, streaks, levels); unlocked ones appear on the home card.
@@ -189,6 +191,7 @@ Logic lives in `GamificationContext`; the home page consumes it for the impact c
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v0.1.5 | 2026-03 | Ingredient-first flow (Start Cooking → Fridge), tap recipe → Recipe Preview directly, recipe steps in Chat, monetary savings metric, Add Food auto-fill, Chat reset after complete, UI cleanup (removed redundant tiles) |
 | v0.1.4 | 2026-03 | History page (cooking journey), Weekly Plan (plan meals per day), Recipe Details steps fix, flow deduplication (skip Recipe Details from Recommendation), modal inside phone frame on desktop |
 | v0.1.2 | 2026-03 | Recipes flow redesign (Energy first, Recipe Recommendation, Recipe Preview), Start Cooking hero tile, OpenAI chat fix for mobile, food waste indicators, Complete cooking overlay |
 | v0.1.1 | 2026-02 | LLM chat (OpenAI/gpt-4o-mini), fridge persistence, recipe suggestions, gamification completion flow |
