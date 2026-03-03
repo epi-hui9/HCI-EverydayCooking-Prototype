@@ -307,20 +307,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
             <Stack spacing={1.25} alignItems="center" sx={{ textAlign: "center" }}>
               <Box sx={{ width: 54, height: 54, borderRadius: "16px", bgcolor: PALETTE.sageLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem" }}>🏆</Box>
               <Typography sx={{ fontSize: "1.125rem", fontWeight: 800, color: PALETTE.textPrimary }}>Nice work 🌿</Typography>
-              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ flexWrap: "wrap", justifyContent: "center", gap: 0.5 }}>
-                <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary }}>+10 pts</Typography>
-                <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textTertiary }}>·</Typography>
-                <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary }}>+0.5 kg CO₂</Typography>
-                {(() => {
-                  const total = deductionDetails.reduce((s, d) => s + (d.moneySaved ?? 0), 0);
-                  return total > 0 && (
-                    <>
-                      <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textTertiary }}>·</Typography>
-                      <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: PALETTE.ecoDeep }}>${total.toFixed(2)} saved</Typography>
-                    </>
-                  );
-                })()}
-              </Stack>
+              <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textSecondary, lineHeight: 1.45 }}>+10 pts · +0.5 kg CO₂ saved</Typography>
 
               {deductionDetails.length > 0 && (
                 <Box sx={{ width: "100%", mt: 0.5 }}>
@@ -340,12 +327,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
                         </Stack>
                         {d.savedFromWaste && (
                           <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.ecoDeep, fontWeight: 600, mt: 0.5 }}>
-                            {d.daysLeft <= 0 ? "Was expired!" : `Expiring in ${d.daysLeft}d`} — saved from waste
-                            {d.moneySaved > 0 && (
-                              <Box component="span" sx={{ fontWeight: 700, color: PALETTE.ecoMedium, ml: 0.25 }}>
-                                · ${d.moneySaved.toFixed(2)}
-                              </Box>
-                            )}
+                            {d.daysLeft <= 0 ? "Was expired!" : `Expiring in ${d.daysLeft}d`} — saved from waste!
                           </Typography>
                         )}
                       </Box>
