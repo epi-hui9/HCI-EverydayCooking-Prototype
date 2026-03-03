@@ -308,6 +308,14 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
               <Box sx={{ width: 54, height: 54, borderRadius: "16px", bgcolor: PALETTE.sageLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem" }}>🏆</Box>
               <Typography sx={{ fontSize: "1.125rem", fontWeight: 800, color: PALETTE.textPrimary }}>Nice work 🌿</Typography>
               <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textSecondary, lineHeight: 1.45 }}>+10 pts · +0.5 kg CO₂ saved</Typography>
+              {(() => {
+                const total = deductionDetails.reduce((s, d) => s + (d.moneySaved ?? 0), 0);
+                return total > 0 && (
+                  <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textTertiary, mt: 0.25, fontStyle: "italic" }}>
+                    That&apos;s about ${total.toFixed(2)} kept in your pocket
+                  </Typography>
+                );
+              })()}
 
               {deductionDetails.length > 0 && (
                 <Box sx={{ width: "100%", mt: 0.5 }}>

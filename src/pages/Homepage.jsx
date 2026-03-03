@@ -16,7 +16,7 @@ const TILES = [
 
 export default function Homepage({ onNavigate, onOpenChat }) {
   const {
-    co2SavedKg, level, points, streakDays,
+    co2SavedKg, moneySavedTotal, level, points, streakDays,
     pointsInCurrentLevel, pointsToNextLevel, POINTS_PER_LEVEL,
     getAchievements,
   } = useGamification();
@@ -127,6 +127,23 @@ export default function Homepage({ onNavigate, onOpenChat }) {
           />
         </Box>
       </Box>
+
+      {/* Money saved — subtle bridge below the card, doesn't compete */}
+      <Typography
+        sx={{
+          fontSize: "0.75rem",
+          fontWeight: 500,
+          color: PALETTE.textSecondary,
+          textAlign: "center",
+          mb: 1.5,
+          opacity: 0.9,
+          letterSpacing: "0.02em",
+        }}
+      >
+        {typeof moneySavedTotal === "number" && moneySavedTotal > 0
+          ? `That's about $${moneySavedTotal.toFixed(1)} saved from waste`
+          : "Use expiring ingredients to save money"}
+      </Typography>
 
       {/* Achievements */}
       {achievements.length > 0 && (

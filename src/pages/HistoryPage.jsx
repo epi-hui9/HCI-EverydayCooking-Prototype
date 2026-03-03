@@ -19,7 +19,7 @@ function formatHistoryDate(isoString) {
 }
 
 export default function HistoryPage({ onBack, onNavigate }) {
-  const { getCookingHistory, mealsSaved, co2SavedKg } = useGamification();
+  const { getCookingHistory, mealsSaved, co2SavedKg, moneySavedTotal } = useGamification();
   const history = getCookingHistory();
 
   return (
@@ -76,6 +76,12 @@ export default function HistoryPage({ onBack, onNavigate }) {
               {co2SavedKg}
             </Typography>
             <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>kg CO₂ saved</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 80 }}>
+            <Typography sx={{ fontSize: "1.5rem", fontWeight: 800, color: PALETTE.ecoMedium, letterSpacing: "-0.02em" }}>
+              ${typeof moneySavedTotal === "number" ? moneySavedTotal.toFixed(1) : moneySavedTotal ?? "0"}
+            </Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>saved</Typography>
           </Box>
         </Stack>
       </Box>
