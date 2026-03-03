@@ -21,6 +21,8 @@ import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 
 const FRIDGE_KEY = "ep.foods.v3";
 const MAX_MISSING = 2;
+/** When user selects N ingredients, recipe must use at least (N - 2) of them. Avoids "strict" matches that only use a tiny subset. */
+const MAX_UNUSED_SELECTED = 2;
 
 export default function RecipeDetailsPage({ onBack, selectedIngredientNames = [], selectedEnergy, dietaryExclusions = [], initialRecipe, onNext }) {
   const [foods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);
@@ -56,8 +58,10 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
     const inSelected = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
     const extraFromFridge = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)) && !selectedSet.has(toCanonicalIngredient(ing)));
     const allInFridge = missing.length === 0;
-    const useOnlySelected = selectedSet.size > 0 && inSelected.length === r.ingredients.length && allInFridge;
-    const useSelectedPlusUpTo2Extras = selectedSet.size > 0 && allInFridge && inSelected.length > 0 && extraFromFridge.length <= MAX_MISSING && extraFromFridge.length > 0;
+    const minSelectedToUse = Math.max(selectedSet.size - MAX_UNUSED_SELECTED, 1);
+    const meetsUtilization = inSelected.length >= minSelectedToUse;
+    const useOnlySelected = selectedSet.size > 0 && inSelected.length === r.ingredients.length && allInFridge && meetsUtilization;
+    const useSelectedPlusUpTo2Extras = selectedSet.size > 0 && allInFridge && inSelected.length > 0 && extraFromFridge.length <= MAX_MISSING && extraFromFridge.length > 0 && meetsUtilization;
     return {
       recipe: r,
       overlapCount: inFridge.length,
