@@ -25,22 +25,21 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
     (Array.isArray(foods) ? foods : []).filter((f) => (f.quantity ?? 1) > 0).map((f) => toCanonicalIngredient(f.name)).filter((n) => n.length > 0)
   );
 
-  let baseRecipes = [...ALL_RECIPES];
-  if (selectedEnergy && MAX_MINUTES_BY_ENERGY[selectedEnergy] != null) {
-    const maxMin = MAX_MINUTES_BY_ENERGY[selectedEnergy];
-    baseRecipes = baseRecipes.filter((r) => parseMinutes(r.prepTime) + parseMinutes(r.cookTime) <= maxMin);
-  }
+  const maxMin = selectedEnergy && MAX_MINUTES_BY_ENERGY[selectedEnergy] != null ? MAX_MINUTES_BY_ENERGY[selectedEnergy] : 999;
+  let baseRecipes = ALL_RECIPES.filter((r) => parseMinutes(r.prepTime) + parseMinutes(r.cookTime) <= maxMin);
 
   const withMeta = baseRecipes.map((r) => {
     const overlap = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
     const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
     const selectedOverlap = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
+    const totalMin = parseMinutes(r.prepTime) + parseMinutes(r.cookTime);
     return {
       recipe: r,
       overlapCount: overlap.length,
       selectedOverlapCount: selectedOverlap.length,
       missing,
       perfect: missing.length === 0,
+      totalMin,
     };
   });
 
@@ -60,6 +59,40 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
       showMode = "partial";
       shown = usesSelected.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount || b.overlapCount - a.overlapCount);
     }
+
+    if (shown.length < 4) {
+      const extra = ALL_RECIPES.filter((r) => {
+        const canon = (ing) => toCanonicalIngredient(ing);
+        const usesSel = r.ingredients.some((ing) => selectedSet.has(canon(ing)));
+        const alreadyShown = shown.some((x) => x.recipe.id === r.id);
+        return usesSel && !alreadyShown;
+      }).map((r) => {
+        const overlap = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
+        const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
+        const selectedOverlap = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
+        return {
+          recipe: r,
+          overlapCount: overlap.length,
+          selectedOverlapCount: selectedOverlap.length,
+          missing,
+          perfect: missing.length === 0,
+          totalMin: parseMinutes(r.prepTime) + parseMinutes(r.cookTime),
+        };
+      }).sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount || b.overlapCount - a.overlapCount);
+      shown = [...shown, ...extra.slice(0, 6 - shown.length)];
+    }
+  } else if (shown.length < 4) {
+    const extra = baseRecipes.length < ALL_RECIPES.length
+      ? ALL_RECIPES.filter((r) => !baseRecipes.some((b) => b.id === r.id))
+        .map((r) => {
+          const overlap = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
+          const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
+          return { recipe: r, overlapCount: overlap.length, selectedOverlapCount: 0, missing, perfect: missing.length === 0, totalMin: parseMinutes(r.prepTime) + parseMinutes(r.cookTime) };
+        })
+        .sort((a, b) => b.overlapCount - a.overlapCount)
+        .slice(0, 6 - shown.length)
+      : [];
+    shown = [...shown, ...extra];
   }
 
   const subtitleText =

@@ -2,8 +2,8 @@
  * Energy level → max total cook time (minutes). Inclusive: high includes medium and low, etc.
  */
 export const MAX_MINUTES_BY_ENERGY = {
-  low: 15,
-  medium: 40,
+  low: 30,
+  medium: 50,
   high: 999,
 };
 

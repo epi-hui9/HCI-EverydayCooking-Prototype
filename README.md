@@ -194,6 +194,7 @@ Logic lives in `GamificationContext`; the home page consumes it for the impact c
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v0.1.7 | 2026-03 | Relaxed energy limits (low 30min, medium 50min), fallback when &lt; 4 recipe matches (small fridge / strict energy) |
 | v0.1.6 | 2026-03 | Recipe filtering by selected ingredients (fix "always 2 options"), Chat production same-origin fix, /api/health diagnostic, build fixes (duplicate key, chunk warning) |
 | v0.1.5 | 2026-03 | Ingredient-first flow (Start Cooking → Fridge), tap recipe → Recipe Preview directly, recipe steps in Chat, monetary savings metric, Add Food auto-fill, Chat reset after complete, UI cleanup (removed redundant tiles) |
 | v0.1.4 | 2026-03 | History page (cooking journey), Weekly Plan (plan meals per day), Recipe Details steps fix, flow deduplication (skip Recipe Details from Recommendation), modal inside phone frame on desktop |
