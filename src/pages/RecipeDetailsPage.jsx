@@ -12,7 +12,7 @@ import { MAX_MINUTES_BY_ENERGY } from "../constants/energy";
 import { parseMinutes } from "../utils/recipe";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 
-const FRIDGE_KEY = "ep.foods.v2";
+const FRIDGE_KEY = "ep.foods.v3";
 
 export default function RecipeDetailsPage({ onBack, selectedIngredientNames = [], selectedEnergy, initialRecipe, onNext }) {
   const [foods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);

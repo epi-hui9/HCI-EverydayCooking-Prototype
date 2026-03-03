@@ -21,10 +21,10 @@ This principle applies to code too: when in doubt, choose the simpler solution t
 ## Features
 
 - **Home:** Gamification dashboard (CO₂ saved, level, points, streak, progress to next level, achievements). **Start Cooking** hero tile (primary entry → Fridge) plus quick access to History and Weekly Plan. Money saved from waste shown subtly below the impact card.
-- **Fridge (Your Food):** List items with expiry dates; add and delete items; sort by expiring soon. **Add Food** with autocomplete and auto-fill (category, expiry from ingredient name). **Next** → Energy → Recipe Details (filtered by fridge).
+- **Fridge (Your Food):** 15 default ingredients (expandable). Add/delete items; sort by expiring soon. **Add Food** with autocomplete and auto-fill (category, expiry from ingredient name). **Next** → Energy → Recipe Details (filtered by selected ingredients).
 - **Recipes flow (two entry points):**
-  - **From bottom nav Recipes tab:** Energy level first → Recipe Recommendation (3 AI-suggested recipes) → tap recipe → **Recipe Preview** (ingredients + steps) → **Start Cooking with AI** → Chat.
-  - **From Start Cooking / Fridge:** Select ingredients → Energy → Recipe Details (tap recipe) → Recipe Preview → Chat.
+  - **From bottom nav Recipes tab:** Energy level first → Recipe Recommendation (3 recipes) → tap recipe → **Recipe Preview** (ingredients + steps) → **Start Cooking with AI** → Chat.
+  - **From Start Cooking / Fridge:** Select ingredients → Energy → Recipe Details (28 recipes, filtered by selection) → Recipe Preview → Chat.
 - **Food waste indicators:** Recipes and ingredients show "Uses soon-expiring" / "Use soon" when they help reduce waste.
 - **History:** Cooking journey timeline — meals saved, CO₂ impact, $ saved. Each completed meal logs recipe, date, and impact. Empty state with Start Cooking CTA.
 - **Weekly Plan:** Plan meals for the week (Mon–Sun). Tap a day to add/change recipe; modal stays inside phone frame on desktop. Shows "X expiring soon" from fridge.
@@ -132,7 +132,7 @@ The chatbot uses **OpenAI** (gpt-4o-mini by default) via:
 4. **Vercel deploy:** Set `OPENAI_API_KEY` in Vercel project environment variables:
    - Vercel Dashboard → Your Project → **Settings** → **Environment Variables**
    - Add `OPENAI_API_KEY` with your key, enable **Production**, **Preview**, **Development**
-   - Redeploy after adding. Without it, Chat uses a demo fallback (pre-written responses) so the app still works on mobile.
+   - Redeploy after adding. Without it, Chat shows an error.
 
 Optional: set `OPENAI_MODEL=gpt-4o` or `gpt-3.5-turbo` in `.env` (or Vercel env) to change the model.
 
@@ -190,14 +190,6 @@ Logic lives in `GamificationContext`; the home page consumes it for the impact c
 - **Environment:** Set `OPENAI_API_KEY` in Vercel project settings.
 - **Build:** `npm run build` → `dist/`; API at `/api/chat` on the same domain.
 
-## Changelog
+## Release notes
 
-| Version | Date | Changes |
-|---------|------|---------|
-| v0.1.7 | 2026-03 | Relaxed energy limits (low 30min, medium 50min), fallback when &lt; 4 recipe matches (small fridge / strict energy) |
-| v0.1.6 | 2026-03 | Recipe filtering by selected ingredients (fix "always 2 options"), Chat production same-origin fix, /api/health diagnostic, build fixes (duplicate key, chunk warning) |
-| v0.1.5 | 2026-03 | Ingredient-first flow (Start Cooking → Fridge), tap recipe → Recipe Preview directly, recipe steps in Chat, monetary savings metric, Add Food auto-fill, Chat reset after complete, UI cleanup (removed redundant tiles) |
-| v0.1.4 | 2026-03 | History page (cooking journey), Weekly Plan (plan meals per day), Recipe Details steps fix, flow deduplication (skip Recipe Details from Recommendation), modal inside phone frame on desktop |
-| v0.1.2 | 2026-03 | Recipes flow redesign (Energy first, Recipe Recommendation, Recipe Preview), Start Cooking hero tile, OpenAI chat fix for mobile, food waste indicators, Complete cooking overlay |
-| v0.1.1 | 2026-02 | LLM chat (OpenAI/gpt-4o-mini), fridge persistence, recipe suggestions, gamification completion flow |
-| — | — | iOS-style UI, brand palette (Tea Green + Light Bronze + Cornsilk), "Comfort First" design principle |
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for current features and updates.

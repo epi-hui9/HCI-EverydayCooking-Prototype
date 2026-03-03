@@ -11,7 +11,7 @@ import { MAX_MINUTES_BY_ENERGY } from "../constants/energy";
 import { parseMinutes } from "../utils/recipe";
 import { PALETTE } from "../theme";
 
-const FRIDGE_KEY = "ep.foods.v2";
+const FRIDGE_KEY = "ep.foods.v3";
 const TOP_N = 3;
 
 export default function RecipeRecommendationPage({ onSelectRecipe, onBack, onBrowseMore, selectedEnergy = "medium" }) {

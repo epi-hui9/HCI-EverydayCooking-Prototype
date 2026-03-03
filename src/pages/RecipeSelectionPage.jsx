@@ -7,7 +7,7 @@ import RadioButtonUncheckedRounded from "@mui/icons-material/RadioButtonUnchecke
 import { useLocalStorageState } from "../utils/useLocalStorageState";
 import { DEFAULT_FRIDGE, getEmoji } from "../data/ingredients";
 
-const FRIDGE_KEY = "ep.foods.v2";
+const FRIDGE_KEY = "ep.foods.v3";
 import { PALETTE } from "../theme";
 
 const getDaysUntilExpiry = (expiryDate) => {

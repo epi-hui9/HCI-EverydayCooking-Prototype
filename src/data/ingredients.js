@@ -123,6 +123,13 @@ const CANONICAL_MAP = {
   broccoli: "broccoli",
   "ground beef": "ground beef",
   "chicken breast": "chicken breast",
+  rice: "rice",
+  pasta: "pasta",
+  butter: "butter",
+  carrots: "carrots",
+  carrot: "carrots",
+  mushrooms: "mushrooms",
+  mushroom: "mushrooms",
 };
 
 export function toCanonicalIngredient(name) {
@@ -178,17 +185,22 @@ const addDays = (d, n) => {
 
 /**
  * Default fridge items — matches recipe selection style.
- * Using v2 key so users with old localStorage get fresh content.
+ * v3: expanded for demo/testing; new key forces reset for all users.
  */
 export const DEFAULT_FRIDGE = [
-  { id: 1, name: "Spinach", quantity: 2, expiryDate: addDays(today, 2), category: "Produce" },
-  { id: 2, name: "Garlic", quantity: 3, expiryDate: addDays(today, 14), category: "Produce" },
-  { id: 3, name: "Ground Beef", quantity: 1, expiryDate: addDays(today, 1), category: "Meat" },
-  { id: 4, name: "Onions", quantity: 4, expiryDate: addDays(today, 7), category: "Produce" },
-  { id: 5, name: "Eggs", quantity: 12, expiryDate: addDays(today, 10), category: "Dairy" },
-  { id: 6, name: "Milk", quantity: 1, expiryDate: addDays(today, 3), category: "Dairy" },
-  { id: 7, name: "Chicken Breast", quantity: 2, expiryDate: addDays(today, 2), category: "Meat" },
-  { id: 8, name: "Tomato", quantity: 5, expiryDate: addDays(today, 5), category: "Produce" },
-  { id: 9, name: "Broccoli", quantity: 2, expiryDate: addDays(today, 4), category: "Produce" },
-  { id: 10, name: "Cheese", quantity: 1, expiryDate: addDays(today, 20), category: "Dairy" },
+  { id: 1, name: "Spinach", quantity: 3, expiryDate: addDays(today, 2), category: "Produce" },
+  { id: 2, name: "Garlic", quantity: 5, expiryDate: addDays(today, 14), category: "Produce" },
+  { id: 3, name: "Ground Beef", quantity: 2, expiryDate: addDays(today, 1), category: "Meat" },
+  { id: 4, name: "Onions", quantity: 5, expiryDate: addDays(today, 7), category: "Produce" },
+  { id: 5, name: "Eggs", quantity: 18, expiryDate: addDays(today, 10), category: "Dairy" },
+  { id: 6, name: "Milk", quantity: 2, expiryDate: addDays(today, 3), category: "Dairy" },
+  { id: 7, name: "Chicken Breast", quantity: 3, expiryDate: addDays(today, 2), category: "Meat" },
+  { id: 8, name: "Tomato", quantity: 6, expiryDate: addDays(today, 5), category: "Produce" },
+  { id: 9, name: "Broccoli", quantity: 3, expiryDate: addDays(today, 4), category: "Produce" },
+  { id: 10, name: "Cheese", quantity: 2, expiryDate: addDays(today, 20), category: "Dairy" },
+  { id: 11, name: "Rice", quantity: 1, expiryDate: addDays(today, 90), category: "Pantry" },
+  { id: 12, name: "Pasta", quantity: 1, expiryDate: addDays(today, 60), category: "Pantry" },
+  { id: 13, name: "Butter", quantity: 1, expiryDate: addDays(today, 14), category: "Dairy" },
+  { id: 14, name: "Carrots", quantity: 4, expiryDate: addDays(today, 10), category: "Produce" },
+  { id: 15, name: "Mushrooms", quantity: 2, expiryDate: addDays(today, 5), category: "Produce" },
 ];

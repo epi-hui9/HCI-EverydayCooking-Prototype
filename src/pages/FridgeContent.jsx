@@ -13,7 +13,7 @@ import { useLocalStorageState } from "../utils/useLocalStorageState";
 import PageHeader from "../components/PageHeader";
 import { DEFAULT_FRIDGE, getEmoji, getDaysUntilExpiry, INGREDIENT_KNOWLEDGE, getIngredientSuggestions, matchIngredient, expiryFromToday } from "../data/ingredients";
 
-const FRIDGE_KEY = "ep.foods.v2";
+const FRIDGE_KEY = "ep.foods.v3";
 
 const getFridgeExpiryStyle = (expiryDate) => {
   const days = getDaysUntilExpiry(expiryDate);

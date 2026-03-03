@@ -12,7 +12,7 @@ import { ALL_RECIPES } from "../data/recipes";
 import { DEFAULT_FRIDGE, getDaysUntilExpiry, getEmoji } from "../data/ingredients";
 
 const PLAN_KEY = "ep.weeklyPlan";
-const FRIDGE_KEY = "ep.foods.v2";
+const FRIDGE_KEY = "ep.foods.v3";
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function getWeekDates() {

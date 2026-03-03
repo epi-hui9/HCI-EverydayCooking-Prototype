@@ -9,7 +9,7 @@ import { DEFAULT_FRIDGE } from "../data/ingredients";
 import { parseRecipeSteps } from "../utils/recipeInstructions";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 
-const FRIDGE_KEY = "ep.foods.v2";
+const FRIDGE_KEY = "ep.foods.v3";
 
 export default function RecipePreviewPage({ recipe, onBack, onStartCooking }) {
   const [foods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);

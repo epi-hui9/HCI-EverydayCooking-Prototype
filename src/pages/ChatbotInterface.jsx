@@ -14,7 +14,7 @@ import { useGamification } from "../context/GamificationContext";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
 import { DEFAULT_FRIDGE, toCanonicalIngredient, getEmoji, getIngredientPriceSaved } from "../data/ingredients";
 
-const FRIDGE_KEY = "ep.foods.v2";
+const FRIDGE_KEY = "ep.foods.v3";
 
 export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, returnToOnChatBack, bottomNavHeight = 56 }) {
   const [messages, setMessages] = useState([]);
