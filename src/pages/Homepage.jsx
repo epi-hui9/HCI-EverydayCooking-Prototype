@@ -4,15 +4,20 @@ import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentR
 import EmojiEventsRounded from "@mui/icons-material/EmojiEventsRounded";
 import HistoryRounded from "@mui/icons-material/HistoryRounded";
 import CalendarTodayRounded from "@mui/icons-material/CalendarTodayRounded";
+import StarRounded from "@mui/icons-material/StarRounded";
 import { PALETTE } from "../theme";
 import { useGamification } from "../context/GamificationContext";
+import { useSavedRecipes } from "../utils/useSavedRecipes";
 
 const TILES = [
   { label: "History", icon: HistoryRounded, nav: "History", color: PALETTE.textTertiary },
   { label: "Weekly Plan", icon: CalendarTodayRounded, nav: "WeeklyPlan", color: PALETTE.sageDark },
+  { label: "Saved", icon: StarRounded, nav: "SavedRecipes", color: PALETTE.accent },
 ];
 
 export default function Homepage({ onNavigate, onOpenChat }) {
+  const { saved } = useSavedRecipes();
+  const savedCount = Array.isArray(saved) ? saved.length : 0;
   const {
     co2SavedKg, moneySavedTotal, level, points, streakDays,
     pointsInCurrentLevel, pointsToNextLevel, POINTS_PER_LEVEL,
@@ -227,6 +232,7 @@ export default function Homepage({ onNavigate, onOpenChat }) {
 
         {TILES.map((item) => {
           const Icon = item.icon;
+          const isSaved = item.nav === "SavedRecipes";
           return (
             <Box
               key={item.label}
@@ -264,7 +270,7 @@ export default function Homepage({ onNavigate, onOpenChat }) {
                 <Icon sx={{ fontSize: 18, color: item.color }} />
               </Box>
               <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: PALETTE.textPrimary, textAlign: "left" }}>
-                {item.label}
+                {item.label}{isSaved && savedCount > 0 ? ` (${savedCount})` : ""}
               </Typography>
             </Box>
           );

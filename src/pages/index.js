@@ -12,3 +12,4 @@ export { default as ChatbotInterface } from "./ChatbotInterface";
 export { default as PlaceholderPage } from "./PlaceholderPage";
 export { default as HistoryPage } from "./HistoryPage";
 export { default as WeeklyPlanPage } from "./WeeklyPlanPage";
+export { default as SavedRecipesPage } from "./SavedRecipesPage";

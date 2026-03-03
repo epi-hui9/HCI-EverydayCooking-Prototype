@@ -20,11 +20,11 @@ This principle applies to code too: when in doubt, choose the simpler solution t
 
 ## Features
 
-- **Home:** Gamification dashboard (CO₂ saved, level, points, streak, progress to next level, achievements). **Start Cooking** hero tile (primary entry → Fridge) plus quick access to History and Weekly Plan. Money saved from waste shown subtly below the impact card.
+- **Home:** Gamification dashboard (CO₂ saved, level, points, streak, progress to next level, achievements). **Start Cooking** hero tile (primary entry → Fridge) plus quick access to History, Weekly Plan, **Saved** (starred recipes). Money saved from waste shown subtly below the impact card.
 - **Fridge (Your Food):** 15 default ingredients (expandable). Add/delete items; sort by expiring soon. **Add Food** with autocomplete and auto-fill (category, expiry from ingredient name). **Next** → Energy → Recipe Details (filtered by selected ingredients).
 - **Recipes flow (two entry points):**
   - **From bottom nav Recipes tab:** Energy level first → Recipe Recommendation (3 recipes) → tap recipe → **Recipe Preview** (ingredients + steps) → **Start Cooking with AI** → Chat.
-  - **From Start Cooking / Fridge:** Select ingredients → Energy → Recipe Details (28 recipes, filtered by selection) → Recipe Preview → Chat.
+  - **From Start Cooking / Fridge:** Select ingredients → Energy → Recipe Details (stricter match: perfect or up to 2 missing; if none, **Generate 3 AI recipes**) → Recipe Preview → Chat. Star any recipe to save.
 - **Food waste indicators:** Recipes and ingredients show "Uses soon-expiring" / "Use soon" when they help reduce waste.
 - **History:** Cooking journey timeline — meals saved, CO₂ impact, $ saved. Each completed meal logs recipe, date, and impact. Empty state with Start Cooking CTA.
 - **Weekly Plan:** Plan meals for the week (Mon–Sun). Tap a day to add/change recipe; modal stays inside phone frame on desktop. Shows "X expiring soon" from fridge.
@@ -89,7 +89,9 @@ src/
 ├── utils/
 │   ├── recipe.js             # parseMinutes
 │   ├── recipeInstructions.js # parseRecipeSteps (step parsing)
-│   └── chatbotAnswers.js     # Chat → backend API (prompt + recipe context)
+│   ├── chatbotAnswers.js     # Chat → backend API (prompt + recipe context)
+│   ├── recipeGenerator.js    # AI recipe generation (fridge + selected)
+│   └── useSavedRecipes.js    # Star/save recipes (localStorage)
 └── pages/
     ├── index.js              # Barrel export
     ├── Homepage.jsx          # Gamification + Start Cooking hero + quick nav tiles
@@ -101,10 +103,12 @@ src/
     ├── ChatbotInterface.jsx  # Chat UI + Complete cooking overlay
     ├── HistoryPage.jsx       # Cooking journey, impact timeline
     ├── WeeklyPlanPage.jsx    # Week view, plan meals per day
+    ├── SavedRecipesPage.jsx  # Starred recipes list
     └── PlaceholderPage.jsx   # Placeholder for future features
 
 api/
-└── chat.js                   # Vercel serverless function (OpenAI proxy)
+├── chat.js                   # Vercel serverless (OpenAI chat)
+└── recipes.js                # Vercel serverless (AI recipe generation)
 
 docs/
 └── GAMIFICATION.md           # Gamification design documentation

@@ -1,7 +1,11 @@
-import { Box, Button, Stack, Typography, IconButton, Chip } from "@mui/material";
+import { useState, useCallback } from "react";
+import { Box, Button, Stack, Typography, IconButton, Chip, CircularProgress } from "@mui/material";
 import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
+import StarRounded from "@mui/icons-material/StarRounded";
+import StarBorderRounded from "@mui/icons-material/StarBorderRounded";
+import AutoAwesomeRounded from "@mui/icons-material/AutoAwesomeRounded";
 import { ALL_RECIPES } from "../data/recipes";
 import { toCanonicalIngredient, getEmoji, getDaysUntilExpiry, getExpiryStyle } from "../data/ingredients";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
@@ -10,12 +14,19 @@ import { RECIPE_INSTRUCTIONS } from "../data/recipeInstructions";
 import { parseRecipeSteps } from "../utils/recipeInstructions";
 import { MAX_MINUTES_BY_ENERGY } from "../constants/energy";
 import { parseMinutes } from "../utils/recipe";
+import { generateRecipes } from "../utils/recipeGenerator";
+import { useSavedRecipes } from "../utils/useSavedRecipes";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 
 const FRIDGE_KEY = "ep.foods.v3";
+const MAX_MISSING = 2;
 
 export default function RecipeDetailsPage({ onBack, selectedIngredientNames = [], selectedEnergy, initialRecipe, onNext }) {
   const [foods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);
+  const [aiRecipes, setAiRecipes] = useState([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
+  const { isSaved, toggleSave } = useSavedRecipes();
 
   const selectedSet = new Set(
     (selectedIngredientNames || []).filter(Boolean).map((n) => toCanonicalIngredient(n)).filter((n) => n.length > 0)
@@ -26,79 +37,65 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
   );
 
   const maxMin = selectedEnergy && MAX_MINUTES_BY_ENERGY[selectedEnergy] != null ? MAX_MINUTES_BY_ENERGY[selectedEnergy] : 999;
-  let baseRecipes = ALL_RECIPES.filter((r) => parseMinutes(r.prepTime) + parseMinutes(r.cookTime) <= maxMin);
+  const baseRecipes = ALL_RECIPES.filter((r) => parseMinutes(r.prepTime) + parseMinutes(r.cookTime) <= maxMin);
 
   const withMeta = baseRecipes.map((r) => {
     const overlap = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
     const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
     const selectedOverlap = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
-    const totalMin = parseMinutes(r.prepTime) + parseMinutes(r.cookTime);
     return {
       recipe: r,
       overlapCount: overlap.length,
       selectedOverlapCount: selectedOverlap.length,
       missing,
       perfect: missing.length === 0,
-      totalMin,
+      good: missing.length <= MAX_MISSING,
     };
   });
 
-  let shown = withMeta;
+  let shown = [];
   let showMode = "all";
   if (selectedSet.size > 0) {
     const usesSelected = withMeta.filter((x) => x.selectedOverlapCount > 0);
     const perfect = usesSelected.filter((x) => x.perfect);
-    const partial = usesSelected.filter((x) => !x.perfect && x.overlapCount > 0);
+    const good = usesSelected.filter((x) => x.good && !x.perfect);
     if (perfect.length > 0) {
       showMode = "perfect";
       shown = perfect.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount);
-    } else if (partial.length > 0) {
-      showMode = "partial";
-      shown = partial.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount || b.overlapCount - a.overlapCount);
-    } else {
-      showMode = "partial";
-      shown = usesSelected.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount || b.overlapCount - a.overlapCount);
+    } else if (good.length > 0) {
+      showMode = "good";
+      shown = good.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount || a.missing.length - b.missing.length);
     }
-
-    if (shown.length < 4) {
-      const extra = ALL_RECIPES.filter((r) => {
-        const canon = (ing) => toCanonicalIngredient(ing);
-        const usesSel = r.ingredients.some((ing) => selectedSet.has(canon(ing)));
-        const alreadyShown = shown.some((x) => x.recipe.id === r.id);
-        return usesSel && !alreadyShown;
-      }).map((r) => {
-        const overlap = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
-        const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
-        const selectedOverlap = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
-        return {
-          recipe: r,
-          overlapCount: overlap.length,
-          selectedOverlapCount: selectedOverlap.length,
-          missing,
-          perfect: missing.length === 0,
-          totalMin: parseMinutes(r.prepTime) + parseMinutes(r.cookTime),
-        };
-      }).sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount || b.overlapCount - a.overlapCount);
-      shown = [...shown, ...extra.slice(0, 6 - shown.length)];
-    }
-  } else if (shown.length < 4) {
-    const extra = baseRecipes.length < ALL_RECIPES.length
-      ? ALL_RECIPES.filter((r) => !baseRecipes.some((b) => b.id === r.id))
-        .map((r) => {
-          const overlap = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
-          const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
-          return { recipe: r, overlapCount: overlap.length, selectedOverlapCount: 0, missing, perfect: missing.length === 0, totalMin: parseMinutes(r.prepTime) + parseMinutes(r.cookTime) };
-        })
-        .sort((a, b) => b.overlapCount - a.overlapCount)
-        .slice(0, 6 - shown.length)
-      : [];
-    shown = [...shown, ...extra];
+  } else {
+    const perfect = withMeta.filter((x) => x.perfect);
+    const good = withMeta.filter((x) => x.good && !x.perfect);
+    showMode = "all";
+    shown = [...perfect, ...good].sort((a, b) => a.missing.length - b.missing.length);
   }
 
+  const fetchAiRecipes = useCallback(async () => {
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const fridgeList = (Array.isArray(foods) ? foods : []).filter((f) => (f.quantity ?? 1) > 0);
+      const selected = (selectedIngredientNames || []).filter(Boolean);
+      const list = await generateRecipes(fridgeList, selected, maxMin);
+      setAiRecipes(list);
+    } catch (e) {
+      setAiError(e.message || "Failed to generate recipes");
+    } finally {
+      setAiLoading(false);
+    }
+  }, [foods, selectedIngredientNames, maxMin]);
+
+  const displayRecipes = aiRecipes.length > 0 ? aiRecipes.map((r) => ({ recipe: r, missing: [], perfect: false })) : shown;
+  const showAiSection = shown.length === 0 && !aiLoading && aiRecipes.length === 0 && !aiError;
+
   const subtitleText =
-    selectedSet.size === 0 ? `${shown.length} recipes available`
-    : showMode === "perfect" ? `${shown.length} perfect matches`
-    : showMode === "partial" ? `${shown.length} suggestions`
+    aiRecipes.length > 0 ? "3 AI-generated recipes"
+    : selectedSet.size === 0 ? `${displayRecipes.length} recipes available`
+    : showMode === "perfect" ? `${displayRecipes.length} perfect matches`
+    : showMode === "good" ? `${displayRecipes.length} suggestions (up to 2 missing)`
     : "No matches found";
 
   /** Single-recipe view: from Recipes tab, user picked one of 3 → just show it + Start Cooking */
@@ -125,7 +122,15 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
           <Typography sx={{ fontSize: "1.0625rem", fontWeight: 600, color: PALETTE.accent }}>Back</Typography>
         </Stack>
 
-        <Box sx={{ textAlign: "center", mb: 1.5 }}>
+        <Box sx={{ textAlign: "center", mb: 1.5, position: "relative" }}>
+          <IconButton
+            size="small"
+            onClick={() => toggleSave(initialRecipe)}
+            sx={{ position: "absolute", top: -4, right: 0, color: isSaved(initialRecipe) ? PALETTE.accent : PALETTE.textTertiary }}
+            aria-label={isSaved(initialRecipe) ? "Unsave" : "Save recipe"}
+          >
+            {isSaved(initialRecipe) ? <StarRounded sx={{ fontSize: 24 }} /> : <StarBorderRounded sx={{ fontSize: 24 }} />}
+          </IconButton>
           <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, letterSpacing: "-0.02em", color: PALETTE.textPrimary }}>
             {initialRecipe.name}
           </Typography>
@@ -288,54 +293,91 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
 
       {/* Recipe list */}
       <Stack spacing={1.25} sx={{ flex: 1, pb: 2 }}>
-        {shown.length === 0 ? (
+        {aiLoading ? (
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", py: 8 }}>
+            <CircularProgress size={36} sx={{ color: PALETTE.accent, mb: 2 }} />
+            <Typography sx={{ fontSize: "0.9375rem", color: PALETTE.textSecondary }}>Generating recipes…</Typography>
+          </Box>
+        ) : showAiSection ? (
           <Box sx={{ textAlign: "center", py: 6, color: PALETTE.textSecondary }}>
             <Typography sx={{ fontSize: "2rem", mb: 1 }}>🍽️</Typography>
             <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: PALETTE.textPrimary }}>No matches found</Typography>
-            <Typography sx={{ fontSize: "0.875rem", mt: 0.75 }}>Try selecting different ingredients or adjusting your energy level.</Typography>
+            <Typography sx={{ fontSize: "0.875rem", mt: 0.75, mb: 2 }}>
+              {selectedSet.size > 0 ? "No recipes match your selection (perfect or up to 2 missing)." : "No recipes match your fridge."}
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AutoAwesomeRounded />}
+              onClick={fetchAiRecipes}
+              sx={{ ...PRIMARY_CTA_SX, borderRadius: "14px" }}
+            >
+              Generate 3 AI recipes
+            </Button>
+          </Box>
+        ) : aiError ? (
+          <Box sx={{ textAlign: "center", py: 6 }}>
+            <Typography sx={{ fontSize: "0.9375rem", color: PALETTE.textSecondary, mb: 2 }}>{aiError}</Typography>
+            <Button variant="outlined" onClick={fetchAiRecipes} sx={{ borderRadius: "14px" }}>Try again</Button>
+          </Box>
+        ) : displayRecipes.length === 0 ? (
+          <Box sx={{ textAlign: "center", py: 6, color: PALETTE.textSecondary }}>
+            <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: PALETTE.textPrimary }}>No recipes yet</Typography>
           </Box>
         ) : (
-          shown.map(({ recipe, missing, perfect }) => {
-            return (
-              <Box
-                key={recipe.id} component="button" type="button"
-                onClick={() => onNext?.(recipe)}
-                sx={{
-                  border: `1px solid ${PALETTE.separator}`,
-                  borderRadius: "14px", bgcolor: PALETTE.surface, textAlign: "left",
-                  px: 2, py: 1.5, cursor: "pointer", transition: "all 0.15s",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                  "&:hover": { borderColor: PALETTE.accentRaw, boxShadow: "0 4px 14px rgba(0,0,0,0.06)" },
-                }}
-              >
-                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1.5}>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: PALETTE.textPrimary, mb: 0.75 }}>
+          displayRecipes.map(({ recipe, missing, perfect }) => (
+            <Box
+              key={recipe.id} component="button" type="button"
+              onClick={() => onNext?.(recipe)}
+              sx={{
+                border: `1px solid ${PALETTE.separator}`,
+                borderRadius: "14px", bgcolor: PALETTE.surface, textAlign: "left",
+                px: 2, py: 1.5, cursor: "pointer", transition: "all 0.15s",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                "&:hover": { borderColor: PALETTE.accentRaw, boxShadow: "0 4px 14px rgba(0,0,0,0.06)" },
+              }}
+            >
+              <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1.5}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
+                    <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: PALETTE.textPrimary }}>
                       {recipe.name}
                     </Typography>
-                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: perfect ? 0.75 : 0.5, flexWrap: "wrap", gap: 0.5 }}>
-                      <Chip icon={<AccessTimeRounded sx={{ fontSize: 14 }} />} label={`${recipe.prepTime} + ${recipe.cookTime}`} size="small"
-                        sx={{ height: 24, fontSize: "0.6875rem", bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textSecondary, fontWeight: 600 }}
+                    {recipe.isAiGenerated && (
+                      <Chip icon={<AutoAwesomeRounded sx={{ fontSize: 12 }} />} label="AI" size="small"
+                        sx={{ height: 20, fontSize: "0.625rem", bgcolor: PALETTE.accentLight, color: PALETTE.accentRaw, fontWeight: 700 }}
                       />
-                      <Chip icon={<LocalFireDepartmentRounded sx={{ fontSize: 14 }} />} label={`${recipe.calories} cal`} size="small"
-                        sx={{ height: 24, fontSize: "0.6875rem", bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textSecondary, fontWeight: 600 }}
-                      />
-                      {!perfect && (
-                        <Chip label="Suggested" size="small"
-                          sx={{ height: 24, fontSize: "0.6875rem", bgcolor: PALETTE.accentLight, color: PALETTE.accentRaw, fontWeight: 700 }}
-                        />
-                      )}
-                    </Stack>
-                    {!perfect && missing?.length > 0 && (
-                      <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.textTertiary, lineHeight: 1.35 }}>
-                        Missing: {missing.slice(0, 4).join(", ")}{missing.length > 4 ? "…" : ""}
-                      </Typography>
                     )}
-                  </Box>
-                </Stack>
-              </Box>
-            );
-          })
+                  </Stack>
+                  <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: perfect ? 0.75 : 0.5, flexWrap: "wrap", gap: 0.5 }}>
+                    <Chip icon={<AccessTimeRounded sx={{ fontSize: 14 }} />} label={`${recipe.prepTime} + ${recipe.cookTime}`} size="small"
+                      sx={{ height: 24, fontSize: "0.6875rem", bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textSecondary, fontWeight: 600 }}
+                    />
+                    <Chip icon={<LocalFireDepartmentRounded sx={{ fontSize: 14 }} />} label={`${recipe.calories} cal`} size="small"
+                      sx={{ height: 24, fontSize: "0.6875rem", bgcolor: PALETTE.surfaceSecondary, color: PALETTE.textSecondary, fontWeight: 600 }}
+                    />
+                    {!perfect && !recipe.isAiGenerated && (
+                      <Chip label="Suggested" size="small"
+                        sx={{ height: 24, fontSize: "0.6875rem", bgcolor: PALETTE.accentLight, color: PALETTE.accentRaw, fontWeight: 700 }}
+                      />
+                    )}
+                  </Stack>
+                  {!perfect && missing?.length > 0 && (
+                    <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.textTertiary, lineHeight: 1.35 }}>
+                      Missing: {missing.slice(0, 4).join(", ")}{missing.length > 4 ? "…" : ""}
+                    </Typography>
+                  )}
+                </Box>
+                <IconButton
+                  size="small"
+                  onClick={(e) => { e.stopPropagation(); toggleSave(recipe); }}
+                  sx={{ color: isSaved(recipe) ? PALETTE.accent : PALETTE.textTertiary, p: 0.5 }}
+                  aria-label={isSaved(recipe) ? "Unsave" : "Save recipe"}
+                >
+                  {isSaved(recipe) ? <StarRounded sx={{ fontSize: 22 }} /> : <StarBorderRounded sx={{ fontSize: 22 }} />}
+                </IconButton>
+              </Stack>
+            </Box>
+          ))
         )}
       </Stack>
 

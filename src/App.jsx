@@ -11,6 +11,7 @@ import {
   PlaceholderPage,
   HistoryPage,
   WeeklyPlanPage,
+  SavedRecipesPage,
 } from "./pages";
 import { BottomNav, BOTTOM_NAV_HEIGHT } from "./components/BottomNav";
 import { ENERGY_BACKGROUNDS } from "./constants/energy";
@@ -170,6 +171,7 @@ function App() {
     ),
     History: <HistoryPage onBack={() => setPage("Home")} onNavigate={setPage} />,
     WeeklyPlan: <WeeklyPlanPage onBack={() => setPage("Home")} onNavigate={setPage} modalContainerRef={phoneFrameRef} />,
+    SavedRecipes: <SavedRecipesPage onBack={() => setPage("Home")} onSelectRecipe={goToRecipePreview} />,
   };
 
   const pageBg =

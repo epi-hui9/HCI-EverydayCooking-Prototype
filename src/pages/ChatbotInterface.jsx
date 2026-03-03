@@ -33,7 +33,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
   const recipeContext = instructionRecipe?.name
-    ? `The user selected the recipe "${instructionRecipe.name}". Here are the instructions:\n${RECIPE_INSTRUCTIONS[instructionRecipe.name] ?? "No instructions available."}`
+    ? `The user selected the recipe "${instructionRecipe.name}". Here are the instructions:\n${instructionRecipe.instructions ?? RECIPE_INSTRUCTIONS[instructionRecipe.name] ?? "No instructions available."}`
     : null;
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
       setMessages([]);
       return;
     }
-    const raw = RECIPE_INSTRUCTIONS[instructionRecipe.name];
+    const raw = instructionRecipe.instructions ?? RECIPE_INSTRUCTIONS[instructionRecipe.name];
     const steps = parseRecipeSteps(raw);
     const stepsText =
       steps.length > 0

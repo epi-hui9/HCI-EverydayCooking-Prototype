@@ -3,6 +3,7 @@
   "outputDirectory": "dist",
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
   "functions": {
-    "api/chat.js": { "maxDuration": 30 }
+    "api/chat.js": { "maxDuration": 30 },
+    "api/recipes.js": { "maxDuration": 45 }
   }
 }

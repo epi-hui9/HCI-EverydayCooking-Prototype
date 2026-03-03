@@ -2,17 +2,22 @@ import { Box, Button, Stack, Typography, IconButton } from "@mui/material";
 import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
+import StarRounded from "@mui/icons-material/StarRounded";
+import StarBorderRounded from "@mui/icons-material/StarBorderRounded";
+import AutoAwesomeRounded from "@mui/icons-material/AutoAwesomeRounded";
 import { RECIPE_INSTRUCTIONS } from "../data/recipeInstructions";
 import { toCanonicalIngredient, getEmoji, getDaysUntilExpiry } from "../data/ingredients";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
 import { DEFAULT_FRIDGE } from "../data/ingredients";
 import { parseRecipeSteps } from "../utils/recipeInstructions";
+import { useSavedRecipes } from "../utils/useSavedRecipes";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 
 const FRIDGE_KEY = "ep.foods.v3";
 
 export default function RecipePreviewPage({ recipe, onBack, onStartCooking }) {
   const [foods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);
+  const { isSaved, toggleSave } = useSavedRecipes();
 
   if (!recipe) return null;
 
@@ -26,7 +31,7 @@ export default function RecipePreviewPage({ recipe, onBack, onStartCooking }) {
     return { name: ing, qty: qtyMap[ing] ?? 1, useSoon, days };
   });
 
-  const rawInstructions = RECIPE_INSTRUCTIONS[recipe.name];
+  const rawInstructions = recipe.instructions || RECIPE_INSTRUCTIONS[recipe.name];
   const steps = parseRecipeSteps(rawInstructions);
 
   return (
@@ -40,10 +45,26 @@ export default function RecipePreviewPage({ recipe, onBack, onStartCooking }) {
       </Stack>
 
       {/* Header */}
-      <Box sx={{ textAlign: "center", mb: 2 }}>
-        <Typography sx={{ fontSize: "1.375rem", fontWeight: 700, letterSpacing: "-0.02em", color: PALETTE.textPrimary, lineHeight: 1.2 }}>
-          {recipe.name}
-        </Typography>
+      <Box sx={{ textAlign: "center", mb: 2, position: "relative" }}>
+        <IconButton
+          size="small"
+          onClick={() => toggleSave(recipe)}
+          sx={{ position: "absolute", top: -4, right: 0, color: isSaved(recipe) ? PALETTE.accent : PALETTE.textTertiary }}
+          aria-label={isSaved(recipe) ? "Unsave" : "Save recipe"}
+        >
+          {isSaved(recipe) ? <StarRounded sx={{ fontSize: 24 }} /> : <StarBorderRounded sx={{ fontSize: 24 }} />}
+        </IconButton>
+        <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.75} sx={{ mb: 0.5 }}>
+          <Typography sx={{ fontSize: "1.375rem", fontWeight: 700, letterSpacing: "-0.02em", color: PALETTE.textPrimary, lineHeight: 1.2 }}>
+            {recipe.name}
+          </Typography>
+          {recipe.isAiGenerated && (
+            <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.25, px: 0.75, py: 0.25, borderRadius: "8px", bgcolor: PALETTE.accentLight }}>
+              <AutoAwesomeRounded sx={{ fontSize: 14, color: PALETTE.accentRaw }} />
+              <Typography sx={{ fontSize: "0.625rem", fontWeight: 700, color: PALETTE.accentRaw }}>AI</Typography>
+            </Box>
+          )}
+        </Stack>
         <Stack direction="row" spacing={0.75} justifyContent="center" sx={{ mt: 1, flexWrap: "wrap", gap: 0.5 }}>
           <Typography component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, fontSize: "0.8125rem", color: PALETTE.textSecondary }}>
             <AccessTimeRounded sx={{ fontSize: 16 }} />
