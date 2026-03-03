@@ -14,10 +14,10 @@ User question:
 ${prompt}
 `;
 
-  // Production (Vercel): use same-origin /api/chat. Dev: use Express on localhost:3001.
-  const base =
-    import.meta.env.VITE_API_BASE ??
-    (import.meta.env.DEV ? "http://localhost:3001" : "");
+  // Production: always same-origin /api/chat (Vercel serverless). Dev: use Express on localhost:3001.
+  const base = import.meta.env.DEV
+    ? (import.meta.env.VITE_API_BASE ?? "http://localhost:3001")
+    : "";
 
   const url = base ? `${base}/api/chat` : "/api/chat";
   const controller = new AbortController();
