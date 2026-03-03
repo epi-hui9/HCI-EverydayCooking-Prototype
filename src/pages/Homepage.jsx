@@ -161,11 +161,11 @@ export default function Homepage({ onNavigate, onOpenChat }) {
         Quick access
       </Typography>
       <Box sx={{ flex: 1, minHeight: 0, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.25, alignContent: "start" }}>
-        {/* Start Cooking — hero tile, full width, primary action */}
+        {/* Start Cooking — ingredient-first flow */}
         <Box
           component="button"
           type="button"
-          onClick={() => onNavigate?.("Recipe")}
+          onClick={() => onNavigate?.("Fridge")}
           sx={{
             gridColumn: "1 / -1",
             border: "none",
@@ -207,7 +207,7 @@ export default function Homepage({ onNavigate, onOpenChat }) {
               Start Cooking
             </Typography>
             <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, mt: 0.25 }}>
-              Energy level → recipes
+              Pick ingredients → get recipes
             </Typography>
           </Box>
         </Box>
