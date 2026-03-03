@@ -84,20 +84,21 @@ export default function Homepage({ onNavigate, onOpenChat }) {
           Your impact this week
         </Typography>
 
-        <Stack direction="row" alignItems="baseline" spacing={1} sx={{ mb: 0.25, flexWrap: "wrap", gap: 0.5 }}>
+        <Stack direction="row" alignItems="baseline" spacing={1} sx={{ mb: 0.5 }}>
           <Typography sx={{ fontSize: "2.25rem", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
             {co2SavedKg}
           </Typography>
           <Typography sx={{ fontSize: "0.9375rem", fontWeight: 500, opacity: 0.75 }}>
             kg CO₂ saved
           </Typography>
-          <Typography sx={{ fontSize: "0.75rem", opacity: 0.6, mx: 0.5 }}>·</Typography>
-          <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em" }}>
-            ${typeof moneySavedTotal === "number" ? moneySavedTotal.toFixed(1) : moneySavedTotal ?? "0"}
-          </Typography>
-          <Typography sx={{ fontSize: "0.875rem", fontWeight: 500, opacity: 0.75 }}>
-            saved
-          </Typography>
+        </Stack>
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, px: 1.25, py: 0.5, borderRadius: "10px", bgcolor: "rgba(255,255,255,0.15)" }}>
+            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, letterSpacing: "-0.01em" }}>
+              ${typeof moneySavedTotal === "number" ? moneySavedTotal.toFixed(1) : moneySavedTotal ?? "0"}
+            </Typography>
+            <Typography sx={{ fontSize: "0.6875rem", fontWeight: 500, opacity: 0.85 }}>saved</Typography>
+          </Box>
         </Stack>
 
         <Typography sx={{ fontSize: "0.6875rem", opacity: 0.5, mb: 2, lineHeight: 1.4 }}>

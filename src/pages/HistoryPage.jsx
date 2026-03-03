@@ -22,8 +22,6 @@ export default function HistoryPage({ onBack, onNavigate }) {
   const { getCookingHistory, mealsSaved, co2SavedKg, moneySavedTotal } = useGamification();
   const history = getCookingHistory();
 
-  const savedFromWasteCount = history.filter((h) => h.savedFromWaste).length;
-
   return (
     <Box sx={{ px: 2, pt: 1, pb: 4, minHeight: "100%", animation: "fadeIn 0.25s ease" }}>
       {/* Back */}
@@ -67,32 +65,24 @@ export default function HistoryPage({ onBack, onNavigate }) {
           Your impact
         </Typography>
         <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1.5 }}>
-          <Box sx={{ flex: 1, minWidth: 80 }}>
-            <Typography sx={{ fontSize: "1.5rem", fontWeight: 800, color: PALETTE.textPrimary, letterSpacing: "-0.02em" }}>
+          <Box sx={{ flex: 1, minWidth: 70 }}>
+            <Typography sx={{ fontSize: "1.375rem", fontWeight: 800, color: PALETTE.textPrimary, letterSpacing: "-0.02em" }}>
               {mealsSaved}
             </Typography>
-            <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>meals saved</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.textSecondary, fontWeight: 600 }}>meals</Typography>
           </Box>
-          <Box sx={{ flex: 1, minWidth: 80 }}>
-            <Typography sx={{ fontSize: "1.5rem", fontWeight: 800, color: PALETTE.ecoDeep, letterSpacing: "-0.02em" }}>
+          <Box sx={{ flex: 1, minWidth: 70 }}>
+            <Typography sx={{ fontSize: "1.375rem", fontWeight: 800, color: PALETTE.ecoDeep, letterSpacing: "-0.02em" }}>
               {co2SavedKg}
             </Typography>
-            <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>kg CO₂ saved</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.textSecondary, fontWeight: 600 }}>kg CO₂</Typography>
           </Box>
-          <Box sx={{ flex: 1, minWidth: 80 }}>
-            <Typography sx={{ fontSize: "1.5rem", fontWeight: 800, color: PALETTE.accent, letterSpacing: "-0.02em" }}>
+          <Box sx={{ flex: 1, minWidth: 70 }}>
+            <Typography sx={{ fontSize: "1.375rem", fontWeight: 800, color: PALETTE.ecoMedium, letterSpacing: "-0.02em" }}>
               ${typeof moneySavedTotal === "number" ? moneySavedTotal.toFixed(1) : moneySavedTotal ?? "0"}
             </Typography>
-            <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>saved</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.textSecondary, fontWeight: 600 }}>saved</Typography>
           </Box>
-          {savedFromWasteCount > 0 && (
-            <Box sx={{ flex: 1, minWidth: 80 }}>
-              <Typography sx={{ fontSize: "1.5rem", fontWeight: 800, color: PALETTE.accent, letterSpacing: "-0.02em" }}>
-                {savedFromWasteCount}
-              </Typography>
-              <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>from waste</Typography>
-            </Box>
-          )}
         </Stack>
       </Box>
 
@@ -157,30 +147,24 @@ export default function HistoryPage({ onBack, onNavigate }) {
                   </Typography>
                 </Box>
                 <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
-                  <Chip
-                    label={`${entry.co2Saved ?? 0.5} kg CO₂`}
-                    size="small"
-                    sx={{
-                      height: 26,
-                      fontSize: "0.6875rem",
-                      fontWeight: 700,
-                      bgcolor: `${PALETTE.ecoMedium}22`,
-                      color: PALETTE.ecoDeep,
-                    }}
-                  />
-                  {(entry.moneySaved ?? 0) > 0 && (
+                  <Stack direction="row" alignItems="center" spacing={0.75}>
                     <Chip
-                      label={`$${entry.moneySaved.toFixed(2)}`}
+                      label={`${entry.co2Saved ?? 0.5} kg CO₂`}
                       size="small"
                       sx={{
-                        height: 26,
-                        fontSize: "0.6875rem",
+                        height: 24,
+                        fontSize: "0.625rem",
                         fontWeight: 700,
-                        bgcolor: `${PALETTE.accent}22`,
-                        color: PALETTE.accentDark,
+                        bgcolor: `${PALETTE.ecoMedium}18`,
+                        color: PALETTE.ecoDeep,
                       }}
                     />
-                  )}
+                    {(entry.moneySaved ?? 0) > 0 && (
+                      <Typography sx={{ fontSize: "0.6875rem", fontWeight: 700, color: PALETTE.ecoMedium }}>
+                        ${entry.moneySaved.toFixed(2)}
+                      </Typography>
+                    )}
+                  </Stack>
                   <Chip
                     icon={<LocalFireDepartmentRounded sx={{ fontSize: 14 }} />}
                     label={`+${entry.pointsEarned ?? 10}`}
