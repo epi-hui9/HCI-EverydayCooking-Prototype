@@ -2,14 +2,14 @@ import { Box, Stack, IconButton, Typography, LinearProgress } from "@mui/materia
 import ChatRounded from "@mui/icons-material/ChatRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
 import EmojiEventsRounded from "@mui/icons-material/EmojiEventsRounded";
-import KitchenRounded from "@mui/icons-material/KitchenRounded";
+import RestaurantMenuRounded from "@mui/icons-material/RestaurantMenuRounded";
 import HistoryRounded from "@mui/icons-material/HistoryRounded";
 import CalendarTodayRounded from "@mui/icons-material/CalendarTodayRounded";
 import { PALETTE } from "../theme";
 import { useGamification } from "../context/GamificationContext";
 
 const TILES = [
-  { label: "My Fridge", icon: KitchenRounded, nav: "Fridge", color: PALETTE.ecoMedium },
+  { label: "Recipes", icon: RestaurantMenuRounded, nav: "Recipe", color: PALETTE.accent },
   { label: "History", icon: HistoryRounded, nav: "History", color: PALETTE.textTertiary },
   { label: "Weekly Plan", icon: CalendarTodayRounded, nav: "WeeklyPlan", color: PALETTE.sageDark },
 ];
@@ -159,11 +159,11 @@ export default function Homepage({ onNavigate, onOpenChat }) {
         Quick access
       </Typography>
       <Box sx={{ flex: 1, minHeight: 0, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.25, alignContent: "start" }}>
-        {/* Start Cooking — quick path: energy → smart suggestions */}
+        {/* Start Cooking — ingredient-first flow */}
         <Box
           component="button"
           type="button"
-          onClick={() => onNavigate?.("Recipe")}
+          onClick={() => onNavigate?.("Fridge")}
           sx={{
             gridColumn: "1 / -1",
             border: "none",
@@ -205,7 +205,7 @@ export default function Homepage({ onNavigate, onOpenChat }) {
               Start Cooking
             </Typography>
             <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, mt: 0.25 }}>
-              Energy level → smart suggestions
+              Pick ingredients → get recipes
             </Typography>
           </Box>
         </Box>
