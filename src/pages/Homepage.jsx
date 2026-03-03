@@ -16,7 +16,7 @@ const TILES = [
 
 export default function Homepage({ onNavigate, onOpenChat }) {
   const {
-    co2SavedKg, level, points, streakDays,
+    co2SavedKg, moneySavedTotal, level, points, streakDays,
     pointsInCurrentLevel, pointsToNextLevel, POINTS_PER_LEVEL,
     getAchievements,
   } = useGamification();
@@ -84,17 +84,24 @@ export default function Homepage({ onNavigate, onOpenChat }) {
           Your impact this week
         </Typography>
 
-        <Stack direction="row" alignItems="baseline" spacing={1} sx={{ mb: 0.25 }}>
+        <Stack direction="row" alignItems="baseline" spacing={1} sx={{ mb: 0.25, flexWrap: "wrap", gap: 0.5 }}>
           <Typography sx={{ fontSize: "2.25rem", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
             {co2SavedKg}
           </Typography>
           <Typography sx={{ fontSize: "0.9375rem", fontWeight: 500, opacity: 0.75 }}>
             kg CO₂ saved
           </Typography>
+          <Typography sx={{ fontSize: "0.75rem", opacity: 0.6, mx: 0.5 }}>·</Typography>
+          <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em" }}>
+            ${typeof moneySavedTotal === "number" ? moneySavedTotal.toFixed(1) : moneySavedTotal ?? "0"}
+          </Typography>
+          <Typography sx={{ fontSize: "0.875rem", fontWeight: 500, opacity: 0.75 }}>
+            saved
+          </Typography>
         </Stack>
 
         <Typography sx={{ fontSize: "0.6875rem", opacity: 0.5, mb: 2, lineHeight: 1.4 }}>
-          Using food before it expires reduces waste emissions.
+          Using food before it expires reduces waste and saves money.
         </Typography>
 
         <Stack direction="row" spacing={1.5} sx={{ mb: 1.5 }}>

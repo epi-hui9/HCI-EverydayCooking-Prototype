@@ -130,6 +130,22 @@ export function toCanonicalIngredient(name) {
   return CANONICAL_MAP[key] ?? key;
 }
 
+/** Estimated price per unit (USD) for waste savings. Used when item saved within 3 days of expiry. */
+const INGREDIENT_PRICE_PER_UNIT = {
+  spinach: 2, garlic: 0.5, "ground beef": 5, onions: 1, eggs: 0.3, milk: 3, "chicken breast": 4,
+  tomato: 0.5, tomatoes: 0.5, broccoli: 2, cheese: 4, eggplant: 1.5, corn: 0.5, rice: 0.2, pasta: 0.3,
+  butter: 0.5, yogurt: 1, carrots: 0.3, potatoes: 0.5, "bell pepper": 1, lemon: 0.5, kale: 2,
+  salmon: 6, tofu: 2, mushrooms: 2, zucchini: 1, cucumber: 0.75, avocado: 1.5, bread: 2,
+  "olive oil": 0.1, "soy sauce": 0.05,
+};
+
+/** Get estimated price saved (USD) for ingredient used. Returns 0 if unknown. */
+export function getIngredientPriceSaved(name, quantityUsed = 1) {
+  const canon = toCanonicalIngredient(name);
+  const price = INGREDIENT_PRICE_PER_UNIT[canon];
+  return price != null ? Math.round(price * quantityUsed * 100) / 100 : 0;
+}
+
 /** Days until expiry (negative = expired). Shared for fridge + recipe pages. */
 export function getDaysUntilExpiry(expiryDate) {
   const today = new Date();

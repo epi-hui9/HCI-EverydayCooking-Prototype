@@ -23,6 +23,7 @@ const GamificationContext = createContext(null);
 export function GamificationProvider({ children }) {
   const [points, setPoints] = useLocalStorageState("ep.points", 340);
   const [co2SavedKg, setCo2SavedKg] = useLocalStorageState("ep.co2SavedKg", 12.4);
+  const [moneySavedTotal, setMoneySavedTotal] = useLocalStorageState("ep.moneySavedTotal", 0);
   const [mealsSaved, setMealsSaved] = useLocalStorageState("ep.mealsSaved", 28);
   const [streakDays, setStreakDays] = useLocalStorageState("ep.streakDays", 5);
   const [lastActivityDate, setLastActivityDate] = useLocalStorageState(
@@ -108,6 +109,7 @@ export function GamificationProvider({ children }) {
 
   const addToHistory = useCallback(
     (entry) => {
+      const moneySaved = entry.moneySaved ?? 0;
       const item = {
         id: Date.now(),
         date: new Date().toISOString(),
@@ -115,10 +117,14 @@ export function GamificationProvider({ children }) {
         co2Saved: entry.co2Saved ?? CO2_PER_MEAL_SAVED_KG,
         pointsEarned: entry.pointsEarned ?? POINTS_PER_MEAL_SAVED,
         savedFromWaste: entry.savedFromWaste ?? false,
+        moneySaved,
       };
       setCookingHistory((prev) => [item, ...(Array.isArray(prev) ? prev : [])].slice(0, 100));
+      if (moneySaved > 0) {
+        setMoneySavedTotal((m) => Math.round((m + moneySaved) * 100) / 100);
+      }
     },
-    [setCookingHistory]
+    [setCookingHistory, setMoneySavedTotal]
   );
 
   const getCookingHistory = useCallback(() => {
@@ -129,6 +135,7 @@ export function GamificationProvider({ children }) {
     points,
     level,
     co2SavedKg,
+    moneySavedTotal,
     mealsSaved,
     streakDays,
     pointsInCurrentLevel,

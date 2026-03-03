@@ -12,7 +12,7 @@ import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 import PageHeader from "../components/PageHeader";
 import { useGamification } from "../context/GamificationContext";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
-import { DEFAULT_FRIDGE, toCanonicalIngredient, getEmoji } from "../data/ingredients";
+import { DEFAULT_FRIDGE, toCanonicalIngredient, getEmoji, getIngredientPriceSaved } from "../data/ingredients";
 
 const FRIDGE_KEY = "ep.foods.v2";
 
@@ -111,7 +111,9 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
         const deduct = Math.min(need, qty);
         remaining[canon] -= deduct;
         const daysLeft = getDaysUntilExpiry(item.expiryDate);
-        details.push({ name: item.name, used: deduct, before: qty, after: qty - deduct, daysLeft, savedFromWaste: daysLeft <= 3 && deduct > 0 });
+        const savedFromWaste = daysLeft <= 3 && deduct > 0;
+        const moneySaved = savedFromWaste ? getIngredientPriceSaved(item.name, deduct) : 0;
+        details.push({ name: item.name, used: deduct, before: qty, after: qty - deduct, daysLeft, savedFromWaste, moneySaved });
       }
     }
     setFoods((p) => {
@@ -133,12 +135,14 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
       return result;
     });
     setDeductionDetails(details);
+    const totalMoneySaved = details.reduce((sum, d) => sum + (d.moneySaved ?? 0), 0);
     addSavedMeal?.(1);
     addToHistory?.({
       recipeName: recipe?.name ?? "Meal",
       co2Saved: 0.5,
       pointsEarned: 10,
       savedFromWaste: details.some((d) => d.savedFromWaste),
+      moneySaved: totalMoneySaved,
     });
     setIsCompleteOpen(true);
   };
@@ -303,7 +307,12 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
             <Stack spacing={1.25} alignItems="center" sx={{ textAlign: "center" }}>
               <Box sx={{ width: 54, height: 54, borderRadius: "16px", bgcolor: PALETTE.sageLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem" }}>🏆</Box>
               <Typography sx={{ fontSize: "1.125rem", fontWeight: 800, color: PALETTE.textPrimary }}>Nice work 🌿</Typography>
-              <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textSecondary, lineHeight: 1.45 }}>+10 pts · +0.5 kg CO₂ saved</Typography>
+              <Typography sx={{ fontSize: "0.875rem", color: PALETTE.textSecondary, lineHeight: 1.45 }}>
+                +10 pts · +0.5 kg CO₂ saved
+                {deductionDetails.some((d) => d.savedFromWaste) && (
+                  <> · ${deductionDetails.reduce((s, d) => s + (d.moneySaved ?? 0), 0).toFixed(2)} saved</>
+                )}
+              </Typography>
 
               {deductionDetails.length > 0 && (
                 <Box sx={{ width: "100%", mt: 0.5 }}>
@@ -324,6 +333,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
                         {d.savedFromWaste && (
                           <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.ecoDeep, fontWeight: 600, mt: 0.5 }}>
                             {d.daysLeft <= 0 ? "Was expired!" : `Expiring in ${d.daysLeft}d`} — saved from waste!
+                            {d.moneySaved > 0 && <> (~${d.moneySaved.toFixed(2)})</>}
                           </Typography>
                         )}
                       </Box>

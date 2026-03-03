@@ -19,7 +19,7 @@ function formatHistoryDate(isoString) {
 }
 
 export default function HistoryPage({ onBack, onNavigate }) {
-  const { getCookingHistory, mealsSaved, co2SavedKg } = useGamification();
+  const { getCookingHistory, mealsSaved, co2SavedKg, moneySavedTotal } = useGamification();
   const history = getCookingHistory();
 
   const savedFromWasteCount = history.filter((h) => h.savedFromWaste).length;
@@ -78,6 +78,12 @@ export default function HistoryPage({ onBack, onNavigate }) {
               {co2SavedKg}
             </Typography>
             <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>kg CO₂ saved</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 80 }}>
+            <Typography sx={{ fontSize: "1.5rem", fontWeight: 800, color: PALETTE.accent, letterSpacing: "-0.02em" }}>
+              ${typeof moneySavedTotal === "number" ? moneySavedTotal.toFixed(1) : moneySavedTotal ?? "0"}
+            </Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>saved</Typography>
           </Box>
           {savedFromWasteCount > 0 && (
             <Box sx={{ flex: 1, minWidth: 80 }}>
@@ -162,6 +168,19 @@ export default function HistoryPage({ onBack, onNavigate }) {
                       color: PALETTE.ecoDeep,
                     }}
                   />
+                  {(entry.moneySaved ?? 0) > 0 && (
+                    <Chip
+                      label={`$${entry.moneySaved.toFixed(2)}`}
+                      size="small"
+                      sx={{
+                        height: 26,
+                        fontSize: "0.6875rem",
+                        fontWeight: 700,
+                        bgcolor: `${PALETTE.accent}22`,
+                        color: PALETTE.accentDark,
+                      }}
+                    />
+                  )}
                   <Chip
                     icon={<LocalFireDepartmentRounded sx={{ fontSize: 14 }} />}
                     label={`+${entry.pointsEarned ?? 10}`}
