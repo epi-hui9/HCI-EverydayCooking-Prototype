@@ -20,7 +20,6 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
   const [inputValue, setInputValue] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
-  const [canCompleteCooking, setCanCompleteCooking] = useState(false);
 
   const chatEndRef = useRef(null);
   const { addSavedMeal, addToHistory, getAchievements } = useGamification();
@@ -38,21 +37,12 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
 
   useEffect(() => {
     setMessages([]);
-    setCanCompleteCooking(false);
   }, [instructionRecipe?.name, instructionRecipe]);
-
-  // Enable Complete cooking after 15s (user has read steps) or after 1 user message
-  useEffect(() => {
-    if (!instructionRecipe?.name) return;
-    const t = setTimeout(() => setCanCompleteCooking(true), 15000);
-    return () => clearTimeout(t);
-  }, [instructionRecipe?.name]);
 
   const sendMessage = useCallback(async (text) => {
     if (!text?.trim() || isStreaming) return;
     const userMsg = { id: Date.now(), text: text.trim(), type: "user" };
     const botId = Date.now() + 1;
-    setCanCompleteCooking(true);
     setMessages((prev) => [...prev, userMsg, { id: botId, text: "", type: "bot" }]);
     setInputValue("");
     setIsStreaming(true);
@@ -246,7 +236,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
       <Box sx={{ flexShrink: 0, pt: 0.75, pb: 0.5, mx: -2, px: 2, bgcolor: PALETTE.surface, borderTop: `0.5px solid ${PALETTE.separator}` }}>
         {instructionRecipe?.name && (
           <Button
-            fullWidth onClick={handleCompleteCooking} disabled={isStreaming || !canCompleteCooking}
+            fullWidth onClick={handleCompleteCooking} disabled={isStreaming}
             startIcon={<LocalFireDepartmentRounded />}
             sx={{
               mb: 0.75, borderRadius: "14px", height: 44,
