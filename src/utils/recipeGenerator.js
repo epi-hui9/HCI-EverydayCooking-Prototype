@@ -1,6 +1,6 @@
 const API_TIMEOUT_MS = 35000;
 
-export async function generateRecipes(fridgeItems, selectedItems, maxMinutes) {
+export async function generateRecipes(fridgeItems, selectedItems, maxMinutes, excludeIngredients = []) {
   const base = import.meta.env.DEV
     ? (import.meta.env.VITE_API_BASE ?? "http://localhost:3001")
     : "";
@@ -17,6 +17,7 @@ export async function generateRecipes(fridgeItems, selectedItems, maxMinutes) {
         fridgeItems: (fridgeItems || []).map((f) => (typeof f === "object" ? f?.name : f)),
         selectedItems: selectedItems || [],
         maxMinutes: maxMinutes ?? 50,
+        excludeIngredients: excludeIngredients || [],
       }),
       signal: controller.signal,
     });

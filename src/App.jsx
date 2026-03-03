@@ -27,6 +27,7 @@ function App() {
   const [returnToOnChatBack, setReturnToOnChatBack] = useState("Home");
   const [selectedIngredientNames, setSelectedIngredientNames] = useState([]);
   const [selectedEnergy, setSelectedEnergy] = useState(null);
+  const [dietaryExclusions, setDietaryExclusions] = useState([]);
   const [selectedRecipeForInstructions, setSelectedRecipeForInstructions] = useState(null);
   const [recipeFromRecipesTab, setRecipeFromRecipesTab] = useState(null);
   const [fromBrowseMore, setFromBrowseMore] = useState(false);
@@ -50,6 +51,7 @@ function App() {
   const handleIngredientsNext = (names) => {
     setSelectedIngredientNames(names ?? []);
     setSelectedEnergy((prev) => prev ?? "medium");
+    setDietaryExclusions([]);
     setPage("Energy");
   };
 
@@ -116,11 +118,13 @@ function App() {
     ),
     Energy: (
       <EnergyLevelPage
-        onOpenChat={goToChat}
         onBack={() => setPage("Fridge")}
         onContinue={handleEnergyContinueFromFridge}
         selectedEnergy={selectedEnergy ?? "medium"}
         onEnergyChange={setSelectedEnergy}
+        showDietaryChips
+        dietaryExclusions={dietaryExclusions}
+        onDietaryChange={(id) => setDietaryExclusions((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))}
       />
     ),
     "Recipe Preview": (
@@ -153,6 +157,7 @@ function App() {
         }}
         selectedIngredientNames={selectedIngredientNames}
         selectedEnergy={selectedEnergy}
+        dietaryExclusions={dietaryExclusions}
         initialRecipe={recipeFromRecipesTab}
         onNext={goToRecipePreview}
       />

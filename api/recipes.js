@@ -7,12 +7,15 @@ Each recipe must have: name, ingredients (array of strings), prepTime (e.g. "5 m
 Keep recipes simple and practical. Total prep+cook time must not exceed the maxMinutes given.
 Return ONLY valid JSON, no markdown or extra text.`;
 
-function buildPrompt(fridgeItems, selectedItems, maxMinutes) {
+function buildPrompt(fridgeItems, selectedItems, maxMinutes, excludeIngredients = []) {
   const fridge = (fridgeItems || []).map((f) => (typeof f === "string" ? f : f?.name)).filter(Boolean).join(", ");
   const selected = (selectedItems || []).join(", ");
+  const exclude = (excludeIngredients || []).length > 0
+    ? `\nIMPORTANT: User has dietary restrictions. Do NOT use these ingredients in any recipe: ${excludeIngredients.join(", ")}.`
+    : "";
   return `User SELECTED these ingredients (MUST use these — user may have dietary restrictions, so respect their choice): ${selected || "none"}
 Available in fridge (can use for variety): ${fridge || "none"}
-Max total time: ${maxMinutes} minutes.
+Max total time: ${maxMinutes} minutes.${exclude}
 
 Generate exactly 3 recipes:
 - Recipe 1: Use ONLY the selected ingredients. No other ingredients.
@@ -26,7 +29,7 @@ Return JSON array:
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   try {
-    const { fridgeItems = [], selectedItems = [], maxMinutes = 50 } = req.body ?? {};
+    const { fridgeItems = [], selectedItems = [], maxMinutes = 50, excludeIngredients = [] } = req.body ?? {};
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({
@@ -34,7 +37,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const prompt = buildPrompt(fridgeItems, selectedItems, maxMinutes);
+    const prompt = buildPrompt(fridgeItems, selectedItems, maxMinutes, excludeIngredients);
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {

@@ -13,6 +13,7 @@ import { DEFAULT_FRIDGE } from "../data/ingredients";
 import { RECIPE_INSTRUCTIONS } from "../data/recipeInstructions";
 import { parseRecipeSteps } from "../utils/recipeInstructions";
 import { MAX_MINUTES_BY_ENERGY } from "../constants/energy";
+import { getExcludedIngredients } from "../constants/dietary";
 import { parseMinutes } from "../utils/recipe";
 import { generateRecipes } from "../utils/recipeGenerator";
 import { useSavedRecipes } from "../utils/useSavedRecipes";
@@ -21,7 +22,7 @@ import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 const FRIDGE_KEY = "ep.foods.v3";
 const MAX_MISSING = 2;
 
-export default function RecipeDetailsPage({ onBack, selectedIngredientNames = [], selectedEnergy, initialRecipe, onNext }) {
+export default function RecipeDetailsPage({ onBack, selectedIngredientNames = [], selectedEnergy, dietaryExclusions = [], initialRecipe, onNext }) {
   const [foods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);
   const [aiRecipes, setAiRecipes] = useState([]);
   const [aiLoading, setAiLoading] = useState(false);
@@ -32,6 +33,10 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
     (selectedIngredientNames || []).filter(Boolean).map((n) => toCanonicalIngredient(n)).filter((n) => n.length > 0)
   );
 
+  const excludeSet = new Set(
+    getExcludedIngredients(dietaryExclusions || []).map((n) => toCanonicalIngredient(n)).filter((n) => n.length > 0)
+  );
+
   const fridgeSet = new Set(
     (Array.isArray(foods) ? foods : []).filter((f) => (f.quantity ?? 1) > 0).map((f) => toCanonicalIngredient(f.name)).filter((n) => n.length > 0)
   );
@@ -39,7 +44,13 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
   const maxMin = selectedEnergy && MAX_MINUTES_BY_ENERGY[selectedEnergy] != null ? MAX_MINUTES_BY_ENERGY[selectedEnergy] : 999;
   const baseRecipes = ALL_RECIPES.filter((r) => parseMinutes(r.prepTime) + parseMinutes(r.cookTime) <= maxMin);
 
-  const withMeta = baseRecipes.map((r) => {
+  const withMeta = baseRecipes
+    .filter((r) => {
+      if (excludeSet.size === 0) return true;
+      const hasExcluded = r.ingredients.some((ing) => excludeSet.has(toCanonicalIngredient(ing)));
+      return !hasExcluded;
+    })
+    .map((r) => {
     const inFridge = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
     const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
     const inSelected = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
@@ -77,20 +88,22 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
     shown = [...perfect, ...good].sort((a, b) => a.missing.length - b.missing.length);
   }
 
+  const excludeIngredients = getExcludedIngredients(dietaryExclusions || []);
+
   const fetchAiRecipes = useCallback(async () => {
     setAiLoading(true);
     setAiError(null);
     try {
       const fridgeList = (Array.isArray(foods) ? foods : []).filter((f) => (f.quantity ?? 1) > 0);
       const selected = (selectedIngredientNames || []).filter(Boolean);
-      const list = await generateRecipes(fridgeList, selected, maxMin);
+      const list = await generateRecipes(fridgeList, selected, maxMin, excludeIngredients);
       setAiRecipes(list);
     } catch (e) {
       setAiError(e.message || "Failed to generate recipes");
     } finally {
       setAiLoading(false);
     }
-  }, [foods, selectedIngredientNames, maxMin]);
+  }, [foods, selectedIngredientNames, maxMin, excludeIngredients]);
 
   const displayRecipes = aiRecipes.length > 0 ? aiRecipes.map((r) => ({ recipe: r, missing: [], perfect: false })) : shown;
   const showAiSection = shown.length === 0 && !aiLoading && aiRecipes.length === 0 && !aiError;

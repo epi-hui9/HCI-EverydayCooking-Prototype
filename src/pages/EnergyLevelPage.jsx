@@ -1,11 +1,12 @@
-import { Box, Button, Stack, Typography, IconButton } from "@mui/material";
+import { Box, Button, Stack, Typography, IconButton, Chip } from "@mui/material";
 import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import { ENERGY_OPTIONS } from "../constants/energy";
+import { DIETARY_OPTIONS } from "../constants/dietary";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 
 const ENERGY_ICONS = { low: "🍃", medium: "🍳", high: "🔥" };
 
-export default function EnergyLevelPage({ onBack, onContinue, selectedEnergy = "medium", onEnergyChange }) {
+export default function EnergyLevelPage({ onBack, onContinue, selectedEnergy = "medium", onEnergyChange, showDietaryChips, dietaryExclusions = [], onDietaryChange }) {
   return (
     <Box sx={{ px: 2, pt: 1, pb: 3, display: "flex", flexDirection: "column", minHeight: "100%", animation: "fadeIn 0.25s ease" }}>
       <Stack direction="row" alignItems="center" sx={{ mb: 0.5 }}>
@@ -59,6 +60,33 @@ export default function EnergyLevelPage({ onBack, onContinue, selectedEnergy = "
           No right answer — just for right now.
         </Typography>
       </Stack>
+
+      {showDietaryChips && (
+        <Box sx={{ mb: 2 }}>
+          <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: PALETTE.textPrimary, mb: 1 }}>
+            Dietary restrictions
+          </Typography>
+          <Stack direction="row" flexWrap="wrap" gap={0.75}>
+            {DIETARY_OPTIONS.map((opt) => {
+              const active = dietaryExclusions.includes(opt.id);
+              return (
+                <Chip
+                  key={opt.id}
+                  label={opt.label}
+                  onClick={() => onDietaryChange?.(opt.id)}
+                  sx={{
+                    bgcolor: active ? PALETTE.accentLight : PALETTE.surfaceSecondary,
+                    color: active ? PALETTE.accent : PALETTE.textSecondary,
+                    border: active ? `1.5px solid ${PALETTE.accent}` : "1.5px solid transparent",
+                    fontWeight: active ? 600 : 500,
+                    "&:hover": { bgcolor: active ? PALETTE.accentLight : "rgba(0,0,0,0.04)" },
+                  }}
+                />
+              );
+            })}
+          </Stack>
+        </Box>
+      )}
 
       <Button fullWidth variant="contained" size="large" onClick={() => onContinue?.(selectedEnergy)} sx={PRIMARY_CTA_SX}>
         Continue
