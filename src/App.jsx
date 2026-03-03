@@ -79,7 +79,10 @@ function App() {
 
   const handleBottomNavNavigate = (tab) => {
     if (tab === "Recipe") setPage("Recipe");
-    else setPage(tab);
+    else if (tab === "Chat") {
+      setSelectedRecipeForInstructions(null);
+      setPage("Chat");
+    } else setPage(tab);
   };
 
   const phoneFrameRef = useRef(null);
@@ -156,7 +159,10 @@ function App() {
     Chat: (
       <ChatbotInterface
         onBack={() => setPage(returnToOnChatBack)}
-        onGoHome={() => setPage("Home")}
+        onGoHome={() => {
+          setSelectedRecipeForInstructions(null);
+          setPage("Home");
+        }}
         instructionRecipe={selectedRecipeForInstructions}
         returnToOnChatBack={returnToOnChatBack}
         bottomNavHeight={BOTTOM_NAV_HEIGHT}

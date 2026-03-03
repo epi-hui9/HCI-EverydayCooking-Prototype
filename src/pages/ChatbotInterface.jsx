@@ -6,6 +6,7 @@ import SmartToyRounded from "@mui/icons-material/SmartToyRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
 import { streamAnswer } from "../utils/chatbotAnswers";
 import { RECIPE_INSTRUCTIONS } from "../data/recipeInstructions";
+import { parseRecipeSteps } from "../utils/recipeInstructions";
 import { SUGGESTED_QUESTIONS } from "../data/chatSuggestions";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 import PageHeader from "../components/PageHeader";
@@ -36,7 +37,18 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
     : null;
 
   useEffect(() => {
-    setMessages([]);
+    if (!instructionRecipe?.name) {
+      setMessages([]);
+      return;
+    }
+    const raw = RECIPE_INSTRUCTIONS[instructionRecipe.name];
+    const steps = parseRecipeSteps(raw);
+    const stepsText =
+      steps.length > 0
+        ? steps.map((s) => `${s.num}. ${s.text}`).join("\n")
+        : "No steps available.";
+    const fullText = `**${instructionRecipe.name}** — Steps:\n\n${stepsText}\n\nAsk me anything: substitutions, timing, or tips.`;
+    setMessages([{ id: 0, text: fullText, type: "bot" }]);
   }, [instructionRecipe?.name, instructionRecipe]);
 
   const sendMessage = useCallback(async (text) => {
