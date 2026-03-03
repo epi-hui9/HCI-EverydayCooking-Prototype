@@ -2,14 +2,12 @@ import { Box, Stack, IconButton, Typography, LinearProgress } from "@mui/materia
 import ChatRounded from "@mui/icons-material/ChatRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
 import EmojiEventsRounded from "@mui/icons-material/EmojiEventsRounded";
-import RestaurantMenuRounded from "@mui/icons-material/RestaurantMenuRounded";
 import HistoryRounded from "@mui/icons-material/HistoryRounded";
 import CalendarTodayRounded from "@mui/icons-material/CalendarTodayRounded";
 import { PALETTE } from "../theme";
 import { useGamification } from "../context/GamificationContext";
 
 const TILES = [
-  { label: "Recipes", icon: RestaurantMenuRounded, nav: "Recipe", color: PALETTE.accent },
   { label: "History", icon: HistoryRounded, nav: "History", color: PALETTE.textTertiary },
   { label: "Weekly Plan", icon: CalendarTodayRounded, nav: "WeeklyPlan", color: PALETTE.sageDark },
 ];
