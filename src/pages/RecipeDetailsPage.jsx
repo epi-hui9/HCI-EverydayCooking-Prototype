@@ -40,16 +40,20 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
   const baseRecipes = ALL_RECIPES.filter((r) => parseMinutes(r.prepTime) + parseMinutes(r.cookTime) <= maxMin);
 
   const withMeta = baseRecipes.map((r) => {
-    const overlap = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
+    const inFridge = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
     const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
-    const selectedOverlap = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
+    const inSelected = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
+    const extraFromFridge = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)) && !selectedSet.has(toCanonicalIngredient(ing)));
+    const allInFridge = missing.length === 0;
+    const useOnlySelected = selectedSet.size > 0 && inSelected.length === r.ingredients.length && allInFridge;
+    const useSelectedPlusUpTo2Extras = selectedSet.size > 0 && allInFridge && inSelected.length > 0 && extraFromFridge.length <= MAX_MISSING && extraFromFridge.length > 0;
     return {
       recipe: r,
-      overlapCount: overlap.length,
-      selectedOverlapCount: selectedOverlap.length,
+      overlapCount: inFridge.length,
+      selectedOverlapCount: inSelected.length,
       missing,
-      perfect: missing.length === 0,
-      good: missing.length <= MAX_MISSING,
+      perfect: selectedSet.size > 0 ? useOnlySelected : allInFridge,
+      good: selectedSet.size > 0 ? useSelectedPlusUpTo2Extras : (!allInFridge && missing.length <= MAX_MISSING),
     };
   });
 
@@ -58,7 +62,7 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
   if (selectedSet.size > 0) {
     const usesSelected = withMeta.filter((x) => x.selectedOverlapCount > 0);
     const perfect = usesSelected.filter((x) => x.perfect);
-    const good = usesSelected.filter((x) => x.good && !x.perfect);
+    const good = usesSelected.filter((x) => x.good);
     if (perfect.length > 0) {
       showMode = "perfect";
       shown = perfect.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount);
@@ -94,8 +98,8 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
   const subtitleText =
     aiRecipes.length > 0 ? "3 AI-generated recipes"
     : selectedSet.size === 0 ? `${displayRecipes.length} recipes available`
-    : showMode === "perfect" ? `${displayRecipes.length} perfect matches`
-    : showMode === "good" ? `${displayRecipes.length} suggestions (up to 2 missing)`
+    : showMode === "perfect" ? `${displayRecipes.length} strict matches (selected only)`
+    : showMode === "good" ? `${displayRecipes.length} suggestions (selected + up to 2 extras)`
     : "No matches found";
 
   /** Single-recipe view: from Recipes tab, user picked one of 3 → just show it + Start Cooking */

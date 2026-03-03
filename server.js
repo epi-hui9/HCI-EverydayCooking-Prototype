@@ -70,7 +70,7 @@ app.post("/api/recipes", async (req, res) => {
 
     const fridge = (fridgeItems || []).map((f) => (typeof f === "string" ? f : f?.name)).filter(Boolean).join(", ");
     const selected = (selectedItems || []).join(", ");
-    const prompt = `User SELECTED: ${selected || "none"}\nFridge: ${fridge || "none"}\nMax time: ${maxMinutes} min.\nGenerate 3 recipes. Prioritize selected. Return JSON array.`;
+    const prompt = `User SELECTED (MUST use these): ${selected || "none"}\nFridge (can use for variety): ${fridge || "none"}\nMax time: ${maxMinutes} min.\nRecipe 1 & 2: ONLY selected ingredients. Recipe 3: selected + 1-2 extra from fridge. Return JSON array.`;
 
     const openaiResp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",

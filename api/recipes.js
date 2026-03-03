@@ -10,11 +10,16 @@ Return ONLY valid JSON, no markdown or extra text.`;
 function buildPrompt(fridgeItems, selectedItems, maxMinutes) {
   const fridge = (fridgeItems || []).map((f) => (typeof f === "string" ? f : f?.name)).filter(Boolean).join(", ");
   const selected = (selectedItems || []).join(", ");
-  return `User SELECTED these ingredients (focus on these): ${selected || "none"}
-Available in fridge: ${fridge || "none"}
+  return `User SELECTED these ingredients (MUST use these — user may have dietary restrictions, so respect their choice): ${selected || "none"}
+Available in fridge (can use for variety): ${fridge || "none"}
 Max total time: ${maxMinutes} minutes.
 
-Generate 3 recipes. Prioritize selected ingredients but you may use other fridge items. Return JSON array:
+Generate exactly 3 recipes:
+- Recipe 1: Use ONLY the selected ingredients. No other ingredients.
+- Recipe 2: Use ONLY the selected ingredients. No other ingredients. (Different dish from Recipe 1.)
+- Recipe 3: Use the selected ingredients as the main focus, but you may add 1–2 extra ingredients from the fridge for a better recipe.
+
+Return JSON array:
 [{"name":"...","ingredients":["..."],"prepTime":"...","cookTime":"...","calories":123,"instructions":"1. Step one. 2. Step two."}, ...]`;
 }
 
