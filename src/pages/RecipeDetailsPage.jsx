@@ -34,17 +34,31 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
   const withMeta = baseRecipes.map((r) => {
     const overlap = r.ingredients.filter((ing) => fridgeSet.has(toCanonicalIngredient(ing)));
     const missing = r.ingredients.filter((ing) => !fridgeSet.has(toCanonicalIngredient(ing)));
-    return { recipe: r, overlapCount: overlap.length, missing, perfect: missing.length === 0 };
+    const selectedOverlap = r.ingredients.filter((ing) => selectedSet.has(toCanonicalIngredient(ing)));
+    return {
+      recipe: r,
+      overlapCount: overlap.length,
+      selectedOverlapCount: selectedOverlap.length,
+      missing,
+      perfect: missing.length === 0,
+    };
   });
 
   let shown = withMeta;
   let showMode = "all";
   if (selectedSet.size > 0) {
-    const perfect = withMeta.filter((x) => x.perfect);
-    if (perfect.length > 0) { showMode = "perfect"; shown = perfect; }
-    else {
-      const partial = withMeta.filter((x) => x.overlapCount > 0).sort((a, b) => b.overlapCount - a.overlapCount);
-      showMode = "partial"; shown = partial;
+    const usesSelected = withMeta.filter((x) => x.selectedOverlapCount > 0);
+    const perfect = usesSelected.filter((x) => x.perfect);
+    const partial = usesSelected.filter((x) => !x.perfect && x.overlapCount > 0);
+    if (perfect.length > 0) {
+      showMode = "perfect";
+      shown = perfect.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount);
+    } else if (partial.length > 0) {
+      showMode = "partial";
+      shown = partial.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount || b.overlapCount - a.overlapCount);
+    } else {
+      showMode = "partial";
+      shown = usesSelected.sort((a, b) => b.selectedOverlapCount - a.selectedOverlapCount || b.overlapCount - a.overlapCount);
     }
   }
 
