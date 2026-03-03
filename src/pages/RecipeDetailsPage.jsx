@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
 import { Box, Button, Stack, Typography, IconButton, Chip } from "@mui/material";
 import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
-import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import { ALL_RECIPES } from "../data/recipes";
 import { toCanonicalIngredient, getEmoji, getDaysUntilExpiry, getExpiryStyle } from "../data/ingredients";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
@@ -17,12 +15,7 @@ import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 const FRIDGE_KEY = "ep.foods.v2";
 
 export default function RecipeDetailsPage({ onBack, selectedIngredientNames = [], selectedEnergy, initialRecipe, onNext }) {
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [foods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);
-
-  useEffect(() => {
-    if (initialRecipe) setSelectedRecipe(initialRecipe);
-  }, [initialRecipe]);
 
   const selectedSet = new Set(
     (selectedIngredientNames || []).filter(Boolean).map((n) => toCanonicalIngredient(n)).filter((n) => n.length > 0)
@@ -256,16 +249,16 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
           </Box>
         ) : (
           shown.map(({ recipe, missing, perfect }) => {
-            const isSelected = selectedRecipe?.id === recipe.id;
             return (
               <Box
                 key={recipe.id} component="button" type="button"
-                onClick={() => setSelectedRecipe(recipe)}
+                onClick={() => onNext?.(recipe)}
                 sx={{
-                  border: `1px solid ${isSelected ? PALETTE.accentRaw : PALETTE.separator}`,
+                  border: `1px solid ${PALETTE.separator}`,
                   borderRadius: "14px", bgcolor: PALETTE.surface, textAlign: "left",
                   px: 2, py: 1.5, cursor: "pointer", transition: "all 0.15s",
-                  boxShadow: isSelected ? "0 4px 14px rgba(0,0,0,0.06)" : "0 1px 3px rgba(0,0,0,0.04)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                  "&:hover": { borderColor: PALETTE.accentRaw, boxShadow: "0 4px 14px rgba(0,0,0,0.06)" },
                 }}
               >
                 <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1.5}>
@@ -292,7 +285,6 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
                       </Typography>
                     )}
                   </Box>
-                  {isSelected && <CheckCircleRounded sx={{ fontSize: 22, color: PALETTE.accent }} />}
                 </Stack>
               </Box>
             );
@@ -300,17 +292,6 @@ export default function RecipeDetailsPage({ onBack, selectedIngredientNames = []
         )}
       </Stack>
 
-      {/* CTA */}
-      {onNext && (
-        <Button
-          fullWidth variant="contained" size="large"
-          disabled={!selectedRecipe}
-          onClick={() => selectedRecipe && onNext?.(selectedRecipe)}
-          sx={PRIMARY_CTA_SX}
-        >
-          Start Cooking
-        </Button>
-      )}
     </Box>
   );
 }
