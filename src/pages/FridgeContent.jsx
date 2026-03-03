@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, Stack, Typography, TextField, IconButton, Chip } from "@mui/material";
+import { Box, Button, Stack, Typography, TextField, IconButton, Chip, Autocomplete, InputAdornment } from "@mui/material";
 import ChevronLeftRounded from "@mui/icons-material/ChevronLeftRounded";
 import AddRounded from "@mui/icons-material/AddRounded";
 import DeleteOutlineRounded from "@mui/icons-material/DeleteOutlineRounded";
@@ -7,10 +7,11 @@ import CloseRounded from "@mui/icons-material/CloseRounded";
 import SwapVertRounded from "@mui/icons-material/SwapVertRounded";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import RadioButtonUncheckedRounded from "@mui/icons-material/RadioButtonUncheckedRounded";
+import AutoAwesomeRounded from "@mui/icons-material/AutoAwesomeRounded";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
 import PageHeader from "../components/PageHeader";
-import { DEFAULT_FRIDGE, getEmoji, getDaysUntilExpiry } from "../data/ingredients";
+import { DEFAULT_FRIDGE, getEmoji, getDaysUntilExpiry, INGREDIENT_KNOWLEDGE, getIngredientSuggestions, matchIngredient, expiryFromToday } from "../data/ingredients";
 
 const FRIDGE_KEY = "ep.foods.v2";
 
@@ -33,6 +34,25 @@ export default function FridgeContent({ onBack, onNext, onOpenChat }) {
   const toggleSelect = (id) =>
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
 
+  const applyAutoFill = (name) => {
+    const matched = matchIngredient(name);
+    if (matched) {
+      setNewFood((prev) => ({
+        ...prev,
+        name: matched.name,
+        category: matched.category,
+        expiryDate: expiryFromToday(matched.shelfLifeDays),
+      }));
+    } else if (name.trim()) {
+      setNewFood((prev) => ({
+        ...prev,
+        name: name.trim(),
+        category: prev.category || "Other",
+        expiryDate: prev.expiryDate || expiryFromToday(7),
+      }));
+    }
+  };
+
   const handleAddFood = () => {
     if (newFood.name && newFood.expiryDate) {
       const qty = Math.max(1, parseInt(String(newFood.quantity), 10) || 1);
@@ -48,39 +68,149 @@ export default function FridgeContent({ onBack, onNext, onOpenChat }) {
   );
 
   if (isAdding) {
+    const suggestions = getIngredientSuggestions(newFood.name, 8);
     return (
       <Box sx={{ px: 2, pt: 1, pb: 3, animation: "fadeIn 0.25s ease" }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <IconButton onClick={() => setIsAdding(false)} sx={{ color: PALETTE.accent }}>
             <ChevronLeftRounded />
           </IconButton>
-          <Typography sx={{ fontSize: "1.0625rem", fontWeight: 600 }}>Add Food</Typography>
+          <Typography sx={{ fontSize: "1.0625rem", fontWeight: 600, color: PALETTE.textPrimary }}>Add Food</Typography>
           <IconButton onClick={() => setIsAdding(false)} sx={{ color: PALETTE.textTertiary }}>
             <CloseRounded />
           </IconButton>
         </Stack>
+
+        <Box
+          sx={{
+            borderRadius: "16px",
+            bgcolor: PALETTE.surface,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
+            p: 2,
+            mb: 2,
+            border: `1px solid ${PALETTE.separator}`,
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.5 }}>
+            <AutoAwesomeRounded sx={{ fontSize: 18, color: PALETTE.ecoMedium }} />
+            <Typography sx={{ fontSize: "0.75rem", fontWeight: 700, color: PALETTE.ecoDeep, letterSpacing: "0.04em" }}>
+              AUTO-FILL
+            </Typography>
+          </Stack>
+          <Typography sx={{ fontSize: "0.8125rem", color: PALETTE.textSecondary, lineHeight: 1.45 }}>
+            Type an ingredient name — category and expiry date will be filled automatically. You can still edit any field.
+          </Typography>
+        </Box>
+
         <Stack spacing={2}>
-          <TextField
-            label="Food Name" required placeholder="e.g. Tomatoes"
-            value={newFood.name} onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
-            size="small" fullWidth
+          <Autocomplete
+            freeSolo
+            options={suggestions}
+            getOptionLabel={(opt) => (typeof opt === "string" ? opt : opt?.name ?? "")}
+            value={newFood.name || null}
+            inputValue={newFood.name}
+            onInputChange={(_, value) => setNewFood((p) => ({ ...p, name: value }))}
+            onChange={(_, value) => {
+              if (value && typeof value === "object" && value.name) {
+                setNewFood((p) => ({
+                  ...p,
+                  name: value.name,
+                  category: value.category,
+                  expiryDate: expiryFromToday(value.shelfLifeDays ?? 7),
+                }));
+              } else {
+                const name = typeof value === "string" ? value : "";
+                setNewFood((p) => ({ ...p, name }));
+                if (name) applyAutoFill(name);
+              }
+            }}
+            onBlur={() => newFood.name.trim() && applyAutoFill(newFood.name)}
+            renderOption={(props, opt) => (
+              <Box
+                component="li"
+                {...props}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                  py: 1.25,
+                  "& .ing-emoji": { fontSize: "1.25rem" },
+                }}
+              >
+                <Typography className="ing-emoji">{getEmoji(opt.name)}</Typography>
+                <Box>
+                  <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, color: PALETTE.textPrimary }}>{opt.name}</Typography>
+                  <Typography sx={{ fontSize: "0.6875rem", color: PALETTE.textSecondary }}>{opt.category} · ~{opt.shelfLifeDays}d</Typography>
+                </Box>
+              </Box>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Food name"
+                required
+                placeholder="e.g. Chicken Breast, Spinach"
+                size="small"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: newFood.name && (
+                    <InputAdornment position="start" sx={{ mr: 0.5 }}>
+                      <Typography sx={{ fontSize: "1.25rem" }}>{getEmoji(newFood.name)}</Typography>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: PALETTE.surfaceSecondary,
+                "& fieldset": { borderColor: PALETTE.separator },
+                "&:hover fieldset": { borderColor: PALETTE.ecoMedium },
+                "&.Mui-focused fieldset": { borderColor: PALETTE.accent, borderWidth: 1.5 },
+              },
+            }}
           />
+
+          <Stack direction="row" spacing={1.5}>
+            <TextField
+              label="Quantity"
+              type="number"
+              inputProps={{ min: 1 }}
+              value={newFood.quantity}
+              onChange={(e) => setNewFood({ ...newFood, quantity: e.target.value })}
+              size="small"
+              sx={{ flex: 0.4, "& .MuiOutlinedInput-root": { borderRadius: "14px", bgcolor: PALETTE.surfaceSecondary } }}
+            />
+            <TextField
+              label="Expiry date"
+              required
+              type="date"
+              value={newFood.expiryDate}
+              onChange={(e) => setNewFood({ ...newFood, expiryDate: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              size="small"
+              sx={{ flex: 1, "& .MuiOutlinedInput-root": { borderRadius: "14px", bgcolor: PALETTE.surfaceSecondary } }}
+            />
+          </Stack>
+
           <TextField
-            label="Quantity" type="number" inputProps={{ min: 1 }}
-            value={newFood.quantity} onChange={(e) => setNewFood({ ...newFood, quantity: e.target.value })}
-            size="small" fullWidth
+            label="Category"
+            value={newFood.category}
+            onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
+            placeholder="Auto-filled or type custom"
+            size="small"
+            fullWidth
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "14px", bgcolor: PALETTE.surfaceSecondary } }}
           />
-          <TextField
-            label="Expiry Date" required type="date"
-            value={newFood.expiryDate} onChange={(e) => setNewFood({ ...newFood, expiryDate: e.target.value })}
-            InputLabelProps={{ shrink: true }} size="small" fullWidth
-          />
-          <TextField
-            label="Category" placeholder="e.g. Produce, Dairy"
-            value={newFood.category} onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
-            size="small" fullWidth
-          />
-          <Button fullWidth variant="contained" onClick={handleAddFood} sx={{ mt: 1, ...PRIMARY_CTA_SX }}>
+
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={handleAddFood}
+            disabled={!newFood.name?.trim() || !newFood.expiryDate}
+            sx={{ mt: 0.5, ...PRIMARY_CTA_SX }}
+          >
             Add to Fridge
           </Button>
         </Stack>
