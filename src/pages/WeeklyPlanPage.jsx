@@ -6,41 +6,52 @@ import AddRounded from "@mui/icons-material/AddRounded";
 import CloseRounded from "@mui/icons-material/CloseRounded";
 import LocalFireDepartmentRounded from "@mui/icons-material/LocalFireDepartmentRounded";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
+import RemoveCircleOutlineRounded from "@mui/icons-material/RemoveCircleOutlineRounded";
 import { PALETTE, PRIMARY_CTA_SX } from "../theme";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
 import { ALL_RECIPES } from "../data/recipes";
 import { DEFAULT_FRIDGE, getDaysUntilExpiry, getEmoji } from "../data/ingredients";
+import { getTodayInChicago, getWeekDatesChicago } from "../utils/chicagoTime";
 
 const PLAN_KEY = "ep.weeklyPlan";
 const FRIDGE_KEY = "ep.foods.v3";
-const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function getWeekDates() {
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + mondayOffset);
-  monday.setHours(0, 0, 0, 0);
-  const dates = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    dates.push(d);
-  }
-  return dates;
+/** Normalize old format { recipeName, recipeId } to { meals: [...] } */
+function getMealsForDay(plan, dateKey) {
+  const entry = plan[dateKey];
+  if (!entry) return [];
+  if (entry.meals && Array.isArray(entry.meals)) return entry.meals;
+  if (entry.recipeName) return [{ recipeName: entry.recipeName, recipeId: entry.recipeId }];
+  return [];
 }
 
-function toDateKey(d) {
-  return d.toISOString().slice(0, 10);
+function addMealToDay(plan, dateKey, recipe) {
+  const next = { ...plan };
+  const meals = getMealsForDay(plan, dateKey);
+  next[dateKey] = { meals: [...meals, { recipeName: recipe.name, recipeId: recipe.id }] };
+  return next;
 }
 
-export default function WeeklyPlanPage({ onBack, onNavigate, modalContainerRef }) {
+function removeMealFromDay(plan, dateKey, mealIndex) {
+  const next = { ...plan };
+  const meals = getMealsForDay(plan, dateKey).filter((_, i) => i !== mealIndex);
+  if (meals.length === 0) delete next[dateKey];
+  else next[dateKey] = { meals };
+  return next;
+}
+
+function clearDay(plan, dateKey) {
+  const next = { ...plan };
+  delete next[dateKey];
+  return next;
+}
+
+export default function WeeklyPlanPage({ onBack, onNavigate, onStartCookingWithRecipe, modalContainerRef }) {
   const [plan, setPlan] = useLocalStorageState(PLAN_KEY, {});
   const [foods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);
   const [modalDay, setModalDay] = useState(null);
 
-  const weekDates = useMemo(getWeekDates, []);
+  const weekDates = useMemo(getWeekDatesChicago, []);
 
   const fridgeList = Array.isArray(foods) ? foods : [];
   const useSoonCount = fridgeList.filter((f) => {
@@ -48,20 +59,32 @@ export default function WeeklyPlanPage({ onBack, onNavigate, modalContainerRef }
     return days <= 4 && days >= 0;
   }).length;
 
-  const plannedCount = weekDates.filter((d) => plan[toDateKey(d)]?.recipeName).length;
+  const plannedCount = weekDates.reduce((sum, w) => sum + getMealsForDay(plan, w.dateKey).length, 0);
 
-  const setPlanForDay = (dateKey, recipe) => {
-    setPlan((p) => {
-      const next = { ...p };
-      if (recipe) next[dateKey] = { recipeName: recipe.name, recipeId: recipe.id };
-      else delete next[dateKey];
-      return next;
-    });
+  const handleAddMeal = (dateKey, recipe) => {
+    setPlan((p) => addMealToDay(p, dateKey, recipe));
+  };
+
+  const handleRemoveMeal = (dateKey, mealIndex) => {
+    setPlan((p) => removeMealFromDay(p, dateKey, mealIndex));
+  };
+
+  const handleClearDay = (dateKey) => {
+    setPlan((p) => clearDay(p, dateKey));
     setModalDay(null);
   };
 
   const handleStartCooking = () => {
-    onNavigate?.("Recipe");
+    const todayKey = getTodayInChicago();
+    const plannedMeals = getMealsForDay(plan, todayKey);
+    const firstRecipe = plannedMeals.length > 0
+      ? ALL_RECIPES.find((r) => r.id === plannedMeals[0].recipeId || r.name === plannedMeals[0].recipeName)
+      : null;
+    if (firstRecipe && onStartCookingWithRecipe) {
+      onStartCookingWithRecipe(firstRecipe);
+    } else {
+      onNavigate?.("Recipe");
+    }
   };
 
   return (
@@ -116,9 +139,9 @@ export default function WeeklyPlanPage({ onBack, onNavigate, modalContainerRef }
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ flexWrap: "wrap", gap: 1 }}>
           <Box>
             <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: PALETTE.textPrimary, letterSpacing: "-0.02em" }}>
-              {plannedCount} of 7
+              {plannedCount}
             </Typography>
-            <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>meals planned</Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: PALETTE.textSecondary, fontWeight: 600 }}>meals planned this week</Typography>
           </Box>
           {useSoonCount > 0 && (
             <Chip
@@ -143,25 +166,24 @@ export default function WeeklyPlanPage({ onBack, onNavigate, modalContainerRef }
 
       {/* Day cards */}
       <Stack spacing={1.25}>
-        {weekDates.map((d) => {
-          const key = toDateKey(d);
-          const entry = plan[key];
-          const isToday = toDateKey(new Date()) === key;
-          const dayName = DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay() - 1];
-          const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        {weekDates.map((w) => {
+          const key = w.dateKey;
+          const meals = getMealsForDay(plan, key);
+          const hasMeals = meals.length > 0;
+          const isToday = getTodayInChicago() === key;
 
           return (
             <Box
               key={key}
               component="button"
               type="button"
-              onClick={() => setModalDay(d)}
+              onClick={() => setModalDay(w)}
               sx={{
                 border: "none",
                 cursor: "pointer",
                 borderRadius: "16px",
                 bgcolor: PALETTE.surface,
-                borderLeft: `4px solid ${isToday ? PALETTE.accent : entry ? PALETTE.ecoMedium : PALETTE.separator}`,
+                borderLeft: `4px solid ${isToday ? PALETTE.accent : hasMeals ? PALETTE.ecoMedium : PALETTE.separator}`,
                 overflow: "hidden",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                 transition: "all 0.2s ease",
@@ -171,16 +193,20 @@ export default function WeeklyPlanPage({ onBack, onNavigate, modalContainerRef }
               }}
             >
               <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }}>
-                <Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography sx={{ fontSize: "0.75rem", fontWeight: 700, color: PALETTE.textSecondary, mb: 0.25 }}>
-                    {dayName} · {dateStr}
+                    {w.dayName} · {w.dateStr}
                     {isToday && (
                       <Chip label="Today" size="small" sx={{ ml: 1, height: 18, fontSize: "0.625rem", fontWeight: 700, bgcolor: PALETTE.accentLight, color: PALETTE.accent }} />
                     )}
                   </Typography>
-                  {entry?.recipeName ? (
-                    <Typography sx={{ fontSize: "0.9375rem", fontWeight: 700, color: PALETTE.textPrimary }}>
-                      {entry.recipeName}
+                  {hasMeals ? (
+                    <Typography sx={{ fontSize: "0.9375rem", fontWeight: 700, color: PALETTE.textPrimary }} noWrap>
+                      {meals.length === 1
+                        ? meals[0].recipeName
+                        : meals.length === 2
+                          ? `${meals[0].recipeName}, ${meals[1].recipeName}`
+                          : `${meals[0].recipeName} +${meals.length - 1} more`}
                     </Typography>
                   ) : (
                     <Stack direction="row" alignItems="center" spacing={0.5}>
@@ -191,8 +217,8 @@ export default function WeeklyPlanPage({ onBack, onNavigate, modalContainerRef }
                     </Stack>
                   )}
                 </Box>
-                {entry && (
-                  <Typography sx={{ fontSize: "1.25rem" }}>{getEmoji(ALL_RECIPES.find((r) => r.name === entry.recipeName)?.ingredients?.[0] ?? "🥗")}</Typography>
+                {hasMeals && (
+                  <Typography sx={{ fontSize: "1.25rem", flexShrink: 0 }}>{getEmoji(ALL_RECIPES.find((r) => r.name === meals[0].recipeName)?.ingredients?.[0] ?? "🥗")}</Typography>
                 )}
               </Stack>
             </Box>
@@ -236,65 +262,106 @@ export default function WeeklyPlanPage({ onBack, onNavigate, modalContainerRef }
         >
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${PALETTE.separator}` }}>
             <Typography sx={{ fontSize: "1.125rem", fontWeight: 700, color: PALETTE.textPrimary }}>
-              {modalDay && `${DAY_NAMES[modalDay.getDay() === 0 ? 6 : modalDay.getDay() - 1]} · ${modalDay.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
+              {modalDay && `${modalDay.dayName} · ${modalDay.dateStr}`}
             </Typography>
             <IconButton onClick={() => setModalDay(null)} sx={{ color: PALETTE.textSecondary }}>
               <CloseRounded />
             </IconButton>
           </Stack>
           <Box sx={{ overflowY: "auto", flex: 1, py: 1, "&::-webkit-scrollbar": { display: "none" } }}>
-            {modalDay && (
-              <Stack spacing={0.75} sx={{ px: 2, pb: 2 }}>
-                <Button
-                  fullWidth
-                  onClick={() => setPlanForDay(toDateKey(modalDay), null)}
-                  sx={{
-                    justifyContent: "flex-start",
-                    color: PALETTE.textTertiary,
-                    fontWeight: 500,
-                    textTransform: "none",
-                    "&:hover": { bgcolor: PALETTE.surfaceSecondary },
-                  }}
-                >
-                  Clear
-                </Button>
-                {ALL_RECIPES.map((recipe) => (
-                  <Box
-                    key={recipe.id}
-                    component="button"
-                    type="button"
-                    onClick={() => setPlanForDay(toDateKey(modalDay), recipe)}
-                    sx={{
-                      border: "none",
-                      cursor: "pointer",
-                      borderRadius: "14px",
-                      bgcolor: PALETTE.surfaceSecondary,
-                      p: 1.5,
-                      textAlign: "left",
-                      transition: "all 0.15s",
-                      "&:hover": { bgcolor: PALETTE.accentLight },
-                    }}
-                  >
-                    <Stack direction="row" alignItems="center" spacing={1.5}>
-                      <Typography sx={{ fontSize: "1.25rem" }}>{getEmoji(recipe.ingredients?.[0])}</Typography>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography sx={{ fontSize: "0.9375rem", fontWeight: 700, color: PALETTE.textPrimary }}>
-                          {recipe.name}
-                        </Typography>
-                        <Stack direction="row" spacing={1} sx={{ mt: 0.25 }}>
-                          <Chip
-                            icon={<AccessTimeRounded sx={{ fontSize: 12 }} />}
-                            label={`${recipe.prepTime} + ${recipe.cookTime}`}
+            {modalDay && (() => {
+              const dateKey = modalDay.dateKey;
+              const meals = getMealsForDay(plan, dateKey);
+              return (
+                <Stack spacing={1} sx={{ px: 2, pb: 2 }}>
+                  {meals.length > 0 && (
+                    <>
+                      <Typography sx={{ fontSize: "0.6875rem", fontWeight: 700, color: PALETTE.textSecondary, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                        Planned ({meals.length})
+                      </Typography>
+                      {meals.map((m, i) => (
+                        <Stack
+                          key={i}
+                          direction="row"
+                          alignItems="center"
+                          spacing={1.5}
+                          sx={{
+                            borderRadius: "12px",
+                            bgcolor: PALETTE.sageLight,
+                            p: 1.25,
+                            border: `1px solid ${PALETTE.separator}`,
+                          }}
+                        >
+                          <Typography sx={{ fontSize: "1.125rem" }}>{getEmoji(ALL_RECIPES.find((r) => r.name === m.recipeName)?.ingredients?.[0] ?? "🥗")}</Typography>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography sx={{ fontSize: "0.9375rem", fontWeight: 700, color: PALETTE.textPrimary }}>{m.recipeName}</Typography>
+                          </Box>
+                          <IconButton
                             size="small"
-                            sx={{ height: 20, fontSize: "0.625rem", bgcolor: PALETTE.surface, color: PALETTE.textSecondary }}
-                          />
+                            onClick={() => handleRemoveMeal(dateKey, i)}
+                            sx={{ color: PALETTE.textTertiary, "&:hover": { color: PALETTE.accent } }}
+                          >
+                            <RemoveCircleOutlineRounded sx={{ fontSize: 20 }} />
+                          </IconButton>
                         </Stack>
-                      </Box>
-                    </Stack>
-                  </Box>
-                ))}
-              </Stack>
-            )}
+                      ))}
+                      <Button
+                        fullWidth
+                        onClick={() => handleClearDay(dateKey)}
+                        sx={{
+                          justifyContent: "flex-start",
+                          color: PALETTE.textTertiary,
+                          fontWeight: 500,
+                          textTransform: "none",
+                          fontSize: "0.8125rem",
+                          "&:hover": { bgcolor: PALETTE.surfaceSecondary },
+                        }}
+                      >
+                        Clear all
+                      </Button>
+                      <Typography sx={{ fontSize: "0.6875rem", fontWeight: 700, color: PALETTE.textSecondary, letterSpacing: "0.04em", textTransform: "uppercase", pt: 0.5 }}>
+                        Add another meal
+                      </Typography>
+                    </>
+                  )}
+                  {ALL_RECIPES.map((recipe) => (
+                    <Box
+                      key={recipe.id}
+                      component="button"
+                      type="button"
+                      onClick={() => handleAddMeal(dateKey, recipe)}
+                      sx={{
+                        border: "none",
+                        cursor: "pointer",
+                        borderRadius: "14px",
+                        bgcolor: PALETTE.surfaceSecondary,
+                        p: 1.5,
+                        textAlign: "left",
+                        transition: "all 0.15s",
+                        "&:hover": { bgcolor: PALETTE.accentLight },
+                      }}
+                    >
+                      <Stack direction="row" alignItems="center" spacing={1.5}>
+                        <Typography sx={{ fontSize: "1.25rem" }}>{getEmoji(recipe.ingredients?.[0])}</Typography>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography sx={{ fontSize: "0.9375rem", fontWeight: 700, color: PALETTE.textPrimary }}>
+                            {recipe.name}
+                          </Typography>
+                          <Stack direction="row" spacing={1} sx={{ mt: 0.25 }}>
+                            <Chip
+                              icon={<AccessTimeRounded sx={{ fontSize: 12 }} />}
+                              label={`${recipe.prepTime} + ${recipe.cookTime}`}
+                              size="small"
+                              sx={{ height: 20, fontSize: "0.625rem", bgcolor: PALETTE.surface, color: PALETTE.textSecondary }}
+                            />
+                          </Stack>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  ))}
+                </Stack>
+              );
+            })()}
           </Box>
         </Box>
       </Modal>

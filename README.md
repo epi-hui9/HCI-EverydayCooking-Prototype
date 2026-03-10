@@ -20,14 +20,14 @@ This principle applies to code too: when in doubt, choose the simpler solution t
 
 ## Features
 
-- **Home:** Gamification dashboard (CO₂ saved, level, points, streak, progress to next level, achievements). **Start Cooking** hero tile (primary entry → Fridge) plus quick access to History, Weekly Plan, **Saved** (starred recipes). Money saved from waste shown subtly below the impact card.
+- **Home:** Gamification dashboard (CO₂ saved with **relatable references** e.g. km by car, level, points, streak, achievements). **Achievements** are **clickable** — tap to view details (unlocked + locked). **Start Cooking** hero tile (primary entry → Fridge) plus quick access to History, Weekly Plan, **Saved** (starred recipes). Homepage **scrolls** on small screens. Money saved from waste shown subtly below the impact card.
 - **Fridge (Your Food):** 15 default ingredients (expandable). Add/delete items; sort by expiring soon. **Add Food** with autocomplete and auto-fill (category, expiry from ingredient name). **Next** → Energy → Recipe Details (filtered by selected ingredients).
 - **Recipes flow (two entry points):**
   - **From bottom nav Recipes tab:** Energy level first → Recipe Recommendation (3 recipes) → tap recipe → **Recipe Preview** (ingredients + steps) → **Start Cooking with AI** → Chat.
   - **From Start Cooking / Fridge:** Select ingredients → Energy (optional **Dietary restrictions**: No meat, No dairy) → Recipe Details (strict/good require recipe to use ≥ N−2 of N selected; if none match, **Generate 3 AI recipes**) → Recipe Preview → Chat. Star any recipe to save.
 - **Food waste indicators:** Recipes and ingredients show "Uses soon-expiring" / "Use soon" when they help reduce waste.
 - **History:** Cooking journey timeline — meals saved, CO₂ impact, $ saved. Each completed meal logs recipe, date, and impact. Empty state with Start Cooking CTA.
-- **Weekly Plan:** Plan meals for the week (Mon–Sun). Tap a day to add/change recipe; modal stays inside phone frame on desktop. Shows "X expiring soon" from fridge.
+- **Weekly Plan:** Plan meals for the week (Mon–Sun) in **Chicago time**. Plan **multiple meals per day**; tap a day to add/remove meals. **Start Cooking** from Weekly Plan begins with today’s first planned meal. Shows "X expiring soon" from fridge.
 - **Chat:** OpenAI-powered assistant; suggested prompts when no recipe selected; recipe context when cooking; **Complete cooking** overlay with Done → Home.
 - **Navigation:** Four-tab bottom bar (Home, Fridge, Recipes, Chat). Back buttons return to previous screen; Chat Back returns to Recipe Preview when in cooking flow.
 
@@ -88,6 +88,7 @@ src/
 │   ├── recipeInstructions.js # RECIPE_INSTRUCTIONS (for chat)
 │   └── chatSuggestions.js    # SUGGESTED_QUESTIONS
 ├── utils/
+│   ├── chicagoTime.js        # Chicago timezone helpers (Weekly Plan dates)
 │   ├── recipe.js             # parseMinutes
 │   ├── recipeInstructions.js # parseRecipeSteps (step parsing)
 │   ├── chatbotAnswers.js     # Chat → backend API (prompt + recipe context)
@@ -164,11 +165,11 @@ Error handling: timeout (28s), clearer messages for network/server errors.
 
 ## Gamification (food waste impact)
 
-- **CO₂ saved:** Shown in kg for the current week (using food before it expires reduces waste-related emissions).
+- **CO₂ saved:** Shown in kg for the current week (using food before it expires reduces waste-related emissions). **Relatable references** (e.g. "≈ 74 km drive (≈ 1 hr)") based on UK Gov 2022 data.
 - **Money saved:** Estimated $ saved when using ingredients within 3 days of expiry; shown subtly below impact card and in History.
 - **Level & points:** Points from “saved meals”; level increases every 100 points.
 - **Streak:** Consecutive days with activity.
-- **Achievements:** Badges (e.g. First Save, Eco Starter, streaks, levels); unlocked ones appear on the home card.
+- **Achievements:** Badges (e.g. First Save, Eco Starter, streaks, levels); unlocked ones appear on the home card. **Tap to view** full list with descriptions (unlocked + locked).
 
 Logic lives in `GamificationContext`; the home page consumes it for the impact card and achievement badges. See **docs/GAMIFICATION.md** for full design documentation.
 

@@ -24,7 +24,7 @@ Design goals:
 
 | Metric | Description | Unit / Format |
 |--------|-------------|----------------|
-| **CO₂ saved** | Estimated CO₂ equivalent avoided by using food before it expires (instead of wasting it). | kg (e.g. 12.4 kg) |
+| **CO₂ saved** | Estimated CO₂ equivalent avoided by using food before it expires (instead of wasting it). Shown with **relatable references** (e.g. "≈ 74 km drive (≈ 1 hr)") based on UK Gov 2022 / Our World in Data. | kg (e.g. 12.4 kg) |
 | **Points** | Earned for “saved meals” (or equivalent actions). Used for level progression. | Integer |
 | **Level** | Derived from total points. Increases every `POINTS_PER_LEVEL` (100). | Integer (1, 2, 3, …) |
 | **Streak** | Consecutive days with at least one “saving” action. | Days (integer) |
@@ -74,7 +74,7 @@ Achievements are fixed in the code and marked as unlocked via `unlockedAchieveme
 | `level_3` | Planet Helper | Reached Level 3 | 🌍 |
 | `level_5` | Waste Fighter | Reached Level 5 | 🏆 |
 
-The Homepage shows a short list of **unlocked** achievements (e.g. first four). Full list and unlock conditions can be extended later (e.g. auto-unlock when `co2SavedKg >= 10` for `eco_10`).
+The Homepage shows a short list of **unlocked** achievements (e.g. first four). **Achievements are clickable** — tapping the row or any badge opens a dialog with the full list (unlocked + locked) and descriptions. Unlocked show their icon; locked show a lock icon.
 
 ---
 
@@ -102,10 +102,10 @@ Calling `addSavedMeal(n)` from those flows will keep points, CO₂, and streak i
 
 - **“Your impact this week”** card (green gradient):
   - **CO₂ saved** (e.g. “12.4 kg CO₂ saved”).
-  - Short explanation: using food before it expires reduces emissions.
+  - **Relatable reference** (e.g. "≈ 74 km drive (≈ 1 hr)") — car: ~0.17 kg/km; flight comparison only when ≥50 kg.
   - **Level** and **Points** in one pill; **Streak** (with flame icon) in another.
   - **Next level** progress bar: `pointsInCurrentLevel / POINTS_PER_LEVEL`, with “X pts to go” label.
-- **Achievements** row: trophy icon + up to four unlocked achievement icons (tooltips with name).
+- **Achievements** row: trophy icon + up to four unlocked achievement icons; **tap to open dialog** with full list (unlocked + locked) and descriptions.
 
 All data is read from `useGamification()`; no gamification logic lives in the page component.
 

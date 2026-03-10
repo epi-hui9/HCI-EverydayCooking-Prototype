@@ -11,7 +11,6 @@ export const ALL_RECIPES = [
   { id: 7, name: "Tomato Cheese Bake", prepTime: "10 min", cookTime: "15 min", calories: 260, ingredients: ["Tomato", "Cheese"], ingredientQuantities: { Tomato: 3, Cheese: 1 } },
   { id: 8, name: "Chicken Spinach Bowl", prepTime: "5 min", cookTime: "18 min", calories: 340, ingredients: ["Chicken Breast", "Spinach", "Garlic"], ingredientQuantities: { "Chicken Breast": 1, Spinach: 1, Garlic: 2 } },
   { id: 9, name: "Beef Onion Skillet", prepTime: "8 min", cookTime: "22 min", calories: 400, ingredients: ["Ground Beef", "Onions"], ingredientQuantities: { "Ground Beef": 1, Onions: 2 } },
-  { id: 10, name: "Broccoli Milk Soup", prepTime: "5 min", cookTime: "20 min", calories: 200, ingredients: ["Milk", "Broccoli"], ingredientQuantities: { Milk: 1, Broccoli: 1 } },
   { id: 11, name: "Eggs & Cheese Scramble", prepTime: "2 min", cookTime: "6 min", calories: 350, ingredients: ["Eggs", "Cheese"], ingredientQuantities: { Eggs: 3, Cheese: 1 } },
   { id: 12, name: "Tomato Onion Sauté", prepTime: "5 min", cookTime: "12 min", calories: 120, ingredients: ["Tomato", "Onions"], ingredientQuantities: { Tomato: 2, Onions: 1 } },
   { id: 13, name: "Chicken Broccoli Stir-fry", prepTime: "8 min", cookTime: "20 min", calories: 360, ingredients: ["Chicken Breast", "Broccoli", "Garlic"], ingredientQuantities: { "Chicken Breast": 1, Broccoli: 1, Garlic: 2 } },

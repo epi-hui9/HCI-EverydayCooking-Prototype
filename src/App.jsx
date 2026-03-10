@@ -20,7 +20,7 @@ import { PALETTE } from "./theme";
 const FRAME_W = 393;
 const FRAME_H = 852;
 
-const FLEX_PAGES = ["Home", "Fridge", "Recipe", "RecipeRecommendation", "Chat"];
+const FLEX_PAGES = ["Fridge", "Recipe", "RecipeRecommendation", "Chat"];
 
 function App() {
   const [page, setPage] = useState("Home");
@@ -175,7 +175,17 @@ function App() {
       />
     ),
     History: <HistoryPage onBack={() => setPage("Home")} onNavigate={setPage} />,
-    WeeklyPlan: <WeeklyPlanPage onBack={() => setPage("Home")} onNavigate={setPage} modalContainerRef={phoneFrameRef} />,
+    WeeklyPlan: (
+      <WeeklyPlanPage
+        onBack={() => setPage("Home")}
+        onNavigate={setPage}
+        onStartCookingWithRecipe={(recipe) => {
+          setSelectedRecipeForInstructions(recipe);
+          setPage("Recipe Preview");
+        }}
+        modalContainerRef={phoneFrameRef}
+      />
+    ),
     SavedRecipes: <SavedRecipesPage onBack={() => setPage("Home")} onSelectRecipe={goToRecipePreview} />,
   };
 
