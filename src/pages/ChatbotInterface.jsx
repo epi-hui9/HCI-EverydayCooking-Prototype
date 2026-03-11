@@ -13,6 +13,7 @@ import PageHeader from "../components/PageHeader";
 import { useGamification } from "../context/GamificationContext";
 import { useLocalStorageState } from "../utils/useLocalStorageState";
 import { DEFAULT_FRIDGE, toCanonicalIngredient, getEmoji, getIngredientPriceSaved } from "../data/ingredients";
+import { PLAN_KEY, removeCompletedRecipeFromPlan } from "../utils/weeklyPlan";
 
 const FRIDGE_KEY = "ep.foods.v3";
 
@@ -25,6 +26,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
   const chatEndRef = useRef(null);
   const { addSavedMeal, addToHistory, getAchievements } = useGamification();
   const [foods, setFoods] = useLocalStorageState(FRIDGE_KEY, DEFAULT_FRIDGE);
+  const [, setPlan] = useLocalStorageState(PLAN_KEY, {});
 
   const scrollToBottom = useCallback(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -144,6 +146,7 @@ export default function ChatbotInterface({ onBack, onGoHome, instructionRecipe, 
       savedFromWaste: details.some((d) => d.savedFromWaste),
       moneySaved: totalMoneySaved,
     });
+    setPlan((p) => removeCompletedRecipeFromPlan(p, recipe));
     setIsCompleteOpen(true);
   };
 

@@ -12,8 +12,8 @@ import { useLocalStorageState } from "../utils/useLocalStorageState";
 import { ALL_RECIPES } from "../data/recipes";
 import { DEFAULT_FRIDGE, getDaysUntilExpiry, getEmoji } from "../data/ingredients";
 import { getTodayInChicago, getWeekDatesChicago } from "../utils/chicagoTime";
+import { PLAN_KEY } from "../utils/weeklyPlan";
 
-const PLAN_KEY = "ep.weeklyPlan";
 const FRIDGE_KEY = "ep.foods.v3";
 
 /** Normalize old format { recipeName, recipeId } to { meals: [...] } */
